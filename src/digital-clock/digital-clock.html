@@ -1,0 +1,69 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="digital-clock">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: inline;
+      }
+    </style>
+    [[timeString]]
+  </template>
+  <script>
+    Polymer({
+       is: "digital-clock",
+
+       properties: {
+         totalSeconds: {
+           type: Number,
+           value: 0,
+           observer: 'setTime'
+         },
+         seconds: {
+           type: Number,
+           reflectToAttribute: true,
+           notify: true
+         },
+         minutes: {
+           type: Number,
+           reflectToAttribute: true,
+           notify: true
+         },
+         hours: {
+           type: Number,
+           reflectToAttribute: true,
+           notify: true
+         },
+         timeString: {
+           type: String,
+           reflectToAttribute: true,
+           notify: true,
+           computed: '_timeString(hours, minutes, seconds)'
+         }
+       },
+
+       _timeString: function(hours, minutes, seconds) {
+         return this.pad(hours) + ':' + this.pad(minutes) + ':' + this.pad(seconds); 
+       },
+
+       pad: function(num) {
+         return num < 10 ? '0' + String(num) : String(num);
+       },
+
+       breakdown: function(seconds) {
+         var hours = Math.floor(seconds/3600);
+         var minutes = Math.floor((seconds - hours * 3600) / 60);
+         var seconds = Math.floor(seconds - hours * 3600 - minutes * 60);
+         return { hours: hours, minutes: minutes, seconds: seconds };
+       },
+
+       setTime: function(seconds) {
+         var breakdown = this.breakdown(seconds);
+         this.hours = breakdown.hours;
+         this.minutes = breakdown.minutes;
+         this.seconds = breakdown.seconds;
+       }
+    });
+  </script>
+</dom-module>

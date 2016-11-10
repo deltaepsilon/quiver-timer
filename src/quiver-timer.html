@@ -1,0 +1,209 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/app-layout/app-scrollpos-control/app-scrollpos-control.html">
+<link rel="import" href="icons.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="timer-fab/timer-fab.html">
+<link rel="import" href="configure-timer/configure-timer.html">
+
+<dom-module id="quiver-timer">
+  <template>
+    <style include="shared-styles">
+      :host {
+        --app-primary-color: #673AB7;
+        --app-secondary-color: #212121;
+        --dark-primary-color: #512DA8;
+        --default-primary-color: #673AB7;
+        --light-primary-color: #D1C4E9;
+        --text-primary-color: #FFFFFF;
+        --accent-color: #009688;
+        --primary-background-color: #D1C4E9;
+        --primary-text-color: #212121;
+        --secondary-text-color: #757575;
+        --disabled-text-color: #BDBDBD;
+        --divider-color: #BDBDBD;
+        /* Components */
+        /* paper-drawer-panel */
+        --drawer-menu-color: #ffffff;
+        --drawer-border-color: 1px solid #ccc;
+        --drawer-toolbar-border-color: 1px solid rgba(0, 0, 0, 0.22);
+        /* paper-menu */
+        --paper-menu-background-color: #fff;
+        --menu-link-color: #111111;
+        /* paper-input */
+        /*--paper-input-container-color: rgba(255, 255, 255, 0.64);
+        --paper-input-container-focus-color: rgba(255, 255, 255, 1);
+        --paper-input-container-input-color: #fff;*/
+        --paper-input-container-color: rgba(103, 58, 183, .64);
+        --paper-input-container-focus-color: rgba(103, 58, 183, 1);
+        --paper-input-container-input-color: #212121;
+
+        /* paper-dialog */
+        --paper-dialog-background-color: #fff;
+
+        /* paper-button */
+        --paper-button-primary: #673AB7;
+        --paper-button-secondary: #009688;
+        --paper-button-tertiary: #212121;
+
+        /* MD color wheel */
+        --md-red: #F44336;
+        --md-pink: #ff4081;
+        --md-purple: #7B1FA2;
+        --md-deep-purple: #7C4DFF;
+        --md-indigo: #3F51B5;
+        --md-blue: #448AFF;
+        --md-light-blue: #03A9F4;
+        --md-cyan: #00BCD4;
+        --md-teal: #009688;
+        --md-green: #4CAF50;
+        --md-light-green: #8BC34A;
+        --md-lime: #CDDC39;
+        --md-yellow: #FFEB3B;
+        --md-amber: #FFC107;
+        --md-orange: #FF9800;
+        --md-deep-orange: #FF5722;
+        --md-brown: #795548;
+        --md-grey: #9E9E9E;
+        --md-blue-grey: #607D8D;
+
+        display: block;
+      }
+      
+      app-header {
+        color: #fff;
+        background-color: var(--app-primary-color);
+      }
+      
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: white;
+      }
+      
+      .drawer-list {
+        margin: 0 20px;
+      }
+      
+      .drawer-list a {
+        display: block;
+        padding: 0 16px;
+        text-decoration: none;
+        color: var(--app-secondary-color);
+        line-height: 40px;
+      }
+      
+      .drawer-list a.iron-selected {
+        color: black;
+        font-weight: bold;
+      }
+    </style>
+
+    <app-location id="appLocation" route="{{route}}" on-location-changed="_locationChanged"></app-location>
+    <app-route id="appRoute" route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+    <app-scrollpos-control selected="{{page}}"></app-scrollpos-control>
+
+    <app-drawer-layout fullbleed>
+      <!-- Drawer content -->
+      <app-drawer>
+        <app-toolbar>Menu</app-toolbar>
+        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+          <a name="timers" href="/timers">Timers</a>
+          <a name="configure" href="/configure/new">New Timer</a>
+        </iron-selector>
+      </app-drawer>
+
+      <!-- Main content -->
+      <app-header-layout has-scrolling-region>
+
+        <app-header condenses reveals effects="waterfall">
+          <app-toolbar>
+            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
+            <div main-title>[[pageTitle]]</div>
+            <timer-fab id="timerFab" page="[[page]]" style="position: absolute; top: 37px; right: 2rem;"></timer-fab>
+          </app-toolbar>
+        </app-header>
+
+        <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="fourohfour" role="main">
+          <timers-view id="timersView" name="timers"></timers-view>
+          <configure-view id="configureView" local-route="[[subroute]]" name="configure" title="{{configureTitle}}"></configure-view>
+          <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
+        </iron-pages>
+
+      </app-header-layout>
+    </app-drawer-layout>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'quiver-timer',
+
+      properties: {
+        page: {
+          type: String,
+          reflectToAttribute: true,
+          observer: '_pageChanged'
+        },
+        pageTitle: {
+          type: String,
+          computed: '_pageTitle(page, route.path, configureTitle)'
+        }
+      },
+
+      observers: [
+        '_routePageChanged(routeData.page)'
+      ],
+
+      listeners: {
+        goTo: '_goTo'
+      },
+
+      _routePageChanged: function(page) {
+        this.page = page || 'timers';
+      },
+
+      _pageChanged: function(page) {
+        // Load page import on demand. Show 404 page if fails
+        var resolvedPageUrl = this.resolveUrl('views/' + page + '-view.html');
+        this.importHref(resolvedPageUrl, null, this._showPage404, true);
+      },
+
+      _showPage404: function() {
+        this.page = 'fourohfour';
+      },
+
+      _goTo: function(e) {
+        var state = e.detail.state || {};
+        var title = e.detail.title || '';
+        var url = e.detail.url || '/';
+        window.history.pushState(state, title, url);
+        window.dispatchEvent(new Event('location-changed'));
+      },
+
+      _pageTitle: function(page, path, configureTitle) {
+        if (page == 'configure') return configureTitle;
+        return 'Quiver Timer';
+      }
+    });
+  </script>
+</dom-module>

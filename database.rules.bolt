@@ -1,0 +1,35 @@
+isUser(uid) {auth.uid == uid}
+isAdmin(environment) {true == root.child('quiver-timer').child(environment).child('user').child('read').child('account').child(auth.uid).child('isAdmin').val()}
+isSubscriber(environment, type, key, auth) {true == root.child('quiver-timer').child(environment).child('user').child('read').child(type).child(auth.uid).child(key).val()}
+
+path /quiver-timer/{environment}/public {
+  read()  {true}
+  write() {isAdmin(environment)}
+}
+
+path /quiver-timer/{environment}/user/owned/{object}/{uid} {
+  read() {isUser(uid)}
+  write() {isUser(uid)}
+}
+path /quiver-timer/{environment}/user/read/{object}/{uid} {
+  read() {isUser(uid)}
+}
+path /quiver-timer/{environment}/user/write/{object}/{uid} {
+  write() {isUser(uid)}
+}
+path /quiver-timer/{environment}/admin {
+  read()  {isAdmin(environment)}
+  write() {isAdmin(environment)}
+}
+
+path /quiver-timer/{environment}/content/all {
+  read()  {isAdmin(environment)}
+}
+
+path /quiver-timer/{environment}/content {
+  read()  {isAdmin(environment)}
+}
+
+path /quiver-timer/{environment}/content/{type}/{key} {
+  read()  {type == 'products' || isSubscriber(environment, type, key, auth) || isAdmin(environment)}
+}

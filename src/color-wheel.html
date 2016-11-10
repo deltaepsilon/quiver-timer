@@ -1,0 +1,200 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<!-- shared styles for all views -->
+<dom-module id="color-wheel">
+	<template>
+		<style>
+    :host {
+      --md-red: #F44336;
+      --md-pink: #ff4081;
+      --md-purple: #7B1FA2;
+      --md-deep-purple: #7C4DFF;
+      --md-indigo: #3F51B5;
+      --md-blue: #448AFF;
+      --md-light-blue: #03A9F4;
+      --md-cyan: #00BCD4;
+      --md-teal: #009688;
+      --md-green: #4CAF50;
+      --md-light-green: #8BC34A;
+      --md-lime: #CDDC39;
+      --md-yellow: #FFEB3B;
+      --md-amber: #FFC107;
+      --md-orange: #FF9800;
+      --md-deep-orange: #FF5722;
+      --md-brown: #795548;
+      --md-grey: #9E9E9E;
+      --md-blue-grey: #607D8D;
+
+      --md-text-light: #FFFFFF;
+      --md-text-dark: #212121;
+    }
+
+    .red {
+      background-color: var(--md-red);
+      color: var(--md-text-light);
+    }
+    .pink {
+      background-color: var(--md-pink);
+      color: var(--md-text-light);
+    }
+    .purple {
+      background-color: var(--md-purple);
+      color: var(--md-text-light);
+    }
+    .deep-purple {
+      background-color: var(--md-deep-purple);
+      color: var(--md-text-light);
+    }
+    .indigo {
+      background-color: var(--md-indigo);
+      color: var(--md-text-light);
+    }
+    .blue {
+      background-color: var(--md-blue);
+      color: var(--md-text-light);
+    }
+    .light-blue {
+      background-color: var(--md-light-blue);
+      color: var(--md-text-light);
+    }
+    .cyan {
+      background-color: var(--md-cyan);
+      color: var(--md-text-light);
+    }
+    .teal {
+      background-color: var(--md-teal);
+      color: var(--md-text-light);
+    }
+    .green {
+      background-color: var(--md-green);
+      color: var(--md-text-light);
+    }
+    .light-green {
+      background-color: var(--md-light-green);
+      color: var(--md-text-light);
+    }
+    .lime {
+      background-color: var(--md-lime);
+      color: var(--md-text-light);
+    }
+    .yellow {
+      background-color: var(--md-yellow);
+      color: var(--md-text-light);
+    }
+    .amber {
+      background-color: var(--md-amber);
+      color: var(--md-text-light);
+    }
+    .orange {
+      background-color: var(--md-orange);
+      color: var(--md-text-light);
+    }
+    .deep-orange {
+      background-color: var(--md-deep-orange);
+      color: var(--md-text-light);
+    }
+    .brown {
+      background-color: var(--md-brown);
+      color: var(--md-text-light);
+    }
+    .grey {
+      background-color: var(--md-grey);
+      color: var(--md-text-light);
+    }
+    .blue-grey {
+      background-color: var(--md-blue-grey);
+      color: var(--md-text-light);
+    }
+
+    /* Numeric */
+
+    .md-0 {
+      background-color: var(--md-red);
+      color: var(--md-text-light);
+    }
+    .md-1 {
+      background-color: var(--md-pink);
+      color: var(--md-text-light);
+    }
+    .md-2 {
+      background-color: var(--md-purple);
+      color: var(--md-text-light);
+    }
+    .md-3 {
+      background-color: var(--md-deep-purple);
+      color: var(--md-text-light);
+    }
+    .md-4 {
+      background-color: var(--md-indigo);
+      color: var(--md-text-light);
+    }
+    .md-5 {
+      background-color: var(--md-blue);
+      color: var(--md-text-light);
+    }
+    .md-6 {
+      background-color: var(--md-light-blue);
+      color: var(--md-text-light);
+    }
+    .md-7 {
+      background-color: var(--md-cyan);
+      color: var(--md-text-light);
+    }
+    .md-8 {
+      background-color: var(--md-teal);
+      color: var(--md-text-light);
+    }
+    .md-9 {
+      background-color: var(--md-green);
+      color: var(--md-text-light);
+    }
+    .md-10 {
+      background-color: var(--md-light-green);
+      color: var(--md-text-light);
+    }
+    .md-11 {
+      background-color: var(--md-lime);
+      color: var(--md-text-light);
+    }
+    .md-12 {
+      background-color: var(--md-yellow);
+      color: var(--md-text-light);
+    }
+    .md-13 {
+      background-color: var(--md-amber);
+      color: var(--md-text-light);
+    }
+    .md-14 {
+      background-color: var(--md-orange);
+      color: var(--md-text-light);
+    }
+    .md-15 {
+      background-color: var(--md-deep-orange);
+      color: var(--md-text-light);
+    }
+    .md-16 {
+      background-color: var(--md-brown);
+      color: var(--md-text-light);
+    }
+    .md-17 {
+      background-color: var(--md-grey);
+      color: var(--md-text-light);
+    }
+    .md-18 {
+      background-color: var(--md-blue-grey);
+      color: var(--md-text-light);
+    }
+			
+		</style>
+	</template>
+</dom-module>

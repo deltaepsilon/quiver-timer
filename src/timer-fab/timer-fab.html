@@ -1,0 +1,56 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="timer-fab">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+    <a href="[[url]]">
+      <paper-fab icon="[[icon]]" on-click="_handleClick" hidden$="[[hidden]]"></paper-fab>
+    </a>
+  </template>
+  <script>
+    Polymer({
+       is: "timer-fab",
+
+       properties: {
+         page: String,
+         icon: {
+           type: String,
+           computed: '_icon(page)'
+         },
+         url: {
+           type: String,
+           computed: '_url(page)'
+         },
+         hidden: {
+           type: Boolean,
+           computed: '_hidden(icon)'
+         }
+       },
+
+       _icon: function(page) {
+         if (page == 'timers') return 'add';
+         return false
+       },
+
+       _url: function(page) {
+         if (page == 'timers') return '/configure/new';
+         return false
+       },
+
+       _hidden: function(icon) {
+         return !icon;
+       },
+
+       _handleClick: function(e) {
+        //  if (page == 'timers') return this.fire('addTimer');;         
+       }
+    });
+  </script>
+</dom-module>

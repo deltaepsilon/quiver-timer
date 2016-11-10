@@ -1,0 +1,50 @@
+<link rel="import" href="../../bower_components/iron-icons/av-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../icons.html">
+<script>
+  window.TimerDefaults = {
+    properties: {
+      periodDefaults: {
+        type: Object,
+        value: {
+          work: {
+            name: 'Work',
+            seconds: 60,
+            minutes: 0,
+            totalSeconds: 60,
+            icon: 'hourglass-empty',
+            type: 'work',
+            isWork: true
+          },
+          rest: {
+            name: 'Rest',
+            seconds: 30,
+            minutes: 0,
+            totalSeconds: 30,
+            icon: 'av:pause-circle-outline',
+            type: 'rest',
+            isRest: true
+          },
+          stopwatch: {
+            name: 'Stopwatch',
+            seconds: 0,
+            minutes: 10,
+            totalSeconds: 600,
+            icon: 'custom:stopwatch',
+            type: 'stopwatch',
+            isStopwatch: true
+          },
+          prepare: {
+            name: 'Prepare',
+            minutes: 0,
+            seconds: 10,
+            totalSeconds: 10,
+            icon: 'av:snooze',
+            type: 'prepare',
+            isPrepare: true
+          }
+        }
+      }
+    }
+  };
+</script>

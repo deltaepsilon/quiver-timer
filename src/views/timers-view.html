@@ -1,0 +1,38 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
+
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="timers-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+    <app-localstorage-document key="timers" data="[[timers]]" on-data-changed="handleEmpty"></app-localstorage-document>
+
+    <h1>Timers View Everybody!!!</h1>
+  </template>
+  <script>
+    Polymer({
+       is: "timers-view",
+
+       properties: {
+         timers: {
+           type: Array,
+           value: []
+         }
+       },
+
+       handleEmpty: function(e) {
+         var timers = e.detail.value;
+         if (!timers.length) {
+           console.log('goTo temporarily disabled');
+          //  this.fire('goTo', {url: '/configure/new'});
+         }
+       }
+    });
+  </script>
+</dom-module>
