@@ -1,0 +1,308 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../../bower_components/paper-slider/paper-slider.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+
+<link rel="import" href="../gesture-service/gesture-service.html">
+<link rel="import" href="../shared-styles.html">
+<link rel="import" href="../color-wheel.html">
+
+<dom-module id="configure-period">
+  <template>
+    <style include="shared-styles">
+      :host {
+        --paper-item-focused-before: {
+          opacity: 0;
+        }
+        display: block;
+      }
+      
+      .show-stopwatch {
+        display: none;
+      }
+      
+      [type="stopwatch"] .show-stopwatch {
+        display: inline;
+      }
+      
+      [type="prepare"] .type-color {
+        color: var(--secondary-text-color);
+      }
+      
+      [type="work"] .type-color {
+        color: var(--paper-button-primary);
+      }
+      
+      [type="rest"] .type-color {
+        color: var(--paper-button-secondary);
+      }
+      
+      label {
+        color: var(--secondary-text-color);
+        font-size: .75rem;
+      }
+      
+      paper-item-body > div {
+        padding: 1.5rem 0;
+      }
+      
+      #wrapper {
+        position: relative;
+      }
+      
+      #gestureService {
+        position: relative;
+        z-index: 1;
+        transition: all 1s ease;
+      }
+      
+      #gestureService[swipe="left"] {
+        transform: translateX(-50%);
+      }
+      
+      #gestureService[swipe="right"] {
+        transform: translateX(50%);
+      }
+      
+      #delete {
+        background-color: var(--md-red);
+        color: var(--text-primary-color);
+        text-transform: uppercase;
+        font-size: 2rem;
+        position: absolute;
+        top: 0;
+        right: 1rem;
+        bottom: 0;
+        left: 1rem;
+      }
+      
+      paper-icon-item .show-on-focus {
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 300ms;
+      }
+      
+      paper-icon-item[show-buttons] .show-on-focus {
+        visibility: visible;
+        opacity: 1;
+      }
+      
+      paper-icon-item[show-buttons] .hide-on-focus {
+        visibility: hidden;
+      }
+      
+      .move-button {
+        position: absolute;
+        left: .5rem;
+        color: var(--secondary-text-color);
+      }
+      
+      .move-up-button {
+        top: 1rem;
+      }
+      
+      .move-down-button {
+        bottom: 1rem;
+      }
+      
+      #wrapper[is-first] .move-up-button {
+        visibility: hidden;
+      }
+      
+      #wrapper[is-last] .move-down-button {
+        visibility: hidden;
+      }
+      
+      .delete-button {
+        position: absolute;
+        left: .5rem;
+      }
+    </style>
+
+    <div id="wrapper" is-first$="[[isFirst]]" is-last$="[[isLast]]">
+      <gesture-service id="gestureService" swipe$="[[swipe]]">
+        <paper-material id="paper" elevation="1" type$="[[period.type]]">
+          <paper-icon-item id="paperIconItem" on-blur="blur">
+            <iron-icon class="type-color animate-visibility hide-on-focus" icon="[[period.icon]]" item-icon></iron-icon>
+            <paper-icon-button class="type-color move-button move-up-button show-on-focus" icon="arrow-drop-up" on-click="moveUp"></paper-icon-button>
+            <paper-icon-button class="type-color move-button move-down-button show-on-focus" icon="arrow-drop-down" on-click="moveDown"></paper-icon-button>
+            <paper-icon-button class="type-color delete-button show-on-focus" icon="delete" item-icon on-click="delete"></paper-icon-button>
+            <paper-item-body three-line>
+              <div class="layout horizontal justified">
+                <strong on-click="editName">[[period.name]]</strong>
+                <div class="layout horizontal center">
+                  <aside class="show-stopwatch" style="font-size: .75rem; margin-right: 1rem;">Time Cap</aside>
+                  <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
+                </div>
+              </div>
+              <div class="layout horizontal justified center wrap">
+                <label for$="seconds-slider-[[index]]">Seconds</label>
+                <paper-slider id$="seconds-slider-[[index]]" class="flex" min="0" max="55" pin value="[[period.seconds]]" period-index$="[[index]]"
+                  on-change="updateSeconds" step="5" snaps></paper-slider>
+              </div>
+              <div class="layout horizontal justified center wrap">
+                <label for$="minutes-slider-[[index]]">Minutes</label>
+                <paper-slider id$="minutes-slider-[[index]]" class="flex accent" min="0" max="59" pin value="[[period.minutes]]" period-index$="[[index]]"
+                  on-change="updateMinutes" step="1" snaps></paper-slider>
+              </div>
+              <!--<div class="layout horizontal justified center wrap">
+                <div class="layout horizontal justified wrap flex">
+                  <paper-button on-click="plusSeconds" period-index$="[[index]]">+ 5s</paper-button>
+                  <paper-button on-click="minusSeconds" period-index$="[[index]]">- 5s</paper-button>
+                </div>
+                <div class="layout horizontal justified wrap flex">
+                  <paper-button on-click="plusMinute" period-index$="[[index]]">+ 1m</paper-button>
+                  <paper-button on-click="minusMinute" period-index$="[[index]]">- 1m</paper-button>
+                </div>
+              </div>-->
+            </paper-item-body>
+          </paper-icon-item>
+        </paper-material>
+      </gesture-service>
+      <div id="delete" class="layout horizontal around-justified center" on-click="delete">
+        <span>Delete</span>
+        <span>Delete</span>
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: "configure-period",
+
+      properties: {
+        period: {
+          type: Object,
+          notify: true
+        },
+        index: Number,
+        periodsCount: Number,
+        isFirst: {
+          type: Boolean,
+          computed: '_isFirst(index)'
+        },
+        isLast: {
+          type: Boolean,
+          computed: '_isLast(index, periodsCount)'
+        },
+        swipe: {
+          type: String,
+          value: 'none'
+        }
+      },
+
+      //  Observers
+      //  observers: ['_firstLast(index, periodsCount)'],
+
+      _isFirst: function(index) {
+        return index < 2;
+      },
+
+      _isLast: function(index, count) {
+        return index > count - 2;
+      },
+
+      // Listeners
+      listeners: {
+        swipeleft: 'swipeLeft',
+        swiperight: 'swipeRight',
+        doubletap: 'doubletap'
+      },
+
+      swipeLeft: function(e) {
+        if (this.swipe == 'none') return this.swipe = 'left';
+        return this.swipe = 'none';
+      },
+
+      swipeRight: function(e) {
+        if (this.swipe == 'none') return this.swipe = 'right';
+        return this.swipe = 'none';
+      },
+
+      doubletap: function(e) {
+        this.focus();
+      },
+
+      moveUp: function(e) {
+        this.fire('moveUp', this.index);
+        this.blur();
+      },
+      
+      moveDown: function() {
+        this.fire('moveDown', this.index);
+        this.blur();
+      },
+
+      delete: function() {
+        this.fire('delete', this.index);
+      },
+
+      focus: function(e) {
+        if (this.period.type !== 'prepare') return this.$.paperIconItem.setAttribute('show-buttons', true);
+      },
+
+      blur: function(e) {
+        setTimeout(function() {
+          this.$.paperIconItem.removeAttribute('show-buttons');
+        }.bind(this));
+      },
+
+      //Functionality
+      updatePeriod: function() {
+        this.period.seconds = Math.max(Math.min(this.period.seconds, 60), 0);
+        this.period.minutes = Math.max(Math.min(this.period.minutes, 60), 0);
+        this.period.displayIcon = this.period.icon; 
+        this.set('period.totalSeconds', this.period.seconds + this.period.minutes * 60);
+        if (typeof this.index == 'number' && this.period) this.fire('period-updated', {index: this.index, period: this.period});
+      },
+
+      setSeconds: function(n) {
+        this.set('period.seconds', n);
+        this.updatePeriod();
+      },
+
+      setMinutes: function(n) {
+        this.set('period.minutes', n);
+        this.updatePeriod();
+      },
+
+      updateMinutes: function(e) {
+        this.setMinutes(e.target.value);
+      },
+
+      updateSeconds: function(e) {
+        this.setSeconds(e.target.value);
+      },
+
+      plusSeconds: function(e) {
+        this.setSeconds(this.period.seconds + 5);
+      },
+
+      minusSeconds: function(e) {
+        this.setSeconds(this.period.seconds - 5);
+      },
+
+      plusMinute: function(e) {
+        this.setMinutes(this.period.minutes + 1);
+      },
+
+      minusMinute: function(e) {
+        this.setMinutes(this.period.minutes - 1);
+      },
+
+      editName: function() {
+        this.fire('openDialog', {
+          id: 'periodNameDialog',
+          period: this.period,
+          callback: function(e) {
+            this.set('period.name', e.target.periodName);
+            this.updatePeriod();
+          }.bind(this)
+        });
+      }
+    });
+  </script>
+</dom-module>

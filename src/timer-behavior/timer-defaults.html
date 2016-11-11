@@ -1,5 +1,7 @@
 <link rel="import" href="../../bower_components/iron-icons/av-icons.html">
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<script src="../../bower_components/lodash/lodash.js"></script>
+
 <link rel="import" href="../icons.html">
 <script>
   window.TimerDefaults = {
@@ -45,6 +47,11 @@
           }
         }
       }
+    },
+
+    getPeriodDefault: function(type, setTimestamp) {
+      var period = _.clone(this.periodDefaults[type]);
+      return setTimestamp ? (period.timestamp = Date.now(), period) : period;
     }
   };
 </script>

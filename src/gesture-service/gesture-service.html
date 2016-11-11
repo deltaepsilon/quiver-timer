@@ -1,0 +1,31 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../shared-styles.html">
+
+<script src="../../bower_components/hammerjs/hammer.js"></script>
+
+<dom-module id="gesture-service">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+    <content id="content"></content>
+  </template>
+  <script>
+    Polymer({
+       is: "gesture-service",
+
+       properties: {
+         hammer: Object,
+         manager: Object
+       },
+
+       attached: function() {
+         this.hammer = new Hammer(this, {domEvents: true});
+         this.manager = new Hammer.Manager(this);
+         this.manager.add(new Hammer.Tap({event: 'doubletap', taps: 2}));
+       }
+    });
+  </script>
+</dom-module>

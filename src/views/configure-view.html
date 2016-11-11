@@ -1,18 +1,15 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/app-route/app-route.html">
 <link rel="import" href="../../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
-<link rel="import" href="../../bower_components/iron-form/iron-form.html">
-<link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
-<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
-<link rel="import" href="../../bower_components/paper-slider/paper-slider.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../color-wheel.html">
 <link rel="import" href="../timer-behavior/timer-defaults.html">
 <link rel="import" href="../digital-clock/digital-clock.html">
+<link rel="import" href="../configure-timer/configure-period.html">
 
 <script src="../../bower_components/lodash/lodash.js"></script>
 
@@ -20,50 +17,20 @@
   <template>
     <style include="shared-styles color-wheel">
       :host {
-        --paper-item-focused-before: {
-          opacity: 0;
-        }
         display: block;
       }
       
-      .buttons {
+      #buttons {
         @apply(--layout-horizontal);
         @apply(--layout-justified);
         @apply(--layout-wrap);
       }
       
-      .buttons paper-button {
+      #buttons paper-button {
         @apply(--layout-flex);
       }
       
-      .show-stopwatch {
-        display: none;
-      }
       
-      [type="stopwatch"] .show-stopwatch {
-        display: inline;
-      }
-
-      [type="prepare"] .type-color {
-        color: var(--secondary-text-color);
-      }
-
-      [type="work"] .type-color {
-        color: var(--paper-button-primary);
-      }
-
-      [type="rest"] .type-color {
-        color: var(--paper-button-secondary);
-      }
-
-      label {
-        color: var(--secondary-text-color);
-        font-size: .75rem;
-      }
-
-      paper-item-body > div {
-        padding: 1.5rem 0;
-      }
     </style>
 
     <app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
@@ -71,50 +38,17 @@
     <app-localstorage-document id="nameStorage" key="editing-name" data="{{editingName}}" zero-value=""></app-localstorage-document>
     <app-localstorage-document id="periodsStorage" key="editing-periods" data="{{editingPeriods}}" zero-value="[]"></app-localstorage-document>
 
-    <form is="iron-form">
-      <template id="editingPeriods" is="dom-repeat" items="[[editingPeriods]]" as="period">
-        <paper-material elevation="1" type$="[[period.type]]">
-          <paper-icon-item>
-            <iron-icon class="type-color" icon="[[period.icon]]" item-icon></iron-icon>
-            <paper-item-body three-line>
-              <div class="layout horizontal justified">
-                <strong>[[period.name]]</strong>
-                <div class="layout horizontal center">
-                  <aside class="show-stopwatch" style="font-size: .75rem; margin-right: 1rem;">Time Cap</aside>
-                  <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>  
-                </div>
-              </div>
-              <div class="layout horizontal justified center wrap">
-                <label for$="seconds-slider-[[index]]">Seconds</label>
-                <paper-slider id$="seconds-slider-[[index]]" class="flex" min="0" max="55" pin value="[[period.seconds]]" period-index$="[[index]]" on-change="updateSeconds" step="5"
-                  snaps></paper-slider>
-              </div>
-              <div class="layout horizontal justified center wrap">
-                <label for$="minutes-slider-[[index]]">Minutes</label>
-                <paper-slider id$="minutes-slider-[[index]]" class="flex accent" min="0" max="59" pin value="[[period.minutes]]" period-index$="[[index]]" on-change="updateMinutes" step="1"
-                  snaps></paper-slider>
-              </div>
-              <!--<div class="layout horizontal justified center wrap">
-                <div class="layout horizontal justified wrap flex">
-                  <paper-button on-click="plusSeconds" period-index$="[[index]]">+ 5s</paper-button>
-                  <paper-button on-click="minusSeconds" period-index$="[[index]]">- 5s</paper-button>
-                </div>
-                <div class="layout horizontal justified wrap flex">
-                  <paper-button on-click="plusMinute" period-index$="[[index]]">+ 1m</paper-button>
-                  <paper-button on-click="minusMinute" period-index$="[[index]]">- 1m</paper-button>
-                </div>
-              </div>-->
-            </paper-item-body>
-          </paper-icon-item>
-        </paper-material>
-      </template>
-      <div class="buttons" style="margin: .5rem 1rem; padding: .5rem 1rem;">
-        <paper-button raised class="primary" on-click="addWork">+ Work</paper-button>
-        <paper-button raised class="secondary" on-click="addRest">+ Rest</paper-button>
-        <paper-button raised class="tertiary" on-click="addStopwatch">+ Stopwatch</paper-button>
-      </div>
-    </form>
-
+    <template id="editingPeriods" is="dom-repeat" items="[[editingPeriods]]" as="period">
+      <configure-period period="{{period}}" on-period-updated="updatePeriod" index="[[index]]" periods-count="[[editingPeriods.length]]"></configure-period>
+    </template>
+    <div id="buttons" style="margin: .5rem 1rem; padding: .5rem 1rem;">
+      <!--<paper-button raised class="primary" on-click="addWork">+ Work</paper-button>
+      <paper-button raised class="secondary" on-click="addRest">+ Rest</paper-button>
+      <paper-button raised class="tertiary" on-click="addStopwatch">+ Stopwatch</paper-button>-->
+      <paper-icon-button icon="hourglass-empty" on-click="addWork"></paper-icon-button>
+      <paper-icon-button icon="av:pause-circle-outline" on-click="addRest"></paper-icon-button>
+      <paper-icon-button icon="custom:stopwatch" on-click="addStopwatch"></paper-icon-button>
+    </div>
   </template>
   <script>
     Polymer({
@@ -140,18 +74,15 @@
         editingPeriods: {
           type: Array,
           value: []
-        },
-        editingPeriodsData: {
-          type: Array,
-          value: []
         }
       },
-
-      observers: ['_setEditing(routeData.timerKey)'],
 
       _title: function(name) {
         return name;
       },
+
+      // Observers
+      observers: ['_setEditing(routeData.timerKey)'],
 
       _setEditing: function(timerKey) {
         if (this.timers[timerKey]) {
@@ -161,6 +92,34 @@
 
         if (!this.editingPeriods.length) this.addPeriod('prepare'); 
       },
+
+      listeners: {
+        moveUp: 'moveUp',
+        moveDown: 'moveDown',
+        delete: 'delete'
+      },
+
+      moveUp: function(e) {
+        if (e.detail < 1) return console.log('skipping up');
+        var index = e.detail;
+        var period = _.clone(this.editingPeriods[index]);
+        this.splice('editingPeriods', index, 1);
+        this.splice('editingPeriods', index - 1, 0, period);
+      },
+
+      moveDown: function(e) {
+        if (e.detail >= this.editingPeriods.length - 1) return console.log('skipping up');
+        var index = e.detail;
+        var period = _.clone(this.editingPeriods[index]);
+        this.splice('editingPeriods', index, 1);
+        this.splice('editingPeriods', index + 1, 0, period);
+      },
+
+      delete: function(e) {
+        this.splice('editingPeriods', e.detail, 1);
+      },
+
+      // Functions
 
       addWork: function() {
         this.addPeriod('work');
@@ -175,57 +134,15 @@
       },
 
       addPeriod: function(type) {
-        var period = _.clone(this.periodDefaults[type]);
-        this.push('editingPeriods', (period.random = Date.now(), period));
+        this.push('editingPeriods', this.getPeriodDefault(type, true));
+        // setTimeout(function() {
+        //   this.fire('scrollIntoView', this.$.buttons);  
+        // }.bind(this), 750);
       },
 
-      _getPeriodIndex: function(period) {
-        return this.editingPeriods.findIndex(function(el) {
-          return el.timestamp = period.timestamp;
-        });
+      updatePeriod: function(e) {
+        this.splice('editingPeriods', e.detail.index, 1, e.detail.period);
       },
-
-      setEditingPeriod: function(period) {
-        period.seconds = Math.max(Math.min(period.seconds, 60), 0);
-        period.minutes = Math.max(Math.min(period.minutes, 60), 0);
-        period.totalSeconds = period.seconds + period.minutes * 60;
-        this.splice('editingPeriods', this._getPeriodIndex(period), 1, period);
-      },
-
-      _getPeriodFromEvent: function(e) {
-        return _.clone(this.editingPeriods[+e.target.getAttribute('period-index')]);
-      },
-
-      updateMinutes: function(e) {
-        var period = this._getPeriodFromEvent(e);
-        this.setEditingPeriod((period.minutes += e.target.value - period.minutes, period));
-      },
-
-      updateSeconds: function(e) {
-        var period = this._getPeriodFromEvent(e);        
-        this.setEditingPeriod((period.seconds += e.target.value - period.seconds, period));
-      },
-
-      plusSeconds: function(e) {
-        var period = this._getPeriodFromEvent(e);       
-        this.setEditingPeriod((period.seconds += 5, period));
-      },
-
-      minusSeconds: function(e) {
-        var period = this._getPeriodFromEvent(e);        
-        this.setEditingPeriod((period.seconds -= 5, period));
-      },
-
-      plusMinute: function(e) {
-        var period = this._getPeriodFromEvent(e);        
-        this.setEditingPeriod((period.minutes += 1, period));
-      },
-
-      minusMinute: function(e) {
-        var period = this._getPeriodFromEvent(e);        
-        this.setEditingPeriod((period.minutes -= 1, period));
-      }
-
 
 
     });

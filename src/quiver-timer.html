@@ -21,12 +21,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
-<link rel="import" href="../../bower_components/app-layout/app-scrollpos-control/app-scrollpos-control.html">
+<link rel="import" href="../bower_components/app-layout/app-scrollpos-control/app-scrollpos-control.html">
 <link rel="import" href="icons.html">
 
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="timer-fab/timer-fab.html">
 <link rel="import" href="configure-timer/configure-timer.html">
+<link rel="import" href="dialogs/period-name-dialog.html">
 
 <dom-module id="quiver-timer">
   <template>
@@ -59,15 +60,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-input-container-color: rgba(103, 58, 183, .64);
         --paper-input-container-focus-color: rgba(103, 58, 183, 1);
         --paper-input-container-input-color: #212121;
-
         /* paper-dialog */
         --paper-dialog-background-color: #fff;
-
         /* paper-button */
         --paper-button-primary: #673AB7;
         --paper-button-secondary: #009688;
         --paper-button-tertiary: #212121;
-
         /* MD color wheel */
         --md-red: #F44336;
         --md-pink: #ff4081;
@@ -88,7 +86,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --md-brown: #795548;
         --md-grey: #9E9E9E;
         --md-blue-grey: #607D8D;
-
         display: block;
       }
       
@@ -134,12 +131,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </app-drawer>
 
       <!-- Main content -->
-      <app-header-layout has-scrolling-region>
+      <app-header-layout id="appHeaderLayout" has-scrolling-region>
 
         <app-header condenses reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            <div main-title>[[pageTitle]]</div>
+            <div main-title style="text-transform: capitalize;">[[pageTitle]]</div>
+            <paper-button on-click="clearLocalStorage">Reset</paper-button>
             <timer-fab id="timerFab" page="[[page]]" style="position: absolute; top: 37px; right: 2rem;"></timer-fab>
           </app-toolbar>
         </app-header>
@@ -149,9 +147,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <configure-view id="configureView" local-route="[[subroute]]" name="configure" title="{{configureTitle}}"></configure-view>
           <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
         </iron-pages>
-
       </app-header-layout>
     </app-drawer-layout>
+    <period-name-dialog id="periodNameDialog"></period-name-dialog>
   </template>
 
   <script>
@@ -170,13 +168,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
+      // Computed
+      _pageTitle: function(page, path, configureTitle) {
+        if (page == 'configure') return configureTitle;
+        return 'Quiver Timer';
+      },
+
+      // Observers
       observers: [
         '_routePageChanged(routeData.page)'
       ],
-
-      listeners: {
-        goTo: '_goTo'
-      },
 
       _routePageChanged: function(page) {
         this.page = page || 'timers';
@@ -192,6 +193,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.page = 'fourohfour';
       },
 
+      // Listeners
+      listeners: {
+        goTo: '_goTo',
+        scrollIntoView: '_scrollIntoView',
+        openDialog: '_openDialog'
+      },
+
       _goTo: function(e) {
         var state = e.detail.state || {};
         var title = e.detail.title || '';
@@ -200,9 +208,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         window.dispatchEvent(new Event('location-changed'));
       },
 
-      _pageTitle: function(page, path, configureTitle) {
-        if (page == 'configure') return configureTitle;
-        return 'Quiver Timer';
+      _scrollIntoView: function(e) {
+        e.detail.scrollIntoView({behavior: 'smooth'});
+      },
+
+      _openDialog: function(e) {
+        this.$[e.detail.id].open(e);
+      },
+
+      // Functions
+      clearLocalStorage: function() {
+        localStorage.clear();
+        location.reload();
       }
     });
   </script>
