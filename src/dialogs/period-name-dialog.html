@@ -12,11 +12,11 @@
       }
     </style>
     <paper-dialog id="editNameDialog" with-backdrop always-on-top="false">
-      <form is="iron-form">
-        <paper-input label="Name" value="{{period.name}}" type="text" autofocus tabinded="0"></paper-input>
+      <form id="form" is="iron-form">
+        <paper-input label="Name" value="{{period.name}}" type="text" autofocus tabinded="0" required auto-validate on-value-changed="validate"></paper-input>
         <div class="buttons">
           <paper-button dialog-dismiss tabindex="2">cancel</paper-button>
-          <paper-button tabindex="1" on-click="editName" period-name="[[period.name]]" dialog-confirm>save</paper-button>
+          <paper-button tabindex="1" on-click="editName" period-name="[[period.name]]" disabled$="[[invalid]]">save</paper-button>
         </div>
       </form>
     </paper-dialog>
@@ -25,10 +25,19 @@
     Polymer({
        is: "period-name-dialog",
 
+       validate: function() {
+        this.invalid = !this.$.form.validate();
+       },
+
        open: function(e) {
+         var dialog = this.$.editNameDialog;
+         var callback = e.detail.callback; 
          this.period = e.detail.period;
-         this.editName = e.detail.callback;
-         this.$.editNameDialog.open();
+         this.editName = function(e) {
+          callback(e.target.periodName);
+          dialog.close();
+         };
+         dialog.open();
        }
     });
   </script>

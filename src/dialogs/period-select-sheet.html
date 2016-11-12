@@ -1,0 +1,68 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="period-select-sheet">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+      .title {
+				color: var(--secondary-text-color);
+        padding: 1rem;
+        font-weight: light;
+			}
+    </style>
+    <template is="dom-if" if="[[show]]">
+      <div class="bottom-sheet">
+        <span class="title">Duplicate periods</span>
+        <paper-icon-item on-click="duplicate">
+          <iron-icon icon="content-copy" item-icon></iron-icon>
+          <paper-item-body>
+            <div>Duplicate</div>
+          </paper-item-body>
+        </paper-icon-item>
+        <paper-icon-item on-click="delete">
+          <iron-icon icon="delete" item-icon></iron-icon>
+          <paper-item-body>
+            <div>Delete</div>
+          </paper-item-body>
+        </paper-icon-item>
+        <paper-icon-item on-click="cancel">
+          <iron-icon icon="cancel" item-icon></iron-icon>
+          <paper-item-body>
+            <div>Cancel</div>
+          </paper-item-body>
+        </paper-icon-item>
+      </div>
+    </template>
+  </template>
+  <script>
+    Polymer({
+       is: "period-select-sheet",
+
+       properties: {
+         show: {
+           type: Boolean,
+           value: false
+         },
+         payload: Object
+       },
+
+       duplicate: function() {
+         this.payload.duplicate();
+       },
+
+       cancel: function() {
+         this.payload.cancel();
+       },
+
+       delete: function() {
+         this.payload.delete();
+       }
+    });
+  </script>
+</dom-module>
