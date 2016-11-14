@@ -221,7 +221,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       // Functions
       clearLocalStorage: function() {
         localStorage.clear();
-        location.reload();
+        location = location.pathname + '?now=' + Date.now();
       },
 
       toggleConfigureSheet: function(e) {

@@ -9,11 +9,13 @@
     <style include="shared-styles">
       :host {
         display: block;
+        user-select: none;
       }
       .title {
 				color: var(--secondary-text-color);
         padding: 1rem;
         font-weight: light;
+        user-select: none;
 			}
     </style>
     <template is="dom-if" if="[[show]]">
