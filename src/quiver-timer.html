@@ -67,6 +67,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-button-primary: #673AB7;
         --paper-button-secondary: #009688;
         --paper-button-tertiary: #212121;
+        /*paper-checkbox*/
+        --paper-checkbox-checked-color: #212121;
         /* MD color wheel */
         --md-red: #F44336;
         --md-pink: #ff4081;
@@ -145,13 +147,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="fourohfour" role="main">
           <timers-view id="timersView" name="timers"></timers-view>
-          <configure-view id="configureView" local-route="[[subroute]]" name="configure" title="{{configureTitle}}" on-show-sheet-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
+          <configure-view id="configureView" local-route="[[subroute]]" name="configure" title="{{configureTitle}}" on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
           <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
     <period-name-dialog id="periodNameDialog"></period-name-dialog>
-    <period-select-sheet id="periodSelectSheet" show="[[showPeriodSelectSheet]]" payload="[[periodSelectSheetPayload]]"></period-select-sheet>
+    <period-select-sheet id="periodSelectSheet" show="[[showPeriodSelectSheet]]" show-bulk-edits="[[showBulkEdits]]" payload="[[periodSelectSheetPayload]]"></period-select-sheet>
   </template>
 
   <script>
@@ -183,6 +185,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _routePageChanged: function(page) {
         this.page = page || 'timers';
+        this.showPeriodSelectSheet = page == 'configure';
       },
 
       _pageChanged: function(page) {
@@ -225,7 +228,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       toggleConfigureSheet: function(e) {
-        this.showPeriodSelectSheet = e.detail.value;
+        this.showBulkEdits = e.detail.value;
       }
     });
   </script>

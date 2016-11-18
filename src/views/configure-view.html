@@ -19,18 +19,6 @@
       :host {
         display: block;
       }
-      
-      #buttons {
-        @apply(--layout-horizontal);
-        @apply(--layout-justified);
-        @apply(--layout-wrap);
-      }
-      
-      #buttons paper-button {
-        @apply(--layout-flex);
-      }
-      
-      
     </style>
 
     <app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
@@ -38,16 +26,15 @@
     <app-localstorage-document id="nameStorage" key="editing-name" data="{{editingName}}" zero-value=""></app-localstorage-document>
     <app-localstorage-document id="periodsStorage" key="editing-periods" data="{{periodsStorage}}" zero-value="[]"></app-localstorage-document>
 
-    <template id="periods" is="dom-repeat" items="[[periods]]" as="period">
-      <configure-period period="{{period}}" on-period-updated="updatePeriodHandler" index="[[index]]" periods-count="[[periods.length]]"></configure-period>
-    </template>
-    <div id="buttons" style="margin: .5rem 1rem; padding: .5rem 1rem;">
-      <!--<paper-button raised class="primary" on-click="addWork">+ Work</paper-button>
-      <paper-button raised class="secondary" on-click="addRest">+ Rest</paper-button>
-      <paper-button raised class="tertiary" on-click="addStopwatch">+ Stopwatch</paper-button>-->
-      <paper-icon-button icon="hourglass-empty" on-click="addWork"></paper-icon-button>
-      <paper-icon-button icon="av:pause-circle-outline" on-click="addRest"></paper-icon-button>
-      <paper-icon-button icon="custom:stopwatch" on-click="addStopwatch"></paper-icon-button>
+    <div style="padding: 1rem 1rem 6rem;">
+      <template id="periods" is="dom-repeat" items="[[periods]]" as="period">
+        <configure-period period="{{period}}" on-period-updated="updatePeriodHandler" index="[[index]]" periods-count="[[periods.length]]"></configure-period>
+      </template>
+      <template is="dom-if" if="[[showSelectAll]]">
+        <div class="layout horizontal end-justified" style="padding: 30px 24px;">
+          <paper-checkbox on-checked-changed="toggleSelectAll"></paper-checkbox>  
+        </div>
+      </template>
     </div>
   </template>
   <script>
@@ -84,24 +71,30 @@
           value: [],
           notify: true
         },
-        showSheet: {
+        bulk: {
           type: Boolean,
-          computed: '_showSheet(periods, periods.splices)',
+          computed: '_bulk(periods, periods.splices)',
           notify: true
         },
         sheetPayload: {
           type: Object,
-          computed: '_sheetPayload(showSheet)',
+          computed: '_sheetPayload(bulk)',
           notify: true
+        },
+        storageReady: Boolean,
+        showSelectAll: {
+          type: Boolean,
+          computed: '_showSelectAll(periods.length)'
         }
       },
 
       attached: function() { 
         var loadPeriodStorage = function(e) {
-          if (!this.periods.length < 2 && e.detail.value.length) {
-            this.periods = e.detail.value;
-          }
           this.$.periodsStorage.removeEventListener('data-changed', loadPeriodStorage);
+          if (!this.periods.length < 2 && e.detail.value.length) {
+            this.splice.apply(this, ['periods', 0, this.periods.length].concat(e.detail.value));
+          }
+          this.storageReady = true;
         }.bind(this);
         this.$.periodsStorage.addEventListener('data-changed', loadPeriodStorage);
       },
@@ -112,12 +105,12 @@
 
       // Observers
       observers: [
-        '_setEditing(routeData.timerKey)',
+        '_setEditing(routeData.timerKey, storageReady)',
         '_periods(periods, periods.splices)'
       ],
 
-      _setEditing: function(timerKey) {
-        if (this.timers[timerKey]) {
+      _setEditing: function(timerKey, storageReady) {
+        if (storageReady && this.timers[timerKey]) {
           this.set('name', timers[timerKey].name);
           this.set('periods', timers[timerKey].periods);  
         }
@@ -130,7 +123,7 @@
         this.$.periodsStorage.save('editing-periods');
       },
 
-      _showSheet: function(periods) {
+      _bulk: function(periods) {
         return !!periods.find(function(period) {
           return period.selected;
         });
@@ -141,7 +134,14 @@
           cancel: this.clearSelected.bind(this),
           duplicate: this.duplicateSelected.bind(this),
           delete: this.deleteSelected.bind(this),
+          addWork: this.addWork.bind(this),
+          addRest: this.addRest.bind(this),
+          addStopwatch: this.addStopwatch.bind(this),
         };
+      },
+
+      _showSelectAll: function(i) {
+        return i > 2;
       },
 
       // Listeners
@@ -154,18 +154,20 @@
 
       moveUp: function(e) {
         if (e.detail < 1) return console.log('skipping up');
-        var index = e.detail;
+        var index = e.detail.index;
         var period = _.clone(this.periods[index]);
         this.splice('periods', index, 1);
         this.splice('periods', index - 1, 0, period);
+        setTimeout(e.detail.callback);
       },
 
       moveDown: function(e) {
         if (e.detail >= this.periods.length - 1) return console.log('skipping up');
-        var index = e.detail;
+        var index = e.detail.index;
         var period = _.clone(this.periods[index]);
         this.splice('periods', index, 1);
         this.splice('periods', index + 1, 0, period);
+        setTimeout(e.detail.callback);
       },
 
       delete: function(e) {
@@ -177,7 +179,15 @@
         var target = e.target;
         period.select = target.select.bind(target);
         period.deselect = target.deselect.bind(target);
-        this.updatePeriod(e.detail.index, period);
+        if (e.detail.refresh) {
+          this.updatePeriod(e.detail.index, period);
+        } else {
+          this.periods[e.detail.index] = period;
+        }
+      },
+
+      toggleSelectAll: function(e) {
+        return e.target.checked ? this.selectAll() : this.clearSelected();
       },
 
       // Functions
@@ -195,14 +205,21 @@
 
       addPeriod: function(type) {
         this.push('periods', this.getPeriodDefault(type, true));
-        setTimeout(function() {
-          this.fire('scrollIntoView', this.$.buttons);  
-        }.bind(this), 750);
       },
 
       updatePeriod: function(index, period) {
         setTimeout(function() {
           this.splice('periods', index, 1, period);  
+        }.bind(this));
+      },
+
+      selectAll: function() {
+        this.periods.forEach(function(period, index) {
+          if (period.type !== 'prepare' && !period.selected) {
+            period.select();
+            period.selected = true;
+            this.updatePeriod(index, period);
+          }           
         }.bind(this));
       },
 
@@ -221,17 +238,15 @@
           if (period.selected) this.push('periods', this.periodsStorage[index]);
         }.bind(this));
         this.clearSelected();
-        setTimeout(function() {
-          this.$.buttons.scrollIntoView({behavior: 'smooth'});  
-        }.bind(this));
       },
 
       deleteSelected: function() {
-        this.periods.forEach(function(period, index) {
-          if (period.selected) this.splice('periods', index, 1);
-        }.bind(this));
+        var i = this.periods.length;
+        while (i--) {
+          if (this.periods[i].selected) this.splice('periods', i, 1);
+        }
         this.clearSelected();
-      }
+      },
 
     });
   </script>

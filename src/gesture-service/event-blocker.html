@@ -1,0 +1,48 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="event-blocker">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+    <content></content>
+  </template>
+  <script>
+    Polymer({
+       is: "event-blocker",
+
+       properties: {
+         tap: Boolean,
+         click: Boolean,
+         press: Boolean,
+         doubletap: Boolean,
+         swipe: Boolean
+       },
+
+       listeners: {
+         tap: 'block',
+         click: 'block',
+         press: 'block',
+         doubletap: 'block',
+         swipe: 'block',
+         blur: 'block'
+       },
+
+       block: function(e) {
+         if (this[e.type]) {
+           e.stopPropagation();
+           e.preventDefault();
+           e.stopImmediatePropagation();
+
+           if (e.gesture) {
+             e.gesture.stopPropagation();
+             e.gesture.preventDefault();
+           }
+         }    
+       }
+    });
+  </script>
+</dom-module>

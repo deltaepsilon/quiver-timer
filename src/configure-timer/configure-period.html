@@ -6,8 +6,10 @@
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
 
 <link rel="import" href="../gesture-service/gesture-service.html">
+<link rel="import" href="../gesture-service/event-blocker.html">
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../color-wheel.html">
 
@@ -32,6 +34,10 @@
       [type="prepare"] .type-color {
         color: var(--secondary-text-color);
       }
+
+      [type="prepare"] .hide-prepare {
+        visibility: hidden;
+      }
       
       [type="work"] .type-color {
         color: var(--paper-button-primary);
@@ -52,6 +58,12 @@
       
       #wrapper {
         position: relative;
+        background: white;
+        border-bottom: 1px solid var(--divider-color);
+      }
+
+      #wrapper[is-last] {
+        border-bottom: none;
       }
       
       #gestureService {
@@ -81,18 +93,21 @@
       }
       
       paper-icon-item .show-on-focus {
-        visibility: hidden;
+        /*visibility: hidden;*/
+        height: 0;
         opacity: 0;
-        transition: opacity 300ms;
+        transition: all 300ms;
       }
       
       paper-icon-item[show-buttons] .show-on-focus {
-        visibility: visible;
+        /*visibility: visible;*/
+        height: inherit !important;
         opacity: 1;
       }
       
       paper-icon-item[show-buttons] .hide-on-focus {
-        visibility: hidden;
+        /*visibility: hidden;*/
+        display: none !important;
       }
       
       .move-button {
@@ -122,55 +137,98 @@
         left: .5rem;
       }
 
-      paper-material[selected] {
+      paper-checkbox {
+        margin: 0 .5rem 0 1rem;
+      }
 
+      paper-button {
+        margin: 0 0 .25rem .25rem;
+        padding: 0;
+        border-radius: 50%;
+        height: 2rem;
+        min-width: 2rem;
+        width: 2rem;
+        font-size: .75rem;
+      }
+
+      #buttons {
+        padding: 0;
+      }
+
+      paper-icon-item[show-buttons] #buttons {
+        padding: .5rem;
+      }
+
+      #buttons > div {
+        padding: 0 1rem;
       }
     </style>
 
-    <div id="wrapper" is-first$="[[isFirst]]" is-last$="[[isLast]]">
-      <gesture-service id="gestureService" swipe$="[[swipe]]">
-        <paper-material id="paper" elevation="1" selected$="[[selected]]" type$="[[period.type]]">
-          <paper-icon-item id="paperIconItem" on-blur="blur">
-            <iron-icon class="type-color animate-visibility hide-on-focus" icon="[[period.icon]]" item-icon></iron-icon>
-            <paper-icon-button class="type-color move-button move-up-button show-on-focus" icon="arrow-drop-up" on-click="moveUp"></paper-icon-button>
-            <paper-icon-button class="type-color move-button move-down-button show-on-focus" icon="arrow-drop-down" on-click="moveDown"></paper-icon-button>
-            <paper-icon-button class="type-color delete-button show-on-focus" icon="delete" item-icon on-click="delete"></paper-icon-button>
-            <paper-item-body three-line>
-              <div class="layout horizontal justified">
-                <strong on-click="editName" style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
-                <div class="layout horizontal center">
-                  <aside class="show-stopwatch" style="font-size: .75rem; margin-right: 1rem;">Time Cap</aside>
-                  <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
-                </div>
+    <div id="wrapper" is-first$="[[isFirst]]" is-last$="[[isLast]]" selected$="[[selected]]" type$="[[period.type]]">
+      <!--<gesture-service id="gestureService" swipe$="[[swipe]]">-->
+        <paper-icon-item id="paperIconItem" on-blur="blur" show-buttons$="[[focused]]">
+          <iron-icon class="type-color animate-visibility hide-on-focus" icon="[[period.icon]]" item-icon></iron-icon>
+          <paper-icon-button class="type-color move-button move-up-button show-on-focus hide-prepare" icon="arrow-drop-up" on-click="moveUp"></paper-icon-button>
+          <paper-icon-button class="type-color move-button move-down-button show-on-focus hide-prepare" icon="arrow-drop-down" on-click="moveDown"></paper-icon-button>
+          <paper-icon-button class="type-color delete-button show-on-focus hide-prepare" icon="delete" item-icon on-click="delete"></paper-icon-button>
+          <paper-item-body>
+            <div class="layout horizontal justified">
+              <strong on-click="editName" style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
+              <div class="layout horizontal center">
+                <aside class="show-stopwatch" style="font-size: .75rem; margin-right: 1rem;">Time Cap</aside>
+                <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
+                <event-blocker click>
+                  <paper-checkbox class="hide-prepare" on-change="checkboxChange" checked="{{selected::change}}"></paper-checkbox>
+                </event-blocker>
               </div>
-              <div class="layout horizontal justified center wrap">
-                <label for$="seconds-slider-[[index]]">Seconds</label>
+            </div>
+            <div id="buttons" class="layout horizontal justified start wrap show-on-focus">
+              <div class="hide-prepare">
+                <div class="flex layout horizontal end-justified wrap">
+                  <paper-button raised class="primary" minutes="0" on-click="minutesClick">0</paper-button>
+                  <paper-button raised class="primary" minutes="1" on-click="minutesClick">1</paper-button>
+                  <paper-button raised class="primary" minutes="2" on-click="minutesClick">2</paper-button>
+                  <paper-button raised class="primary" minutes="3" on-click="minutesClick">3</paper-button>
+                  <paper-button raised class="primary" minutes="4" on-click="minutesClick">4</paper-button>
+                  <paper-button raised class="primary" minutes="5" on-click="minutesClick">5</paper-button>
+                  <paper-button raised class="primary" minutes="6" on-click="minutesClick">6</paper-button>
+                  <paper-button raised class="primary" minutes="7" on-click="minutesClick">7</paper-button>  
+                </div>  
+              </div>
+              <div class="flex layout horizontal end-justified wrap">
+                <paper-button raised class="secondary" seconds="0" on-click="secondsClick">0</paper-button>
+                <paper-button raised class="secondary" seconds="15" on-click="secondsClick">15</paper-button>
+                <paper-button raised class="secondary" seconds="30" on-click="secondsClick">30</paper-button>
+                <paper-button raised class="secondary" seconds="45" on-click="secondsClick">45</paper-button>  
+              </div>
+            </div>
+            <!--<div class="layout horizontal justified center wrap show-on-focus">
+              <label for$="seconds-slider-[[index]]">Seconds</label>
+              <event-blocker blur>
                 <paper-slider id$="seconds-slider-[[index]]" class="flex" min="0" max="55" pin value="[[period.seconds]]" period-index$="[[index]]"
-                  on-change="updateSeconds" step="5" snaps></paper-slider>
-              </div>
-              <div class="layout horizontal justified center wrap">
-                <label for$="minutes-slider-[[index]]">Minutes</label>
+                on-change="updateSeconds" step="5" snaps></paper-slider>
+              </event-blocker>
+            </div>
+            <div class="layout horizontal justified center wrap show-on-focus">
+              <label for$="minutes-slider-[[index]]">Minutes</label>
+              <event-blocker blur>
                 <paper-slider id$="minutes-slider-[[index]]" class="flex accent" min="0" max="59" pin value="[[period.minutes]]" period-index$="[[index]]"
-                  on-change="updateMinutes" step="1" snaps></paper-slider>
+                on-change="updateMinutes" step="1" snaps></paper-slider>
+              </event-blocker>
+            </div>-->
+            <!--<div class="layout horizontal justified center wrap">
+              <div class="layout horizontal justified wrap flex">
+                <paper-button on-click="plusSeconds" period-index$="[[index]]">+ 5s</paper-button>
+                <paper-button on-click="minusSeconds" period-index$="[[index]]">- 5s</paper-button>
               </div>
-              <!--<div class="layout horizontal justified center wrap">
-                <div class="layout horizontal justified wrap flex">
-                  <paper-button on-click="plusSeconds" period-index$="[[index]]">+ 5s</paper-button>
-                  <paper-button on-click="minusSeconds" period-index$="[[index]]">- 5s</paper-button>
-                </div>
-                <div class="layout horizontal justified wrap flex">
-                  <paper-button on-click="plusMinute" period-index$="[[index]]">+ 1m</paper-button>
-                  <paper-button on-click="minusMinute" period-index$="[[index]]">- 1m</paper-button>
-                </div>
-              </div>-->
-            </paper-item-body>
-          </paper-icon-item>
-        </paper-material>
-      </gesture-service>
-      <div id="delete" class="layout horizontal around-justified center" on-click="delete">
-        <span>Delete</span>
-        <span>Delete</span>
-      </div>
+              <div class="layout horizontal justified wrap flex">
+                <paper-button on-click="plusMinute" period-index$="[[index]]">+ 1m</paper-button>
+                <paper-button on-click="minusMinute" period-index$="[[index]]">- 1m</paper-button>
+              </div>
+            </div>-->
+          </paper-item-body>
+        </paper-icon-item>
+      <!--</gesture-service>-->
     </div>
   </template>
   <script>
@@ -200,7 +258,19 @@
         swipe: {
           type: String,
           value: 'none'
+        },
+        focused: {
+          type: Boolean,
+          reflectToAttribute: true
+        },
+        selected: {
+          type: Boolean,
+          value: false
         }
+      },
+
+      attached: function() {
+        this.fire('period-updated', {index: this.index, period: this.period});
       },
 
       //  Observers
@@ -216,10 +286,11 @@
 
       // Listeners
       listeners: {
-        swipeleft: 'swipeLeft',
-        swiperight: 'swipeRight',
-        doubletap: 'doubletap',
-        press: 'press'
+        // swipeleft: 'swipeLeft',
+        // swiperight: 'swipeRight',
+        click: 'click',
+        // doubletap: 'doubletap',
+        // press: 'press'
       },
 
       swipeLeft: function(e) {
@@ -236,19 +307,45 @@
         this.focus();
       },
 
+      click: function(e) {
+        this.focus();
+      },      
+
       press: _.debounce(function() {
         if (this.period.type != 'prepare') this.set('selected', !this.selected);
         this.period.selected = this.selected;
         this.updatePeriod();
       }, 50),
 
+      checkboxChange: function(e) {
+        if (this.period.type != 'prepare') this.set('selected', e.target.checked);
+        this.period.selected = this.selected;
+        this.updatePeriod();
+      },
+
+      minutesClick: function(e) {
+        this.set('period.minutes', +e.target.getAttribute('minutes'));
+        this.updatePeriod();
+      },
+
+      secondsClick: function(e) {
+        this.set('period.seconds', +e.target.getAttribute('seconds'));
+        this.updatePeriod();
+      },
+
       moveUp: function(e) {
-        this.fire('moveUp', this.index);
+        this.fire('moveUp', {
+          index: this.index,
+          callback: this.cancelBlur.bind(this)
+        });
         this.blur();
       },
       
       moveDown: function() {
-        this.fire('moveDown', this.index);
+        this.fire('moveDown', {
+          index: this.index,
+          callback: this.cancelBlur.bind(this)
+        });
         this.blur();
       },
 
@@ -257,22 +354,31 @@
       },
 
       focus: function(e) {
-        if (this.period.type !== 'prepare') return this.$.paperIconItem.setAttribute('show-buttons', true);
+        return this.set('focused', true);
+        console.log(this.focused);
       },
 
       blur: function(e) {
+        if (e && e.relatedTarget && e.relatedTarget.is == 'paper-button') return this.$.paperIconItem.focus();
+        if (e && e.relatedTarget && e.relatedTarget.is == 'paper-icon-button') return;
         setTimeout(function() {
-          this.$.paperIconItem.removeAttribute('show-buttons');
+          if (this.shouldCancelBlur) return this.$.paperIconItem.focus(), this.shouldCancelBlur = false;
+          this.set('focused', false);
         }.bind(this));
+      },
+
+      cancelBlur: function() {
+        this.shouldCancelBlur = true;
       },
 
       //Functionality
       updatePeriod: function() {
-        this.period.seconds = Math.max(Math.min(this.period.seconds, 60), 0);
-        this.period.minutes = Math.max(Math.min(this.period.minutes, 60), 0);
+        this.period.seconds = Math.max(Math.min(this.period.seconds, 59), 0);
+        this.period.minutes = Math.max(Math.min(this.period.minutes, 59), 0);
         this.period.displayIcon = this.period.icon; 
         this.set('period.totalSeconds', this.period.seconds + this.period.minutes * 60);
-        if (typeof this.index == 'number' && this.period) this.fire('period-updated', {index: this.index, period: this.period});
+        if (typeof this.index == 'number' && this.period) this.fire('period-updated', {index: this.index, period: this.period, refresh: true});
+        this.cancelBlur();
       },
 
       setSeconds: function(n) {

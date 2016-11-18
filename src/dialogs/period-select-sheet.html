@@ -2,6 +2,8 @@
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/iron-icons/av-icons.html">
 <link rel="import" href="../shared-styles.html">
 
 <dom-module id="period-select-sheet">
@@ -11,34 +13,19 @@
         display: block;
         user-select: none;
       }
-      .title {
-				color: var(--secondary-text-color);
-        padding: 1rem;
-        font-weight: light;
-        user-select: none;
-			}
     </style>
     <template is="dom-if" if="[[show]]">
-      <div class="bottom-sheet">
-        <span class="title">Duplicate periods</span>
-        <paper-icon-item on-click="duplicate">
-          <iron-icon icon="content-copy" item-icon></iron-icon>
-          <paper-item-body>
-            <div>Duplicate</div>
-          </paper-item-body>
-        </paper-icon-item>
-        <paper-icon-item on-click="delete">
-          <iron-icon icon="delete" item-icon></iron-icon>
-          <paper-item-body>
-            <div>Delete</div>
-          </paper-item-body>
-        </paper-icon-item>
-        <paper-icon-item on-click="cancel">
-          <iron-icon icon="cancel" item-icon></iron-icon>
-          <paper-item-body>
-            <div>Cancel</div>
-          </paper-item-body>
-        </paper-icon-item>
+      <div class="bottom-sheet layout horizontal justified">
+        <template is="dom-if" if="[[showBulkEdits]]">
+          <paper-icon-button icon="cancel" on-click="cancel"></paper-icon-button>
+          <paper-icon-button icon="delete" on-click="delete"></paper-icon-button>
+          <paper-icon-button icon="content-copy" on-click="duplicate"></paper-icon-button>
+        </template>
+        <template is="dom-if" if="[[!showBulkEdits]]">
+          <paper-icon-button icon="hourglass-empty" on-click="addWork"></paper-icon-button>
+          <paper-icon-button icon="av:pause-circle-outline" on-click="addRest"></paper-icon-button>
+          <paper-icon-button icon="custom:stopwatch" on-click="addStopwatch"></paper-icon-button>
+        </template> 
       </div>
     </template>
   </template>
@@ -47,7 +34,7 @@
        is: "period-select-sheet",
 
        properties: {
-         show: {
+         showBulkEdits: {
            type: Boolean,
            value: false
          },
@@ -64,7 +51,19 @@
 
        delete: function() {
          this.payload.delete();
-       }
+       },
+
+       addWork: function() {
+         this.payload.addWork();
+       },
+
+       addRest: function() {
+         this.payload.addRest();
+       },
+
+       addStopwatch: function() {
+         this.payload.addStopwatch();
+       },
     });
   </script>
 </dom-module>
