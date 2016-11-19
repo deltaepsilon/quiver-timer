@@ -1,9 +1,11 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/app-route/app-route.html">
-<link rel="import" href="../../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
+<link rel="import" href="../../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../bower_components/paper-styles/shadow.html">
 
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../color-wheel.html">
@@ -19,17 +21,29 @@
       :host {
         display: block;
       }
+      #periods-wrapper {
+        @apply(--shadow-elevation-2dp);
+      }
     </style>
 
     <app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
-    <app-localstorage-document id="timersStorage" key="timers" data="{{timers}}"></app-localstorage-document>
-    <app-localstorage-document id="nameStorage" key="editing-name" data="{{editingName}}" zero-value=""></app-localstorage-document>
-    <app-localstorage-document id="periodsStorage" key="editing-periods" data="{{periodsStorage}}" zero-value="[]"></app-localstorage-document>
+    <app-indexeddb-mirror id="timersData" key="timers" session="[[session]]" data="{{timers}}" persisted-data="{{timersData}}"></app-indexeddb-mirror>
+    <app-indexeddb-mirror id="nameData" key="timer-name" session="[[session]]" data="{{timerName}}" persisted-data="{{timerNameData}}"></app-indexeddb-mirror>
+    <app-indexeddb-mirror id="periodsData" key="periods" session="[[session]]" data="{{periods}}" persisted-data="{{periodsData}}"></app-indexeddb-mirror>
+    <!--<app-localstorage-document id="timersStorage" key="timers" data="{{timers}}"></app-localstorage-document>
+    <app-localstorage-document id="nameStorage" key="timer-name" data="{{timerName}}" zero-value=""></app-localstorage-document>
+    <app-localstorage-document id="periodsStorage" key="editing-periods" data="{{periodsStorage}}" zero-value="[]"></app-localstorage-document>-->
 
-    <div style="padding: 1rem 1rem 6rem;">
-      <template id="periods" is="dom-repeat" items="[[periods]]" as="period">
-        <configure-period period="{{period}}" on-period-updated="updatePeriodHandler" index="[[index]]" periods-count="[[periods.length]]"></configure-period>
-      </template>
+    <paper-material elevation="1" class="layout horizontal justified">
+      <h3 on-click="editName">[[timerName]]</h3>
+      <digital-clock total-seconds="[[totalSeconds]]" style="margin: 21px 50px 0 0;"></digital-clock>
+    </paper-material>
+    <div style="padding: 0rem 1rem 6rem;">
+      <div id="periods-wrapper">
+        <template id="periods" is="dom-repeat" items="[[periods]]" as="period">
+          <configure-period class="divided" period="{{period}}" on-period-updated="updatePeriodHandler" index="[[index]]" periods-count="[[periods.length]]"></configure-period>
+        </template>  
+      </div>  
       <template is="dom-if" if="[[showSelectAll]]">
         <div class="layout horizontal end-justified" style="padding: 30px 24px;">
           <paper-checkbox on-checked-changed="toggleSelectAll"></paper-checkbox>  
@@ -38,6 +52,7 @@
     </div>
   </template>
   <script>
+    var newTimerName = 'New Timer';
     Polymer({
       is: "configure-view",
 
@@ -45,22 +60,27 @@
 
       properties: {
         localRoute: Object,
+        session: String,
         title: {
           type: String,
           notify: true,
-          computed: '_title(name)'
+          computed: '_title(timerName)'
         },
         timers: {
           type: Array,
           value: []
         },
-        editingName: {
+        timerName: {
           type: String,
-          value: 'Timer'
+          value: newTimerName
         },
         periods: {
           type: Array,
           value: []
+        },
+        totalSeconds: {
+          type: Number,
+          computed: '_totalSeconds(periods, periods.splices)'
         },
         periodsStorage: {
           type: Array,
@@ -78,7 +98,6 @@
         },
         sheetPayload: {
           type: Object,
-          computed: '_sheetPayload(bulk)',
           notify: true
         },
         storageReady: Boolean,
@@ -89,14 +108,18 @@
       },
 
       attached: function() { 
-        var loadPeriodStorage = function(e) {
-          this.$.periodsStorage.removeEventListener('data-changed', loadPeriodStorage);
-          if (!this.periods.length < 2 && e.detail.value.length) {
-            this.splice.apply(this, ['periods', 0, this.periods.length].concat(e.detail.value));
-          }
-          this.storageReady = true;
-        }.bind(this);
-        this.$.periodsStorage.addEventListener('data-changed', loadPeriodStorage);
+        // var loadPeriodStorage = function(e) {
+        //   this.$.periodsStorage.removeEventListener('data-changed', loadPeriodStorage);
+        //   if (!this.periods.length < 2 && e.detail.value.length) {
+        //     this.splice.apply(this, ['periods', 0, this.periods.length].concat(e.detail.value));
+        //   }
+        //   this.storageReady = true;
+        // }.bind(this);
+        // this.$.periodsStorage.addEventListener('data-changed', loadPeriodStorage);
+        this.fire('timerFab', {
+          callback: this.save.bind(this)
+        });
+        this.sheetPayload = this._sheetPayload();
       },
 
       _title: function(name) {
@@ -105,13 +128,13 @@
 
       // Observers
       observers: [
-        '_setEditing(routeData.timerKey, storageReady)',
+        '_setEditing(routeData.timerKey, storageReady, timers)',
         '_periods(periods, periods.splices)'
       ],
 
-      _setEditing: function(timerKey, storageReady) {
-        if (storageReady && this.timers[timerKey]) {
-          this.set('name', timers[timerKey].name);
+      _setEditing: function(timerKey, storageReady, timers) {
+        if (storageReady && timers[timerKey]) {
+          this.set('timerName', timers[timerKey].name);
           this.set('periods', timers[timerKey].periods);  
         }
 
@@ -121,6 +144,12 @@
       _periods: function(periods) {
         this.periodsStorage = periods;
         this.$.periodsStorage.save('editing-periods');
+      },
+
+      _totalSeconds: function(periods) {
+        return periods.reduce(function(seconds, period) {
+          return seconds + period.totalSeconds;
+        }, 0);
       },
 
       _bulk: function(periods) {
@@ -191,6 +220,42 @@
       },
 
       // Functions
+      reset: function() {
+        this.set('timerName', newTimerName);
+        this.splice('periods', 0, this.periods.length);
+      },
+
+      save: function() {
+        var timer = {
+          name: this.timerName,
+          periods: this.periods,
+          totalSeconds: this.totalSeconds,
+          updated: Date.now()
+        };
+        if (this.timerKey) {
+          this.splice('timers', this.timerKey, 1, timer);
+        } else {
+          this.push('timers', timer);
+        }
+        this.reset();
+        this.fire('back');
+        // this.fire('goTo', {
+        //   state: {},
+        //   title: 'Timers',
+        //   url: '/timers'
+        // });  
+      },
+
+      editName: function() {
+        this.fire('openDialog', {
+          id: 'itemNameDialog',
+          name: this.timerName,
+          callback: function(name) {
+            this.set('timerName', name || 'Fred Timer');
+          }.bind(this)
+        });
+      },
+
       addWork: function() {
         this.addPeriod('work');
       },

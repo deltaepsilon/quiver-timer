@@ -8,6 +8,7 @@
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
 
+<link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../gesture-service/gesture-service.html">
 <link rel="import" href="../gesture-service/event-blocker.html">
 <link rel="import" href="../shared-styles.html">
@@ -17,10 +18,10 @@
   <template>
     <style include="shared-styles">
       :host {
+        display: block;
         --paper-item-focused-before: {
           opacity: 0;
         }
-        display: block;
       }
       
       .show-stopwatch {
@@ -59,7 +60,6 @@
       #wrapper {
         position: relative;
         background: white;
-        border-bottom: 1px solid var(--divider-color);
       }
 
       #wrapper[is-last] {
@@ -202,30 +202,6 @@
                 <paper-button raised class="secondary" seconds="45" on-click="secondsClick">45</paper-button>  
               </div>
             </div>
-            <!--<div class="layout horizontal justified center wrap show-on-focus">
-              <label for$="seconds-slider-[[index]]">Seconds</label>
-              <event-blocker blur>
-                <paper-slider id$="seconds-slider-[[index]]" class="flex" min="0" max="55" pin value="[[period.seconds]]" period-index$="[[index]]"
-                on-change="updateSeconds" step="5" snaps></paper-slider>
-              </event-blocker>
-            </div>
-            <div class="layout horizontal justified center wrap show-on-focus">
-              <label for$="minutes-slider-[[index]]">Minutes</label>
-              <event-blocker blur>
-                <paper-slider id$="minutes-slider-[[index]]" class="flex accent" min="0" max="59" pin value="[[period.minutes]]" period-index$="[[index]]"
-                on-change="updateMinutes" step="1" snaps></paper-slider>
-              </event-blocker>
-            </div>-->
-            <!--<div class="layout horizontal justified center wrap">
-              <div class="layout horizontal justified wrap flex">
-                <paper-button on-click="plusSeconds" period-index$="[[index]]">+ 5s</paper-button>
-                <paper-button on-click="minusSeconds" period-index$="[[index]]">- 5s</paper-button>
-              </div>
-              <div class="layout horizontal justified wrap flex">
-                <paper-button on-click="plusMinute" period-index$="[[index]]">+ 1m</paper-button>
-                <paper-button on-click="minusMinute" period-index$="[[index]]">- 1m</paper-button>
-              </div>
-            </div>-->
           </paper-item-body>
         </paper-icon-item>
       <!--</gesture-service>-->
@@ -270,6 +246,7 @@
       },
 
       attached: function() {
+        this.validatePeriod();
         this.fire('period-updated', {index: this.index, period: this.period});
       },
 
@@ -372,11 +349,15 @@
       },
 
       //Functionality
-      updatePeriod: function() {
+      validatePeriod: function() {
         this.period.seconds = Math.max(Math.min(this.period.seconds, 59), 0);
         this.period.minutes = Math.max(Math.min(this.period.minutes, 59), 0);
         this.period.displayIcon = this.period.icon; 
         this.set('period.totalSeconds', this.period.seconds + this.period.minutes * 60);
+      },
+
+      updatePeriod: function() {
+        this.validatePeriod();
         if (typeof this.index == 'number' && this.period) this.fire('period-updated', {index: this.index, period: this.period, refresh: true});
         this.cancelBlur();
       },
@@ -417,8 +398,8 @@
 
       editName: function() {
         this.fire('openDialog', {
-          id: 'periodNameDialog',
-          period: this.period,
+          id: 'itemNameDialog',
+          name: this.period.name,
           callback: function(name) {
             this.set('period.name', name);
             this.updatePeriod();

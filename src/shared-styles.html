@@ -73,6 +73,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				@apply(--shadow-elevation-8dp);
 				background: var(--primary-background-color);
 			}
+
+			paper-material.list {
+				padding: 0;
+				width: calc(100% - 2rem);
+			}
 			
 			paper-button.primary {
 				background: var(--paper-button-primary);
@@ -140,6 +145,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				background: white;
 				padding: 1rem;
 				@apply(--shadow-elevation-16dp);
+			}
+
+			.divided {
+				border-bottom: 1px solid var(--divider-color);
+			}
+			.divided:last-of-type {
+				border-bottom: none;
 			}
 		</style>
 	</template>

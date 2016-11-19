@@ -4,7 +4,7 @@
 <link rel="import" href="../../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../shared-styles.html">
 
-<dom-module id="period-name-dialog">
+<dom-module id="item-name-dialog">
   <template>
     <style include="shared-styles">
       :host {
@@ -13,17 +13,17 @@
     </style>
     <paper-dialog id="editNameDialog" with-backdrop always-on-top="false">
       <form id="form" is="iron-form">
-        <paper-input label="Name" value="{{period.name}}" type="text" autofocus tabinded="0" required auto-validate on-value-changed="validate"></paper-input>
+        <paper-input label="Name" value="{{name}}" type="text" autofocus tabindex="0" required auto-validate on-value-changed="validate"></paper-input>
         <div class="buttons">
           <paper-button dialog-dismiss tabindex="2">cancel</paper-button>
-          <paper-button tabindex="1" on-click="editName" period-name="[[period.name]]" disabled$="[[invalid]]">save</paper-button>
+          <paper-button tabindex="1" on-click="editName" item-name="[[name]]" disabled$="[[invalid]]">save</paper-button>
         </div>
       </form>
     </paper-dialog>
   </template>
   <script>
     Polymer({
-       is: "period-name-dialog",
+       is: "item-name-dialog",
 
        validate: function() {
         this.invalid = !this.$.form.validate();
@@ -32,9 +32,9 @@
        open: function(e) {
          var dialog = this.$.editNameDialog;
          var callback = e.detail.callback; 
-         this.period = e.detail.period;
+         this.name = e.detail.name;
          this.editName = function(e) {
-          callback(e.target.periodName);
+          callback(e.target.itemName);
           dialog.close();
          };
          dialog.open();

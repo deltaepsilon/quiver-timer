@@ -1,6 +1,17 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/iron-icons/av-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 
+<link rel="import" href="../gesture-service/gesture-service.html">
+<link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../shared-styles.html">
 
 <dom-module id="timers-view">
@@ -9,11 +20,62 @@
       :host {
         display: block;
       }
+      
+      paper-item {
+        padding: 1rem 2rem;
+      }
+      
+      .show-on-focus {
+        display: none !important;
+      }
+      
+      paper-icon-item[focused] .show-on-focus {
+        display: inherit !important;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: white;
+      }
     </style>
 
-    <app-localstorage-document key="timers" data="[[timers]]" on-data-changed="handleEmpty"></app-localstorage-document>
+    <app-localstorage-document id="timersStorage" key="timers" data="[[timers]]" on-data-changed="_dataChanged" zero-value="[]"></app-localstorage-document>
 
-    <h1>Timers View Everybody!!!</h1>
+    <template is="dom-if" if="[[timers.length]]">
+      <paper-material class="list" elevation="1">
+        <template is="dom-repeat" items="[[timers]]" as="timer">
+          <div class="divided">
+            <paper-item>
+              <paper-item-body>
+                <div class="layout horizontal justified center">
+                  <span class="">[[timer.name]]</span>
+                  <a class="flex layout horizontal center-justified" href="/timer/[[index]]">
+                    <paper-icon-button icon="av:play-circle-outline"></paper-icon-button>
+                  </a>  
+                  <aside>
+                    <digital-clock total-seconds="[[timer.totalSeconds]]"></digital-clock>
+                  </aside>
+                  <paper-menu-button>
+                    <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
+                    <paper-menu class="dropdown-content">
+                      <paper-item>
+                        <paper-icon-button icon="delete" on-click="delete" index="[[index]]"></paper-icon-button>  
+                      </paper-item>
+                      <paper-item>
+                        <a href="/configure/[[index]]">
+                          <paper-icon-button icon="editor:mode-edit"></paper-icon-button>
+                        </a>  
+                      </paper-item>
+                    </paper-menu>
+                  </paper-menu-button>
+                </div>
+              </paper-item-body>
+            </paper-item>
+          </div>
+        </template>
+      </paper-material>
+    </template>
   </template>
   <script>
     Polymer({
@@ -26,13 +88,26 @@
          }
        },
 
-       handleEmpty: function(e) {
-         var timers = e.detail.value;
-         if (!timers.length) {
-           console.log('goTo temporarily disabled');
+       attached: function() {
+         console.log('attached timers-view');
+         this.fire('timerFab');
+       },
+
+      //  Listeners
+      _dataChanged: function(e) {
+        this.splice.apply(this, ['timers', 0, this.timers.length].concat(e.detail.value));
+        var timers = e.detail.value;
+        if (!timers.length) {
+          // console.log('goTo temporarily disabled');
           //  this.fire('goTo', {url: '/configure/new'});
-         }
-       }
+        }
+      },
+
+      // Functions
+      delete: function(e) {
+        this.splice('timers', e.target.index, 1);
+        this.$.timersStorage.data = this.timers;
+      }
     });
   </script>
 </dom-module>

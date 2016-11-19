@@ -1,0 +1,118 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="../../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
+
+<link rel="import" href="../shared-styles.html">
+<link rel="import" href="../digital-clock/digital-clock.html">
+
+<dom-module id="timer-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      .show-stopwatch {
+        display: none;
+      }
+      
+      [type="stopwatch"] .show-stopwatch {
+        display: inline;
+      }
+
+      [type="prepare"] .type-color {
+        color: var(--secondary-text-color);
+      }
+
+      [type="work"] .type-color {
+        color: var(--paper-button-primary);
+      }
+      
+      [type="rest"] .type-color {
+        color: var(--paper-button-secondary);
+      }
+
+      paper-icon-item {
+        padding: 1rem 2rem;
+      }
+    </style>
+
+    <app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
+    <app-localstorage-document id="timersStorage" key="timers" on-data-changed="_handleData" zero-value="[]"></app-localstorage-document>
+
+    <paper-material elevation="1" class="layout horizontal justified">
+      <a href$="/configure/[[timerKey]]">
+        <iron-icon icon="editor:mode-edit" style="margin: 1.25rem 2rem 0 1rem;"></iron-icon>
+      </a>
+      <h3 class="flex">[[timer.name]]</h3>
+      <digital-clock total-seconds="[[timer.totalSeconds]]" style="margin: 21px 1rem 0 0;"></digital-clock>
+    </paper-material>
+    
+    <paper-material class="list" elevation="1">
+      <template is="dom-repeat" items="[[timer.periods]]" as="period">
+        <paper-icon-item class="divided" type$="[[period.type]]">
+            <iron-icon class="type-color" icon="[[period.icon]]" item-icon></iron-icon>
+            <paper-item-body>
+              <div class="layout horizontal justified">
+                <strong style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
+                <div class="layout horizontal center">
+                  <aside class="show-stopwatch" style="font-size: .75rem; margin-right: 1rem;">Time Cap</aside>
+                  <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
+                </div>
+              </div>
+            </paper-item-body>
+          </paper-icon-item>
+      </template>
+    </paper-material>
+  </template>
+  <script>
+    Polymer({
+       is: "timer-view",
+
+       properties: {
+         localRoute: Object,
+         timerKey: {
+           type: Number,
+           computed: '_timerKey(routeData.timerKey)'
+         },
+         timers: {
+           type: Array,
+           value: []
+         },
+         timer: {
+           type: Object,
+           computed: '_timer(timerKey, timers, timers.splices)'
+         }
+       },
+
+       attached: function() {
+         this.fire('timerFab', {
+          callback: this.start.bind(this)
+        });
+       },
+
+       //  Observers
+       _timerKey: function(timerKey) {
+         return timerKey;
+       },
+
+       _handleData: function(e) {
+         this.splice.apply(this, ['timers', 0, this.timers.length].concat(e.detail.value));
+         console.log('e timer', e);
+       },
+
+       _timer: function(timerKey, timers) {
+         return timers[timerKey];
+       },
+
+       //  Functions
+       start: function() {
+         console.log('starting timer', this.timer);
+       }
+    });
+  </script>
+</dom-module>

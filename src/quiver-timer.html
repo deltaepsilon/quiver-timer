@@ -27,7 +27,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="timer-fab/timer-fab.html">
 <link rel="import" href="configure-timer/configure-timer.html">
-<link rel="import" href="dialogs/period-name-dialog.html">
+<link rel="import" href="dialogs/item-name-dialog.html">
 <link rel="import" href="dialogs/period-select-sheet.html">
 
 <dom-module id="quiver-timer">
@@ -140,19 +140,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <app-toolbar>
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
             <div main-title style="text-transform: capitalize;">[[pageTitle]]</div>
-            <paper-button on-click="clearLocalStorage">Reset</paper-button>
-            <timer-fab id="timerFab" page="[[page]]" style="position: absolute; top: 37px; right: 2rem;"></timer-fab>
+            <paper-button class="tertiary" on-click="clearLocalStorage" style="margin-right: 5rem;">Reset</paper-button>
+            <timer-fab id="timerFab" page="[[page]]" payload="[[timerFabPayload]]" style="position: absolute; top: 37px; right: 2rem;"></timer-fab>
           </app-toolbar>
         </app-header>
 
         <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="fourohfour" role="main">
-          <timers-view id="timersView" name="timers"></timers-view>
-          <configure-view id="configureView" local-route="[[subroute]]" name="configure" title="{{configureTitle}}" on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
+          <timers-view id="timersView" name="timers" session="[[session]]"></timers-view>
+          <timer-view id="timerView" name="timer" local-route="[[subroute]]" session="[[session]]"></timer-view>
+          <configure-view id="configureView" local-route="[[subroute]]" session="[[session]]" name="configure" title="{{configureTitle}}" on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
           <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
-    <period-name-dialog id="periodNameDialog"></period-name-dialog>
+    <item-name-dialog id="itemNameDialog"></item-name-dialog>
     <period-select-sheet id="periodSelectSheet" show="[[showPeriodSelectSheet]]" show-bulk-edits="[[showBulkEdits]]" payload="[[periodSelectSheetPayload]]"></period-select-sheet>
   </template>
 
@@ -168,13 +169,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         pageTitle: {
           type: String,
-          computed: '_pageTitle(page, route.path, configureTitle)'
+          computed: '_pageTitle(page)'
+        },
+        session: {
+          type: String,
+          value: '123456'
         }
       },
 
       // Computed
-      _pageTitle: function(page, path, configureTitle) {
-        if (page == 'configure') return configureTitle;
+      _pageTitle: function(page) {
         return 'Quiver Timer';
       },
 
@@ -186,6 +190,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _routePageChanged: function(page) {
         this.page = page || 'timers';
         this.showPeriodSelectSheet = page == 'configure';
+        if (page == 'timers' && this.$.timersView.attached) this.$.timersView.attached();
+        if (page == 'timer' && this.$.timerView.attached) this.$.configureView.attached();
+        if (page == 'configure' && this.$.configureView.attached) this.$.configureView.attached();
       },
 
       _pageChanged: function(page) {
@@ -201,16 +208,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       // Listeners
       listeners: {
         goTo: '_goTo',
+        back: '_back',
         scrollIntoView: '_scrollIntoView',
-        openDialog: '_openDialog'
+        openDialog: '_openDialog',
+        timerFab: '_timerFab'
       },
 
       _goTo: function(e) {
         var state = e.detail.state || {};
         var title = e.detail.title || '';
         var url = e.detail.url || '/';
-        window.history.pushState(state, title, url);
-        window.dispatchEvent(new Event('location-changed'));
+        setTimeout(function() {
+          window.history.pushState(state, title, url);
+          window.dispatchEvent(new Event('location-changed'));  
+        });
+      },
+
+      _back: function() {
+        window.history.go(-1);
       },
 
       _scrollIntoView: function(e) {
@@ -219,6 +234,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _openDialog: function(e) {
         this.$[e.detail.id].open(e);
+      },
+
+      _timerFab: function(e) {
+        this.timerFabPayload = e.detail;
       },
 
       // Functions
