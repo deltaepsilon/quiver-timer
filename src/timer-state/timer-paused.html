@@ -1,0 +1,27 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="timer-paused">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>timer paused</h2>
+  </template>
+  <script>
+    Polymer({
+       is: "timer-paused",
+
+       properties: {
+         state: String,
+         title: String,
+         periods: {
+           type: Array,
+           value: []
+         }
+       }
+    });
+  </script>
+</dom-module>

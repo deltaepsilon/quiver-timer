@@ -7,67 +7,52 @@
 <link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
 
 <link rel="import" href="../shared-styles.html">
+<link rel="import" href="../color-wheel.html">
 <link rel="import" href="../digital-clock/digital-clock.html">
+<link rel="import" href="../timer-state/timer-stopped.html">
+<link rel="import" href="../timer-state/timer-playing.html">
+<link rel="import" href="../timer-state/timer-paused.html">
 
 <dom-module id="timer-view">
   <template>
-    <style include="shared-styles">
+    <style include="shared-styles color-wheel">
       :host {
         display: block;
       }
 
-      .show-stopwatch {
+      #wrapper .show-stopped {
         display: none;
       }
-      
-      [type="stopwatch"] .show-stopwatch {
-        display: inline;
+
+      #wrapper .show-paused {
+        display: none;
       }
 
-      [type="prepare"] .type-color {
-        color: var(--secondary-text-color);
+      #wrapper .show-playing {
+        display: none;
       }
 
-      [type="work"] .type-color {
-        color: var(--paper-button-primary);
-      }
-      
-      [type="rest"] .type-color {
-        color: var(--paper-button-secondary);
+      #wrapper[state="stopped"] .show-stopped {
+        display: inherit;
       }
 
-      paper-icon-item {
-        padding: 1rem 2rem;
+      #wrapper[state="paused"] .show-paused {
+        display: inherit;
+      }
+
+      #wrapper[state="playing"] .show-playing {
+        display: inherit;
       }
     </style>
 
     <app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
     <app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
 
-    <paper-material elevation="1" class="layout horizontal justified">
-      <a href$="/configure/[[timerKey]]">
-        <iron-icon icon="editor:mode-edit" style="margin: 1.25rem 2rem 0 1rem;"></iron-icon>
-      </a>
-      <h3 class="flex">[[timer.name]]</h3>
-      <digital-clock total-seconds="[[timer.totalSeconds]]" style="margin: 21px 1rem 0 0;"></digital-clock>
-    </paper-material>
-    
-    <paper-material class="list" elevation="1">
-      <template is="dom-repeat" items="[[timer.periods]]" as="period">
-        <paper-icon-item class="divided" type$="[[period.type]]">
-            <iron-icon class="type-color" icon="[[period.icon]]" item-icon></iron-icon>
-            <paper-item-body>
-              <div class="layout horizontal justified">
-                <strong style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
-                <div class="layout horizontal center">
-                  <aside class="show-stopwatch" style="font-size: .75rem; margin-right: 1rem;">Time Cap</aside>
-                  <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
-                </div>
-              </div>
-            </paper-item-body>
-          </paper-icon-item>
-      </template>
-    </paper-material>
+    <div id="wrapper" state$="[[state]]">
+      <timer-stopped class="show-stopped" state="[[state]]" timer-key="[[timerKey]]" timer="[[timer]]"></timer-stopped>
+      <timer-playing class="show-playing" state="[[state]]" title="[[timer.name]]" periods="timer.periods"></timer-playing>
+      <timer-paused class="show-paused" state="[[state]]" title="[[timer.name]]" periods="timer.periods"></timer-paused>
+    </div>
   </template>
   <script>
     Polymer({
@@ -83,13 +68,18 @@
          timer: {
            type: Object,
            computed: '_timer(timerKey, timersData.value)'
+         },
+         state: {
+           type: String,
+           value: 'stopped'
          }
        },
 
        attached: function() {
          this.fire('timerFab', {
-          callback: this.start.bind(this)
-        });
+           icon: 'av:play-arrow',
+           callback: this.play.bind(this)
+         });
        },
 
        //  Observers
@@ -103,12 +93,42 @@
        },
 
        _timer: function(timerKey, timers) {
-         return timers[timerKey];
+         var timer = timers[timerKey];
+         timer.periods = timer.periods.map(function(period, i) {
+          return period.color = Math.round(i/18%1*18), period;  
+         });
+         return timer;
        },
 
-       //  Functions
-       start: function() {
-         console.log('starting timer', this.timer);
+       //Listeners
+       listeners: {
+         play: 'play',
+         pause: 'pause',
+         stop: 'stop'
+       },
+
+       play: function() {
+         this.state = 'playing';
+         this.fire('timerFab', {
+           icon: 'av:pause',
+           callback: this.pause.bind(this)
+         });
+       },
+
+       pause: function() {
+         this.state = 'paused';
+         this.fire('timerFab', {
+           icon: 'av:play-arrow',
+           callback: this.play.bind(this)
+         });
+       },
+
+       stop: function() {
+         this.state = 'stopped';
+         this.fire('timerFab', {
+           icon: 'av:play-arrow',
+           callback: this.play.bind(this)
+         });
        }
     });
   </script>
