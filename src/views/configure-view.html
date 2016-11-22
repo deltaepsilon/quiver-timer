@@ -1,6 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/app-route/app-route.html">
-<link rel="import" href="../../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="../../bower_components/app-pouchdb/app-pouchdb-document.html">
 <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
@@ -27,12 +27,10 @@
     </style>
 
     <app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
-    <app-indexeddb-mirror id="timersData" key="timers" session="[[session]]" data="{{timers}}" persisted-data="{{timersData}}"></app-indexeddb-mirror>
-    <app-indexeddb-mirror id="nameData" key="timer-name" session="[[session]]" data="{{timerName}}" persisted-data="{{timerNameData}}"></app-indexeddb-mirror>
-    <app-indexeddb-mirror id="periodsData" key="periods" session="[[session]]" data="{{periods}}" persisted-data="{{periodsData}}"></app-indexeddb-mirror>
-    <!--<app-localstorage-document id="timersStorage" key="timers" data="{{timers}}"></app-localstorage-document>
-    <app-localstorage-document id="nameStorage" key="timer-name" data="{{timerName}}" zero-value=""></app-localstorage-document>
-    <app-localstorage-document id="periodsStorage" key="editing-periods" data="{{periodsStorage}}" zero-value="[]"></app-localstorage-document>-->
+
+    <app-pouchdb-document id="periodsStorage" db-name="quiver-timer" doc-id="periods" data="{{periodsData}}"></app-pouchdb-document>
+    <app-pouchdb-document id="timerNameStorage" db-name="quiver-timer" doc-id="timer-name" data="{{timerNameData}}"></app-pouchdb-document>
+    <app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
 
     <paper-material elevation="1" class="layout horizontal justified">
       <h3 on-click="editName">[[timerName]]</h3>
@@ -40,15 +38,13 @@
     </paper-material>
     <div style="padding: 0rem 1rem 6rem;">
       <div id="periods-wrapper">
-        <template id="periods" is="dom-repeat" items="[[periods]]" as="period">
-          <configure-period class="divided" period="{{period}}" on-period-updated="updatePeriodHandler" index="[[index]]" periods-count="[[periods.length]]"></configure-period>
+        <template id="periods" is="dom-repeat" items="{{periods}}" as="period">
+          <configure-period class="divided" period="{{period}}" rev="[[period._rev]]" on-period-updated="updatePeriodHandler" index="[[index]]" periods-count="[[periods.length]]"></configure-period>
         </template>  
       </div>  
-      <template is="dom-if" if="[[showSelectAll]]">
-        <div class="layout horizontal end-justified" style="padding: 30px 24px;">
-          <paper-checkbox on-checked-changed="toggleSelectAll"></paper-checkbox>  
-        </div>
-      </template>
+      <div class="layout horizontal end-justified" style="padding: 30px 24px;" hidden$="[[!showSelectAll]]">
+        <paper-checkbox id="toggleCheckbox" on-checked-changed="toggleSelectAll"></paper-checkbox>  
+      </div>
     </div>
   </template>
   <script>
@@ -66,25 +62,28 @@
           notify: true,
           computed: '_title(timerName)'
         },
+        timerKey: {
+          type: String,
+          computed: '_timerKey(routeData.timerKey)'
+        },
+        timersData: Object,
         timers: {
           type: Array,
-          value: []
+          computed: '_value(timersData.value)'
         },
+        timerNameData: Object,
         timerName: {
           type: String,
-          value: newTimerName
+          computed: '_timerName(timerNameData.value)'
         },
+        periodsData: Object,
         periods: {
           type: Array,
-          value: []
+          computed: '_periods(periodsData, periodsData._rev)'
         },
         totalSeconds: {
           type: Number,
-          computed: '_totalSeconds(periods, periods.splices)'
-        },
-        periodsStorage: {
-          type: Array,
-          value: []
+          computed: '_totalSeconds(periods, periodsData._rev)'
         },
         selected: {
           type: Array,
@@ -93,7 +92,7 @@
         },
         bulk: {
           type: Boolean,
-          computed: '_bulk(periods, periods.splices)',
+          computed: '_bulk(periods, periodsData.value)',
           notify: true
         },
         sheetPayload: {
@@ -108,14 +107,6 @@
       },
 
       attached: function() { 
-        // var loadPeriodStorage = function(e) {
-        //   this.$.periodsStorage.removeEventListener('data-changed', loadPeriodStorage);
-        //   if (!this.periods.length < 2 && e.detail.value.length) {
-        //     this.splice.apply(this, ['periods', 0, this.periods.length].concat(e.detail.value));
-        //   }
-        //   this.storageReady = true;
-        // }.bind(this);
-        // this.$.periodsStorage.addEventListener('data-changed', loadPeriodStorage);
         this.fire('timerFab', {
           callback: this.save.bind(this)
         });
@@ -128,32 +119,42 @@
 
       // Observers
       observers: [
-        '_setEditing(routeData.timerKey, storageReady, timers)',
-        '_periods(periods, periods.splices)'
+        '_setEditing(routeData.timerKey, timersData)'
       ],
 
-      _setEditing: function(timerKey, storageReady, timers) {
-        if (storageReady && timers[timerKey]) {
-          this.set('timerName', timers[timerKey].name);
-          this.set('periods', timers[timerKey].periods);  
-        }
+      _setEditing: function(timerKey, timersData) {
+        if (timersData.value && timersData.value[timerKey]) {
+          this.set('timerNameData.value', timersData.value[timerKey].name);
+          this.set('periodsData.value', timersData.value[timerKey].periods); 
 
-        if (!this.periods.length) this.addPeriod('prepare'); 
+        }
       },
 
-      _periods: function(periods) {
-        this.periodsStorage = periods;
-        this.$.periodsStorage.save('editing-periods');
+      _timerKey: function(timerKey) {
+        return timerKey;
+      },
+
+      _value: function(value) {
+        return value;
+      },
+
+      _timerName: function(value) {
+        return value || newTimerName;
+      },
+
+      _periods: function(periodsData) {
+        if (periodsData.value && periodsData.value.length) return _.clone(periodsData.value || []);
+        this.addDefaultPeriod();
       },
 
       _totalSeconds: function(periods) {
-        return periods.reduce(function(seconds, period) {
+        return !periods ? 0 : periods.reduce(function(seconds, period) {
           return seconds + period.totalSeconds;
         }, 0);
       },
 
       _bulk: function(periods) {
-        return !!periods.find(function(period) {
+        return !periods ? false : !!periods.find(function(period) {
           return period.selected;
         });
       },
@@ -184,30 +185,31 @@
       moveUp: function(e) {
         if (e.detail < 1) return console.log('skipping up');
         var index = e.detail.index;
-        var period = _.clone(this.periods[index]);
-        this.splice('periods', index, 1);
-        this.splice('periods', index - 1, 0, period);
+        var period = this._cleanPeriod(this.periods[index]);
+        this.periodsData.value.splice(index, 1);
+        this.periodsData.value.splice(index - 1, 0, period);
         setTimeout(e.detail.callback);
+        this._periodsSave();
       },
 
       moveDown: function(e) {
         if (e.detail >= this.periods.length - 1) return console.log('skipping up');
         var index = e.detail.index;
-        var period = _.clone(this.periods[index]);
-        this.splice('periods', index, 1);
-        this.splice('periods', index + 1, 0, period);
+        var period = this._cleanPeriod(this.periods[index]);
+        this.periodsData.value.splice(index, 1);
+        this.periodsData.value.splice(index + 1, 0, period);
         setTimeout(e.detail.callback);
+        this._periodsSave();
       },
 
       delete: function(e) {
-        this.splice('periods', e.detail, 1);
+        this.periodsData.value.splice(e.detail, 1);
+        this._periodsSave();
       },
 
       updatePeriodHandler: function(e) {
-        var period = e.detail.period;
+        var period = _.clone(e.detail.period);
         var target = e.target;
-        period.select = target.select.bind(target);
-        period.deselect = target.deselect.bind(target);
         if (e.detail.refresh) {
           this.updatePeriod(e.detail.index, period);
         } else {
@@ -216,27 +218,47 @@
       },
 
       toggleSelectAll: function(e) {
-        return e.target.checked ? this.selectAll() : this.clearSelected();
+        return e.target.checked ? this.selectAll() : setTimeout(this.clearSelected.bind(this));
       },
 
       // Functions
+      _cleanPeriod: function(period) {
+        return _.omit(_.clone(period), ['select', 'deselect']);
+      },
+
+      _periodsSave: _.debounce(function() {
+        this.periodsData.value = this.periodsData.value.map(function(period) {
+          return this._cleanPeriod(period);
+        }.bind(this));
+        this.notifyPath('periodsData.value');
+      }, 50),
+
       reset: function() {
-        this.set('timerName', newTimerName);
+        this.timerNameData.value = newTimerName;
+        this.notifyPath('timerNameData.value');
+        if (this.periodsData && this.periodsData.value) {
+          this.periodsData.value.splice(0, this.periodsData.value.length);
+          this.notifyPath('periodsData.value');
+        }
         this.splice('periods', 0, this.periods.length);
       },
 
       save: function() {
         var timer = {
           name: this.timerName,
-          periods: this.periods,
+          periods: this.periodsData.value.map(function(period) {
+            return this._cleanPeriod(period);
+          }.bind(this)),
           totalSeconds: this.totalSeconds,
           updated: Date.now()
         };
-        if (this.timerKey) {
-          this.splice('timers', this.timerKey, 1, timer);
+        if (!this.timersData.value) this.timersData.value = [];
+        if (this.timerKey != 'new') {
+          this.timersData.value.splice(+this.timerKey, 1, timer);
         } else {
-          this.push('timers', timer);
+          this.timersData.value.push(timer);
         }
+        this.notifyPath('timersData.value')
         this.reset();
         this.fire('back');
         // this.fire('goTo', {
@@ -251,7 +273,7 @@
           id: 'itemNameDialog',
           name: this.timerName,
           callback: function(name) {
-            this.set('timerName', name || 'Fred Timer');
+            this.set('timerNameData.value', name || 'Fred Timer');
           }.bind(this)
         });
       },
@@ -268,39 +290,62 @@
         this.addPeriod('stopwatch');
       },
 
+      addDefaultPeriod: _.debounce(function() {
+        setTimeout(function() {
+          this.addPeriod('prepare');
+        }.bind(this));
+      }, 50),
+
       addPeriod: function(type) {
-        this.push('periods', this.getPeriodDefault(type, true));
+        if (!this.periodsData.value) this.periodsData.value = [];
+        this.periodsData.value.push(this.getPeriodDefault(type, true));
+        this._periodsSave();
       },
 
       updatePeriod: function(index, period) {
-        setTimeout(function() {
-          this.splice('periods', index, 1, period);  
-        }.bind(this));
+        this.periodsData.value[index] = this._cleanPeriod(period);
+        this._periodsSave();
       },
 
       selectAll: function() {
-        this.periods.forEach(function(period, index) {
-          if (period.type !== 'prepare' && !period.selected) {
-            period.select();
+        this.periodsData.value.forEach(function(period, index) {
+          if (period.type !== 'prepare') {
             period.selected = true;
-            this.updatePeriod(index, period);
-          }           
+          } 
         }.bind(this));
+        this.periods.forEach(function(period, index) {
+          if (period.type !== 'prepare') {
+            period.selected = true;
+            period.select();
+          } 
+        }.bind(this));
+        this._periodsSave();
       },
 
-      clearSelected: function() {
-        this.periods.forEach(function(period, index) {
-          if (period.selected) {
-            period.deselect();
+      clearSelected: _.debounce(function() {
+        if (!this.periodsData.value) return;
+        this.periodsData.value.forEach(function(period, index) {
+          if (period.type !== 'prepare') { 
             period.selected = false;
-            this.updatePeriod(index, period);  
           }
         }.bind(this));
-      },
+        this.periods.forEach(function(period, index) {
+          if (period.type !== 'prepare') { 
+            period.selected = false;
+            period.deselect();
+          }
+        }.bind(this));
+        this._periodsSave();
+        this.$.toggleCheckbox.set('checked', false);
+      }, 50),
 
       duplicateSelected: function(e) {
         this.periods.forEach(function(period, index) {
-          if (period.selected) this.push('periods', this.periodsStorage[index]);
+          if (period.selected) {
+            var newPeriod = this._cleanPeriod(this.periodsData.value[index]);
+            newPeriod.selected = false;
+            this.periodsData.value.push(newPeriod);
+          }
         }.bind(this));
         this.clearSelected();
       },
@@ -308,7 +353,9 @@
       deleteSelected: function() {
         var i = this.periods.length;
         while (i--) {
-          if (this.periods[i].selected) this.splice('periods', i, 1);
+          if (this.periods[i].selected) {
+            this.periodsData.value.splice(i, 1);
+          } 
         }
         this.clearSelected();
       },

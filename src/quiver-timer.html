@@ -191,7 +191,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.page = page || 'timers';
         this.showPeriodSelectSheet = page == 'configure';
         if (page == 'timers' && this.$.timersView.attached) this.$.timersView.attached();
-        if (page == 'timer' && this.$.timerView.attached) this.$.configureView.attached();
+        if (page == 'timer' && this.$.timerView.attached) this.$.timerView.attached();
         if (page == 'configure' && this.$.configureView.attached) this.$.configureView.attached();
       },
 

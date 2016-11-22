@@ -1,5 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
+<link rel="import" href="../../bower_components/app-pouchdb/app-pouchdb-document.html">
 <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
@@ -21,10 +21,6 @@
         display: block;
       }
       
-      paper-item {
-        padding: 1rem 2rem;
-      }
-      
       .show-on-focus {
         display: none !important;
       }
@@ -40,38 +36,42 @@
       }
     </style>
 
-    <app-localstorage-document id="timersStorage" key="timers" data="[[timers]]" on-data-changed="_dataChanged" zero-value="[]"></app-localstorage-document>
+    <app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
 
     <template is="dom-if" if="[[timers.length]]">
       <paper-material class="list" elevation="1">
         <template is="dom-repeat" items="[[timers]]" as="timer">
-          <div class="divided">
-            <paper-item>
+          <div>
+            <paper-icon-item two-line>
+              <a class="flex layout horizontal center-justified" href="/timer/[[index]]" item-icon>
+                <paper-icon-button icon="av:play-circle-outline"></paper-icon-button>
+              </a>
               <paper-item-body>
                 <div class="layout horizontal justified center">
-                  <span class="">[[timer.name]]</span>
-                  <a class="flex layout horizontal center-justified" href="/timer/[[index]]">
-                    <paper-icon-button icon="av:play-circle-outline"></paper-icon-button>
-                  </a>  
-                  <aside>
-                    <digital-clock total-seconds="[[timer.totalSeconds]]"></digital-clock>
-                  </aside>
+                  <div class="flex">
+                    <div>
+                      <strong>[[timer.name]]</strong>  
+                    </div>
+                    <div secondary>
+                      <digital-clock total-seconds="[[timer.totalSeconds]]"></digital-clock>
+                    </div>  
+                  </div>
                   <paper-menu-button>
                     <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
                     <paper-menu class="dropdown-content">
-                      <paper-item>
-                        <paper-icon-button icon="delete" on-click="delete" index="[[index]]"></paper-icon-button>  
-                      </paper-item>
                       <paper-item>
                         <a href="/configure/[[index]]">
                           <paper-icon-button icon="editor:mode-edit"></paper-icon-button>
                         </a>  
                       </paper-item>
+                      <paper-item>
+                        <paper-icon-button icon="delete" on-click="delete" index="[[index]]"></paper-icon-button>  
+                      </paper-item>
                     </paper-menu>
-                  </paper-menu-button>
+                  </paper-menu-button>  
                 </div>
               </paper-item-body>
-            </paper-item>
+            </paper-icon-item>
           </div>
         </template>
       </paper-material>
@@ -82,9 +82,10 @@
        is: "timers-view",
 
        properties: {
+         timersData: Object,
          timers: {
            type: Array,
-           value: []
+           computed: '_timers(timersData.value)'
          }
        },
 
@@ -92,6 +93,11 @@
          console.log('attached timers-view');
          this.fire('timerFab');
        },
+
+      // Observers
+      _timers: function(timers) {
+        return timers || [];
+      },
 
       //  Listeners
       _dataChanged: function(e) {
@@ -105,8 +111,8 @@
 
       // Functions
       delete: function(e) {
-        this.splice('timers', e.target.index, 1);
-        this.$.timersStorage.data = this.timers;
+        this.timersData.value.splice(+e.target.index, 1);
+        this.notifyPath('timersData.value');
       }
     });
   </script>

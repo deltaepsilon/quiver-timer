@@ -138,7 +138,7 @@
       }
 
       paper-checkbox {
-        margin: 0 .5rem 0 1rem;
+        margin: 1rem;
       }
 
       paper-button {
@@ -162,6 +162,13 @@
       #buttons > div {
         padding: 0 1rem;
       }
+
+      .checkbox-container {
+        position: absolute;
+        right: .5rem;
+        top: .8125rem;
+        bottom: 0;
+      }
     </style>
 
     <div id="wrapper" is-first$="[[isFirst]]" is-last$="[[isLast]]" selected$="[[selected]]" type$="[[period.type]]">
@@ -171,20 +178,20 @@
           <paper-icon-button class="type-color move-button move-up-button show-on-focus hide-prepare" icon="arrow-drop-up" on-click="moveUp"></paper-icon-button>
           <paper-icon-button class="type-color move-button move-down-button show-on-focus hide-prepare" icon="arrow-drop-down" on-click="moveDown"></paper-icon-button>
           <paper-icon-button class="type-color delete-button show-on-focus hide-prepare" icon="delete" item-icon on-click="delete"></paper-icon-button>
-          <paper-item-body>
-            <div class="layout horizontal justified">
+          <paper-item-body style="padding: 1rem 0;">
+            <div class="layout horizontal justified" style="padding: 0;">
               <strong on-click="editName" style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
-              <div class="layout horizontal center">
-                <aside class="show-stopwatch" style="font-size: .75rem; margin-right: 1rem;">Time Cap</aside>
-                <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
-                <event-blocker click>
-                  <paper-checkbox class="hide-prepare" on-change="checkboxChange" checked="{{selected::change}}"></paper-checkbox>
-                </event-blocker>
-              </div>
             </div>
-            <div id="buttons" class="layout horizontal justified start wrap show-on-focus">
-              <div class="hide-prepare">
-                <div class="flex layout horizontal end-justified wrap">
+            <event-blocker class="checkbox-container" click>
+              <paper-checkbox class="hide-prepare" on-change="checkboxChange" checked="{{selected::change}}"></paper-checkbox>
+            </event-blocker>
+            <span secondary>
+              <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
+              <aside class="show-stopwatch" style="font-size: .75rem; margin-right: 1rem;">Time Cap</aside>
+            </span>
+            <div id="buttons" class="layout horizontal end-justified start show-on-focus">
+              <div class="hide-prepare" style="max-width: 50%;">
+                <div class="layout horizontal end-justified wrap">
                   <paper-button raised class="primary" minutes="0" on-click="minutesClick">0</paper-button>
                   <paper-button raised class="primary" minutes="1" on-click="minutesClick">1</paper-button>
                   <paper-button raised class="primary" minutes="2" on-click="minutesClick">2</paper-button>
@@ -251,7 +258,15 @@
       },
 
       //  Observers
-      //  observers: ['_firstLast(index, periodsCount)'],
+       observers: [
+        //  '_firstLast(index, periodsCount)',
+        '_period(period, period.*)'
+      ],
+
+      _period: function(period) {
+        if (!period.select) period.select = this.select.bind(this);
+        if (!period.deselect) period.deselect = this.deselect.bind(this);
+      },
 
       _isFirst: function(index) {
         return index < 2;
@@ -313,15 +328,14 @@
       moveUp: function(e) {
         this.fire('moveUp', {
           index: this.index,
-          callback: this.cancelBlur.bind(this)
+          callback: this.blur.bind(this)
         });
-        this.blur();
       },
       
       moveDown: function() {
         this.fire('moveDown', {
           index: this.index,
-          callback: this.cancelBlur.bind(this)
+          callback: this.blur.bind(this)
         });
         this.blur();
       },
