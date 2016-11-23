@@ -1,5 +1,10 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../shared-styles.html">
+
+
+<script src="../../bower_components/timer.js/dist/timer.js"></script>
 
 <dom-module id="timer-playing">
   <template>
@@ -9,6 +14,9 @@
       }
     </style>
     <h2>timer playing</h2>
+    <strong>Global: <digital-clock total-seconds="[[globalSeconds]]"></digital-clock></strong>
+    <strong>Period: <digital-clock total-seconds="[[periodSeconds]]"></digital-clock></strong>
+    <aside>Current Period: [[currentPeriod]]</aside>
   </template>
   <script>
     Polymer({
@@ -16,11 +24,82 @@
 
        properties: {
          state: String,
+         currentState: String,
+         laggedState: String,
          title: String,
          periods: {
            type: Array,
            value: []
+         },
+         periodTimer: {
+           type: Object,
+           value: function() {
+             return new Timer({tick: 1});
+           }
+         },
+         globalTimer: {
+           type: Object,
+           value: function() {
+             return new Timer({tick: 1});
+           }
+         },
+         currentPeriod: {
+           type: Number,
+           value: 0
+         },
+         periodSeconds: {
+           type: Number,
+           computed: '_periodSeconds(periods, currentPeriod)'
+         },
+         globalSeconds: {
+           type: Number,
+           computed: '_globalSeconds(periods)'
          }
+       },
+
+       observers: [
+         '_state(state)',
+         '_timer(currentState, laggedState, periodTimer, globalTimer, periodSeconds, globalSeconds)'
+       ],
+
+       _state: function(state) {
+         this.laggedState = this.currentState || false;
+         this.currentState = state;
+       },
+
+       _timer: function(state, lagged, periodTimer, globalTimer, periodSeconds, globalSeconds) {
+         if (state == 'paused') {
+           periodTimer.pause();
+           globalTimer.pause();
+         } else if (state == 'stopped') {
+           periodTimer.stop();
+           globalTimer.stop();
+         } else if (state == 'playing' && lagged == 'paused') {
+           periodTimer.start();
+           globalTimer.start();
+         } else {
+           periodTimer.start(periodSeconds).on('tick', this._periodTickHandler.bind(this));
+           globalTimer.start(globalSeconds).on('tick', this._globalTickHandler.bind(this));;
+         }
+         console.log(state, lagged, periodTimer, globalTimer, periodSeconds, globalSeconds);
+       },
+
+       _periodSeconds: function(periods, currentPeriod) {
+         return periods[currentPeriod] ? periods[currentPeriod].totalSeconds : 0;
+       },
+
+       _globalSeconds: function(periods, currentPeriod) {
+         return periods.reduce(function(seconds, period) {
+           return seconds += period.totalSeconds;
+         }, 0);
+       },
+
+       _periodTickHandler: function(ms) {
+         console.log('period s', Math.round(ms/1000));
+       },
+
+       _globalTickHandler: function(ms) {
+         console.log('global s', Math.round(ms/1000));
        }
     });
   </script>

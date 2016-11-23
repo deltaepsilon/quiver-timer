@@ -35,7 +35,7 @@
          },
          url: {
            type: String,
-           computed: '_url(page)'
+           computed: '_url(page, payload.url)'
          },
          hidden: {
            type: Boolean,
@@ -51,7 +51,8 @@
          return false
        },
 
-       _url: function(page) { 
+       _url: function(page, url) {
+         if  (url) return url;
          if (page == 'timers') return '/configure/new';
          return false
        },
