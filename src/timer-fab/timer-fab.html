@@ -11,16 +11,15 @@
       :host {
         display: block;
       }
+
     </style>
 
-    <template is="dom-if" if="[[url]]">
+    <div hidden$="[[hidden]]">
       <a href="[[url]]">
-        <paper-fab icon="[[icon]]" on-click="_handleClick" hidden$="[[hidden]]"></paper-fab>
+        <paper-fab icon="[[icon]]" on-click="_handleClick"></paper-fab>
       </a>
-    </template>
-    <template is="dom-if" if="[[!url]]">
-      <paper-fab icon="[[icon]]" on-click="_handleClick" hidden$="[[hidden]]"></paper-fab>
-    </template>
+      <!--<paper-fab icon="[[icon]]" on-click="_handleClick" hidden$="[[url]]"></paper-fab>  -->
+    </div>
     
   </template>
   <script>
@@ -39,26 +38,29 @@
          },
          hidden: {
            type: Boolean,
-           computed: '_hidden(icon)'
+           computed: '_hidden(url, icon)'
+         },
+         hideUrl: {
+           type: Boolean,
+           computed: '_hideUrl(url)'
          },
          payload: Object
        },
 
        _icon: function(page, icon) {
-         if (icon) return icon;
-         if (page == 'timers') return 'add';
-         if (page == 'configure') return 'save';
-         return false
+         return icon;
        },
 
        _url: function(page, url) {
-         if  (url) return url;
-         if (page == 'timers') return '/configure/new';
-         return false
+         return url;
        },
 
-       _hidden: function(icon) {
-         return !icon;
+       _hideUrl: function(url) {
+         return !url;
+       },
+
+       _hidden: function(url, icon) {
+         return !url || !icon;
        },
 
        _handleClick: function(e) {

@@ -1,0 +1,70 @@
+<script>
+  TimerCyclesBehavior = {
+    _globalCycles: function(periods) {
+      return [periods];
+    },
+
+    _cycles: function(periods) {
+      function isEqual(a, b) {
+        if (a.length !== b.length) return false;
+
+        var i = a.length;
+        while (i--) {
+          if (a[i].type !== b[i].type || a[i].totalSeconds !== b[i].totalSeconds || a[i].name !== b[i].name) return false;
+        }
+        return true;
+      };
+
+      function findMatch(periods, count) {
+        var toMatch = periods.slice(0, count);
+        function look(multiplier) {
+          var prospective = periods.slice(multiplier * count, (multiplier + 1) * count);
+          if (isEqual(toMatch, prospective)) return look(multiplier + 1);
+          return {
+            count: count,
+            multiplier: multiplier
+          };
+        };
+        return look(1);
+      };
+
+      function hasVariation(periods) {
+        var i = periods.length;
+        while (i--) {
+          if (!isEqual([periods[i]], [periods[0]])) return true;
+        }
+        return false;
+      };
+
+      var nextMatch = 0;
+      return periods.reduce(function(cycles, period, i) {
+        if (i < nextMatch) return cycles; // Enable match skipping
+
+        var remaining = periods.slice(i);
+        var half = Math.round(remaining.length / 2);
+
+        for (var j = half; j > 1; j--) {
+          let matches = findMatch(remaining, j);
+          let multiplier = matches.multiplier;
+          if (multiplier > 1 && hasVariation(remaining.slice(0, matches.count))) { // Handle multi-period cycles
+            while (multiplier--) {
+              cycles.push(remaining.slice(0, matches.count)); // Push copies onto cycles
+            }
+            nextMatch = i + matches.count * matches.multiplier;
+            return cycles;
+          } 
+        }
+
+        // Handle single-period cycles
+        var matches = findMatch(remaining, 1);
+        var multiplier = matches.multiplier;
+        while (multiplier--) {
+          cycles.push(remaining.slice(0, 1));
+        }
+        nextMatch = i + matches.count * matches.multiplier;
+
+        return cycles;
+      }, []);
+    }
+  };
+</script>

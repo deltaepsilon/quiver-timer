@@ -77,6 +77,10 @@
          }
        },
 
+       attached: function() {
+         this.stop();
+       },
+
        //  Observers
        observers: [
          '_timerFab(state)'
@@ -86,22 +90,14 @@
          console.log('timerFab', state);
          switch (true) {
            case state == 'playing':
-              this.fire('timerFab', {
-                icon: 'av:pause',
-                url: '/timer/' + this.timerKey + '/paused'
-              });
+              this.play();
+              this.$.timerPlaying.attached();
               break;
            case state == 'paused':
-              this.fire('timerFab', {
-                icon: 'av:play-arrow',
-                url: '/timer/' + this.timerKey + '/playing'
-              });
+              this.pause();
               break;
            case state == 'stopped':
-              this.fire('timerFab', {
-                icon: 'av:play-arrow',
-                url: '/timer/' + this.timerKey + '/playing'
-              });
+              this.stop();
               break;
          }
        },
@@ -126,14 +122,15 @@
        listeners: {
          play: 'play',
          pause: 'pause',
-         stop: 'stop'
+         stop: 'stop',
+         end: 'end'
        },
 
        play: function() {
          this.state = 'playing';
          this.fire('timerFab', {
            icon: 'av:pause',
-           url: '/timer/' + this.timerKey + '/pause'
+           url: '/timer/' + this.timerKey + '/paused'
          });
        },
 
@@ -150,6 +147,14 @@
          this.fire('timerFab', {
            icon: 'av:play-arrow',
            url: '/timer/' + this.timerKey + '/playing'
+         });
+       },
+
+       end: function() {
+         var timerView = this;
+         this.fire('timerFab', {
+           icon: 'av:stop',
+           url: '/timer/' + this.timerKey + '/stopped'
          });
        }
     });

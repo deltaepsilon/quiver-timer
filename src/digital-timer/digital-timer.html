@@ -1,0 +1,50 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="digital-timer">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+    <h3>Current Cycle: [[currentCycle]]</h3>
+  </template>
+  <script>
+    Polymer({
+       is: "digital-timer",
+
+       properties: {
+         title: String,
+         cycles: Array,
+         currentPeriod: Number,
+         seconds: Number,
+         periods: {
+           type: Array,
+           computed: '_periods(cycles, cycles.length)'
+         },
+         currentCycle: {
+           type: Number,
+           computed: '_currentCycle(currentPeriod, cycles, cycles.length)'
+         }
+       },
+
+       // Observers
+       _periods: function(cycles) {
+         return cycles.reduce(function(periods, cycle) {
+           return periods.concat(cycle);
+         }, []);
+       },
+
+       _currentCycle: function(currentPeriod, cycles) {
+         var count = 0;
+         for (var i = 0; i < cycles.length; i ++) {
+           count += cycles[i].length;
+           if (count >= currentPeriod) return i;
+         }
+         throw new Error('exceeded max period');
+       }
+
+    });
+  </script>
+</dom-module>

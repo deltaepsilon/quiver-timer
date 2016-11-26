@@ -1,0 +1,581 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>my-view1</title>
+
+    <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../bower_components/web-component-tester/browser.js"></script>
+
+    <!-- Import the element to test -->
+    <link rel="import" href="../src/timer-behavior/timer-cycles-behavior.html">
+  </head>
+  <body>
+    <test-fixture id="basic">
+      <template>
+      </template>
+    </test-fixture>
+
+    <script>
+      suite('TimerCyclesBehavior tests', function() {
+        var home;
+
+        setup(function() {
+          home = fixture('basic');
+        });
+
+        var threeCycles =  {
+          "name": "Three Cycles +",
+          "periods": [
+            {
+              "name": "Prepare",
+              "minutes": 0,
+              "seconds": 0,
+              "totalSeconds": 0,
+              "icon": "av:snooze",
+              "type": "prepare",
+              "isPrepare": true,
+              "timestamp": 1479830521617,
+              "displayIcon": "av:snooze",
+              "color": 0
+            },
+            {
+              "name": "Pushpress",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480133542777,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 1
+            },
+            {
+              "name": "Rest",
+              "seconds": 30,
+              "minutes": 0,
+              "totalSeconds": 30,
+              "icon": "av:pause-circle-outline",
+              "type": "rest",
+              "isRest": true,
+              "timestamp": 1480133555967,
+              "displayIcon": "av:pause-circle-outline",
+              "selected": false,
+              "color": 2
+            },
+            {
+              "name": "Deadlift",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480133562570,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 3
+            },
+            {
+              "name": "Rest",
+              "seconds": 30,
+              "minutes": 0,
+              "totalSeconds": 30,
+              "icon": "av:pause-circle-outline",
+              "type": "rest",
+              "isRest": true,
+              "timestamp": 1480133572650,
+              "displayIcon": "av:pause-circle-outline",
+              "selected": false,
+              "color": 4
+            },
+            {
+              "name": "Pushpress",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480133542777,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 5
+            },
+            {
+              "name": "Rest",
+              "seconds": 30,
+              "minutes": 0,
+              "totalSeconds": 30,
+              "icon": "av:pause-circle-outline",
+              "type": "rest",
+              "isRest": true,
+              "timestamp": 1480133555967,
+              "displayIcon": "av:pause-circle-outline",
+              "selected": false,
+              "color": 6
+            },
+            {
+              "name": "Deadlift",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480133562570,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 7
+            },
+            {
+              "name": "Rest",
+              "seconds": 30,
+              "minutes": 0,
+              "totalSeconds": 30,
+              "icon": "av:pause-circle-outline",
+              "type": "rest",
+              "isRest": true,
+              "timestamp": 1480133572650,
+              "displayIcon": "av:pause-circle-outline",
+              "selected": false,
+              "color": 8
+            },
+            {
+              "name": "Pushpress",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480133542777,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 9
+            },
+            {
+              "name": "Rest",
+              "seconds": 30,
+              "minutes": 0,
+              "totalSeconds": 30,
+              "icon": "av:pause-circle-outline",
+              "type": "rest",
+              "isRest": true,
+              "timestamp": 1480133555967,
+              "displayIcon": "av:pause-circle-outline",
+              "selected": false,
+              "color": 10
+            },
+            {
+              "name": "Deadlift",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480133562570,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 11
+            },
+            {
+              "name": "Rest",
+              "seconds": 30,
+              "minutes": 0,
+              "totalSeconds": 30,
+              "icon": "av:pause-circle-outline",
+              "type": "rest",
+              "isRest": true,
+              "timestamp": 1480133572650,
+              "displayIcon": "av:pause-circle-outline",
+              "selected": false,
+              "color": 12
+            },
+            {
+              "name": "Rower AMRAP",
+              "seconds": 0,
+              "minutes": 10,
+              "totalSeconds": 600,
+              "icon": "custom:stopwatch",
+              "type": "stopwatch",
+              "isStopwatch": true,
+              "timestamp": 1480133595353,
+              "displayIcon": "custom:stopwatch",
+              "color": 13
+            }
+          ],
+          "totalSeconds": 1140,
+          "updated": 1480133628510
+        };
+        var subCycleEmom = {
+          "name": "Sub-cycle EMOM",
+          "periods": [
+            {
+              "name": "Prepare",
+              "minutes": 0,
+              "seconds": 10,
+              "totalSeconds": 10,
+              "icon": "av:snooze",
+              "type": "prepare",
+              "isPrepare": true,
+              "timestamp": 1480175249651,
+              "displayIcon": "av:snooze",
+              "color": 0
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 4,
+              "totalSeconds": 240,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175267968,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 1
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 4,
+              "totalSeconds": 240,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175267968,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 2
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 4,
+              "totalSeconds": 240,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175267968,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 3
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 4,
+              "totalSeconds": 240,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175267968,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 4
+            },
+            {
+              "name": "Rest",
+              "seconds": 30,
+              "minutes": 5,
+              "totalSeconds": 330,
+              "icon": "av:pause-circle-outline",
+              "type": "rest",
+              "isRest": true,
+              "timestamp": 1480175282354,
+              "displayIcon": "av:pause-circle-outline",
+              "selected": false,
+              "color": 5
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 4,
+              "totalSeconds": 240,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175267968,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 6
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 4,
+              "totalSeconds": 240,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175267968,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 7
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 4,
+              "totalSeconds": 240,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175267968,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 8
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 4,
+              "totalSeconds": 240,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175267968,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 9
+            },
+            {
+              "name": "Rest",
+              "seconds": 30,
+              "minutes": 5,
+              "totalSeconds": 330,
+              "icon": "av:pause-circle-outline",
+              "type": "rest",
+              "isRest": true,
+              "timestamp": 1480175282354,
+              "displayIcon": "av:pause-circle-outline",
+              "selected": false,
+              "color": 10
+            },
+            {
+              "name": "Stopwatch",
+              "seconds": 0,
+              "minutes": 10,
+              "totalSeconds": 600,
+              "icon": "custom:stopwatch",
+              "type": "stopwatch",
+              "isStopwatch": true,
+              "timestamp": 1480175315436,
+              "displayIcon": "custom:stopwatch",
+              "color": 11
+            }
+          ],
+          "totalSeconds": 3190,
+          "updated": 1480175336717
+        };
+        var tenMinuteEmom = {
+          "name": "10m EMOM",
+          "periods": [
+            {
+              "name": "Prepare",
+              "minutes": 0,
+              "seconds": 10,
+              "totalSeconds": 10,
+              "icon": "av:snooze",
+              "type": "prepare",
+              "isPrepare": true,
+              "timestamp": 1480175206641,
+              "displayIcon": "av:snooze",
+              "color": 0
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175212131,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 1
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175217832,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 2
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175218600,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 3
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175212131,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 4
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175217832,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 5
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175218600,
+              "displayIcon": "hourglass-empty",
+              "selected": false,
+              "color": 6
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175235736,
+              "displayIcon": "hourglass-empty",
+              "color": 7
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175237358,
+              "displayIcon": "hourglass-empty",
+              "color": 8
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175238367,
+              "displayIcon": "hourglass-empty",
+              "color": 9
+            },
+            {
+              "name": "Work",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1480175238851,
+              "displayIcon": "hourglass-empty",
+              "color": 10
+            }
+          ],
+          "totalSeconds": 610,
+          "updated": 1480175249394
+        };
+
+        // test('Number in circle should be 1', function() {
+        //   var circle = Polymer.dom(home.root).querySelector('.circle');
+        //   assert.equal(circle.textContent, '1');
+        // })
+
+        test('Global Cycles', function() {
+          var subCycleEmomCycles = TimerCyclesBehavior._globalCycles(subCycleEmom.periods);
+          var threeCyclesCycles = TimerCyclesBehavior._globalCycles(threeCycles.periods);
+          var tenMinuteEmomCycles = TimerCyclesBehavior._globalCycles(tenMinuteEmom.periods);
+          assert.equal(subCycleEmomCycles.length, 1);
+          assert.equal(threeCyclesCycles.length, 1);
+          assert.equal(tenMinuteEmomCycles.length, 1);
+          assert.equal(subCycleEmomCycles[0].length, subCycleEmom.periods.length);
+          assert.equal(threeCyclesCycles[0].length, threeCycles.periods.length);
+          assert.equal(tenMinuteEmomCycles[0].length, tenMinuteEmom.periods.length);
+        });
+
+        test('Sub-cycle EMOM', function() {
+          var cycles = TimerCyclesBehavior._cycles(subCycleEmom.periods);
+          assert.equal(cycles.length, 4);
+          assert.equal(cycles[0].length, 1);
+          assert.equal(cycles[1].length, 5);
+          assert.equal(cycles[2].length, 5);
+          assert.equal(cycles[3].length, 1);
+        });
+
+        test('Three Cycles', function() {
+          var cycles = TimerCyclesBehavior._cycles(threeCycles.periods);
+          assert.equal(cycles.length, 5);
+          assert.equal(cycles[0].length, 1);
+          assert.equal(cycles[1].length, 4);
+          assert.equal(cycles[2].length, 4);
+          assert.equal(cycles[3].length, 4);
+          assert.equal(cycles[4].length, 1);
+        });
+
+        test('10 Minute EMOM', function() {
+          var cycles = TimerCyclesBehavior._cycles(tenMinuteEmom.periods);
+          assert.equal(cycles.length, 11);
+          cycles.forEach(function(cycle) {
+            assert.equal(cycle.length, 1);  
+          });
+        });
+
+
+      });
+    </script>
+  </body>
+</html>

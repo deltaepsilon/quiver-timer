@@ -43,7 +43,7 @@
         <template is="dom-repeat" items="[[timers]]" as="timer">
           <div>
             <paper-icon-item two-line>
-              <a class="flex layout horizontal center-justified" href="/timer/[[index]]" item-icon>
+              <a class="flex layout horizontal center-justified" href="/timer/[[index]]/stopped" item-icon>
                 <paper-icon-button icon="av:play-circle-outline"></paper-icon-button>
               </a>
               <paper-item-body>
@@ -91,7 +91,10 @@
 
        attached: function() {
          console.log('attached timers-view');
-         this.fire('timerFab');
+         this.fire('timerFab', {
+           icon: 'add',
+           url: '/configure/new'
+         });
        },
 
       // Observers
