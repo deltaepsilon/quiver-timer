@@ -12,10 +12,14 @@
         display: block;
       }
     </style>
-    <h3>Display Cycle: [[Title]]</h3>
+    <h3>Display Cycle: [[title]]</h3>
     <p>Seconds: <digital-clock total-seconds="[[seconds]]"></digital-clock></p>
     <p>Cycle Seconds: <digital-clock total-seconds="[[cycleSeconds]]"></digital-clock></p>
-    <p>Cycle Percentages: [[cyclePercentages]]</p>
+    <ul>
+      <!--<template is="dom-repeat" items="[[cyclePercentages]]" as="percentage">
+        <li>[[percentage]]</li>  
+      </template>-->
+    </ul>
     <p>Seconds Percentage: [[secondsPercentage]]</p>
     
   </template>
@@ -45,13 +49,14 @@
 
        _cyclePercentages: function(cycle) {
          var totalSeconds = cycle.seconds || this.getCycleSeconds(cycle);
-         console.log('cyclePercentages', totalSeconds);
          var percentages = cycle.map(function(period) {
            return  Math.round((period.totalSeconds/totalSeconds) * 100) / 100;
          }.bind(this));
+        //  if (this.title == 'Cycle') {
+        //    debugger;
+        //  }
 
          this.splice.apply(this, ['cyclePercentages', 0, this.cyclePercentages.length].concat(percentages));
-         console.log('percentages', this.cyclePercentages);
        },
 
        _secondsPercentage: function(cycleSeconds, cycle) {
