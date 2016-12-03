@@ -1,10 +1,61 @@
 <script>
   TimerCyclesBehavior = {
-    _globalCycles: function(periods) {
-      return [periods];
+    properties: {
+      periodIndex: {
+        type: Number,
+        computed: '_periodIndex(seconds, periods, periods.splices)'
+      },
+      period: {
+        type: Object,
+        computed: '_period(periodIndex, periods, periods.splices)'
+      },
+      periodSeconds: {
+        type: Number,
+        computed: '_periodSeconds(seconds, periodIndex, periods, periods.splices)'
+      },
+      globalCycles: {
+        type: Array,
+        value: []
+      },
+      periodCycles: {
+        type: Array,
+        value: []
+      },
+      periodCycleSeconds: {
+        type: Number,
+        computed: '_periodCycleSeconds(seconds, periodCycles, periods.splices)'
+      },
+      globalCycle: {
+        type: Array,
+        value: []
+      },
+      periodCycle: {
+        type: Array,
+        value: []
+      }
     },
 
-    _cycles: function(periods) {
+    // Observers
+    observers: [
+      '_globalCycles(periods, periods.splices)',
+      '_periodCycles(periods, periods.splices)',
+      '_periodCycle(seconds, periodCycles)'
+    ],
+
+    getCycleSeconds: function(cycle) {
+      return cycle.reduce(function(s, period) {
+        return s + period.totalSeconds;
+      }, 0);
+    },
+
+    _globalCycles: function(periods) {
+      this.splice.apply(this, ['globalCycles', 0, this.globalCycles.length, periods]);
+      this.splice.apply(this, ['globalCycle', 0, this.globalCycle.length].concat(periods));
+      this.globalCycles[0].seconds = this.getCycleSeconds(periods);
+    },
+
+    _periodCycles: function(periods) {
+      console.log('_periodCycles periods', periods);
       function isEqual(a, b) {
         if (a.length !== b.length) return false;
 
@@ -37,7 +88,7 @@
       };
 
       var nextMatch = 0;
-      return periods.reduce(function(cycles, period, i) {
+      var periodCycles = periods.reduce(function(cycles, period, i) {
         if (i < nextMatch) return cycles; // Enable match skipping
 
         var remaining = periods.slice(i);
@@ -64,7 +115,63 @@
         nextMatch = i + matches.count * matches.multiplier;
 
         return cycles;
-      }, []);
-    }
+      }, []).map(function(cycle) {
+        return cycle.seconds = this.getCycleSeconds(cycle), cycle;
+      }.bind(this));
+
+      this.splice.apply(this, ['periodCycles', 0, this.periodCycles.length].concat(periodCycles));
+    },
+
+    _periodIndex: function(seconds, periods) {
+      var i = periods.length;
+      while (i--) {
+        seconds -= periods[i].totalSeconds
+        if (seconds <= 0) break;
+      }
+      return i;
+    },
+
+    _period: function(periodIndex, periods) {
+      return periods[periodIndex];
+    },
+
+    _periodSeconds: function(seconds, periodIndex, periods) {
+      var i = periods.length;
+      while (i--) {
+        if (i == periodIndex) break;
+        seconds -= periods[i].totalSeconds;
+      }
+      return seconds;
+    },
+
+    _periodCycleSeconds: function(seconds, periodCycles) {
+      var i = periodCycles.length;
+      while (i--) {
+        let periodSeconds = periodCycles[i].seconds;
+        if (seconds > periodSeconds) seconds -= periodSeconds; continue;
+        break;
+      }
+      return seconds;
+    },
+
+    _globalCycle: function(globalCycles) {
+      return globalCycles[0];
+    },
+
+    _periodCycle: function(seconds, periodCycles) {
+      var i = periodCycles.length;
+      while (i--) {
+        let periodSeconds = periodCycles[i].seconds;
+        if (seconds > periodSeconds) {
+          seconds -= periodSeconds; 
+          continue;
+        } 
+        break;
+      }
+      if (!_.isEqual(this.periodCycle, periodCycles[i])) {
+        this.splice.apply(this, ['periodCycle', 0, this.periodCycle.length].concat(periodCycles[i]));
+        this.periodCycle.seconds = periodCycles[i].seconds;
+      }
+    },
   };
 </script>

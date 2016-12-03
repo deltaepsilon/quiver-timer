@@ -6,6 +6,7 @@
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
 
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../color-wheel.html">
@@ -14,33 +15,35 @@
 <link rel="import" href="../timer-state/timer-playing.html">
 <link rel="import" href="../timer-state/timer-paused.html">
 
+<script src="../../bower_components/timer.js/dist/timer.js"></script>
+
 <dom-module id="timer-view">
   <template>
     <style include="shared-styles color-wheel">
       :host {
         display: block;
       }
-
+      
       #wrapper .show-stopped {
         display: none;
       }
-
+      
       #wrapper .show-paused {
         display: none;
       }
-
+      
       #wrapper .show-playing {
         display: none;
       }
-
+      
       #wrapper[state="stopped"] .show-stopped {
         display: inherit;
       }
-
+      
       #wrapper[state="paused"] .show-paused {
         display: inherit;
       }
-
+      
       #wrapper[state="playing"] .show-playing {
         display: inherit;
       }
@@ -50,10 +53,17 @@
     <app-route route="{{subroute}}" pattern="/:state" data="{{subrouteData}}"></app-route>
     <app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
 
+    <paper-material elevation="1">
+      <h3>[[timer.name]]</h3>
+      <h3>total seconds: [[timer.totalSeconds]]</h3>
+      <p>state: [[state]]</p>
+      <p>seconds: [[seconds]]</p>
+    </paper-material>
+
     <iron-pages selected="[[state]]" attr-for-selected="name" fallback-selection="stopped" role="main">
-      <timer-stopped id="timerStopped" name="stopped" state="[[state]]" timer-key="[[timerKey]]" timer="[[timer]]"></timer-stopped>
-      <timer-playing id="timerPlaying" name="playing" state="[[state]]" title="[[timer.name]]" periods="[[timer.periods]]"></timer-playing>
-      <timer-paused id="timerPaused"  name="paused" state="[[state]]" title="[[timer.name]]" periods="[[timer.periods]]"></timer-paused>
+      <timer-stopped id="timerStopped" name="stopped" timer-key="[[timerKey]]" timer="[[timer]]"></timer-stopped>
+      <timer-playing id="timerPlaying" name="playing" seconds="[[seconds]]" periods="[[workingPeriods]]"></timer-playing>
+      <timer-paused id="timerPaused" name="paused" seconds="[[seconds]]" periods="[[workingPeriods]]"></timer-paused>
     </iron-pages>
   </template>
   <script>
@@ -74,6 +84,26 @@
          state: {
            type: String,
            computed: '_state(subrouteData)'
+         },
+         clock: {
+           type: Object,
+           value: function() {
+             return new Timer({
+               tick: 1,
+               ontick: this.tickHandler.bind(this),
+              //  onstop: function() {
+              //    console.log('timer stopped');
+              //  },
+              //  onstart: function() {
+              //    console.log('timer started');
+              //  }
+             });
+           }
+         },
+         seconds: Number,
+         workingPeriods: {
+           type: Array,
+           value: []
          }
        },
 
@@ -83,15 +113,15 @@
 
        //  Observers
        observers: [
-         '_timerFab(state)'
+         '_timerFab(state)',
+         '_clock(state, timer.periods, clock)',
+         '_workingPeriods(workingPeriods, timer.periods)'
        ],
 
        _timerFab: function(state) {
-         console.log('timerFab', state);
          switch (true) {
            case state == 'playing':
               this.play();
-              this.$.timerPlaying.attached();
               break;
            case state == 'paused':
               this.pause();
@@ -99,6 +129,22 @@
            case state == 'stopped':
               this.stop();
               break;
+         }
+       },
+
+       _clock: function(state, periods, clock) {
+         if (state == 'paused') {
+           clock.pause();
+         } else if (state == 'stopped') {
+           clock.stop();
+         } else if (state == 'playing') {
+           if (clock.getDuration()) {
+             clock.start();
+           } else {
+             clock.start(periods.reduce(function(s, period) {
+               return s += period.totalSeconds;
+             }, 1));
+           }
          }
        },
 
@@ -118,20 +164,25 @@
          return timer;
        },
 
+       _workingPeriods: function(workingPeriods, periods) {
+         if (periods) {
+           this.splice.apply(this, ['workingPeriods', 0, this.workingPeriods.length].concat(_.cloneDeep(periods)));
+         }
+       },
+
        //Listeners
        listeners: {
          play: 'play',
          pause: 'pause',
          stop: 'stop',
-         end: 'end'
+         end: 'end',
+         previous: 'previous',
+         next: 'next'
        },
 
        play: function() {
          this.state = 'playing';
-         this.fire('timerFab', {
-           icon: 'av:pause',
-           url: '/timer/' + this.timerKey + '/paused'
-         });
+         this.fire('timerFab');
        },
 
        pause: function() {
@@ -156,6 +207,24 @@
            icon: 'av:stop',
            url: '/timer/' + this.timerKey + '/stopped'
          });
+       },
+
+       previous: function() {
+         var prevSeconds = this.period.totalSeconds - this.periodSeconds + 2;
+         if (prevSeconds < 5 && this.periodIndex) {
+           prevSeconds += this.timer.periods[this.periodIndex - 1].totalSeconds;
+         }
+         this.clock.stop();
+         this.clock.start(this.seconds + prevSeconds);
+       },
+
+       next: function() {
+         this.clock.stop();
+         this.clock.start(this.seconds - this.periodSeconds + 2);
+       },
+
+       tickHandler: function(ms) {
+         this.seconds = Math.round(ms/1000) - 1;
        }
     });
   </script>

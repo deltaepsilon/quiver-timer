@@ -1,12 +1,13 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/iron-icons/av-icons.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
 
 <link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../digital-timer/digital-timer.html">
 <link rel="import" href="../timer-behavior/timer-cycles-behavior.html">
 <link rel="import" href="../shared-styles.html">
-
 
 <script src="../../bower_components/timer.js/dist/timer.js"></script>
 <script src="../../bower_components/lodash/lodash.js"></script>
@@ -41,15 +42,46 @@
       [type="stopwatch"] .show-stopwatch {
         display: inherit;
       }
+
+      #wrapper {
+        padding: 1rem;
+      }
+
+      [current-period="0"] .invisible-first-period {
+        visibility: none;
+      }
     </style>
-    <div type$="[[period.type]]">
-      <h2>timer playing</h2>
-      <strong>Global: <digital-clock total-seconds="[[globalDisplaySeconds]]"></digital-clock></strong>
-      <strong>Period: <digital-clock total-seconds="[[periodDisplaySeconds]]"></digital-clock></strong>
-      <aside>Current Period: [[currentPeriod]]</aside>
-      <digital-timer id="globalTimer" title="Total" cycles="[[globalCycles]]" current-period="[[currentPeriod]]" seconds="[[globalDisplaySeconds]]"></digital-timer>
-      <digital-timer id="periodTimer" title="Cycle" cycles="[[cycles]]" current-period="[[currentPeriod]]" seconds="[[periodDisplaySeconds]]"></digital-timer>
-      <paper-icon-button class="show-stopwatch" icon="av:skip-next" on-click="advance"></paper-icon-button>  
+
+    <paper-material elevation="1">
+      <p>periodIndex: [[periodIndex]]</p>
+      <p>period.totalSeconds: [[period.totalSeconds]]</p>
+      <p>periodSeconds: [[periodSeconds]]</p>
+      <p>globalCycles: [[globalCycles]]</p>
+      <p>cycles: [[periodCycles]]</p>
+      <p>period cycle seconds: [[periodCycleSeconds]]</p>
+    </paper-material>
+
+    <div id="wrapper" type$="[[period.type]]" current-period$="[[currentPeriod]]">
+      <paper-item>
+        <paper-item-body two-line>
+          <div class="layout horizontal justified">
+            <strong>[[title]]</strong>
+            <!--<paper-icon-button class="show-stopwatch" icon="av:skip-next" on-click="next"></paper-icon-button>-->
+          </div>
+          <div secondary>
+            <digital-clock total-seconds="[[globalSeconds]]"></digital-clock>
+          </div>
+        </paper-item-body>
+      </paper-item>
+      <digital-timer id="globalTimer" title="[[title]]" seconds="[[seconds]]" cycle-seconds="[[seconds]]" cycle="[[globalCycle]]"></digital-timer>
+      <digital-timer id="periodTimer" title="Cycle" seconds="[[periodSeconds]]" cycle-seconds="[[periodCycleSeconds]]" cycle="[[periodCycle]]"></digital-timer>
+      <div class="bottom-sheet layout horizontal justified center">
+        <paper-icon-button class="invisible-first-period" icon="av:skip-previous" on-click="previous"></paper-icon-button>
+        <a href$="/timer/[[timerKey]]/paused">
+          <paper-fab icon="av:pause"></paper-fab>
+        </a>
+        <paper-icon-button icon="av:skip-next" on-click="next"></paper-icon-button>
+      </div>
     </div>
     
   </template>
@@ -60,169 +92,11 @@
        behaviors: [TimerCyclesBehavior],
 
        properties: {
-         state: String,
-         currentState: String,
-         laggedState: String,
-         title: String,
+         seconds: Number,
          periods: {
            type: Array,
            value: []
-         },
-         workingPeriods: {
-           type: Array,
-           value: []
-         },
-         periodTimer: {
-           type: Object,
-           value: function() {
-             return new Timer({
-               tick: 1,
-               ontick: this._periodTickHandler.bind(this),
-               onstop: function() {
-                 console.log('period timer stopped');
-               },
-               onstart: function() {
-                 console.log('period timer started');
-               }
-             });
-           }
-         },
-         globalTimer: {
-           type: Object,
-           value: function() {
-             return new Timer({
-               tick: 1,
-               ontick: this._globalTickHandler.bind(this),
-               onstop: function() {
-                 console.log('global timer stopped');
-               },
-               onstart: function() {
-                 console.log('global timer started');
-               }
-             });
-           }
-         },
-         currentPeriod: {
-           type: Number,
-           value: 0
-         },
-         maxPeriod: {
-           type: Number,
-           computed: '_maxPeriod(periods)'
-         },
-         periodSeconds: {
-           type: Number,
-           computed: '_periodSeconds(workingPeriods, currentPeriod, maxPeriod, workingPeriods.splices)'
-         },
-         globalSeconds: {
-           type: Number,
-           computed: '_globalSeconds(workingPeriods, currentPeriod, workingPeriods.splices)'
-         },
-         period: {
-           type: String,
-           computed: '_period(workingPeriods, currentPeriod, workingPeriods.splices)'
-         },
-         periodDisplaySeconds: Number,
-         globalDisplaySeconds: Number,
-         cycles: {
-           type: Array,
-           computed: '_cycles(workingPeriods, workingPeriods.splices)'
-         },
-         globalCycles: {
-           type: Array,
-           computed: '_globalCycles(workingPeriods, workingPeriods.splices)'
          }
-       },
-
-       attached: function() {
-         this.set('currentPeriod', 0);
-         this._workingPeriods();
-       },
-
-       observers: [
-         '_state(state)',
-         '_timer(currentState, laggedState, periodTimer, globalTimer, periodSeconds, globalSeconds, currentPeriod)',
-         '_workingPeriods(periods)'
-       ],
-
-       _state: function(state) {
-         this.laggedState = this.currentState || false;
-         this.currentState = state;
-       },
-
-       _timer: function(currentState, laggedState, periodTimer, globalTimer, periodSeconds, globalSeconds) {
-         console.log('_timer', currentState, laggedState, periodTimer, globalTimer, periodSeconds, globalSeconds);
-         console.log('starting status', periodTimer.getStatus(), globalTimer.getStatus());
-         if (currentState == 'paused') {
-           periodTimer.pause();
-           globalTimer.pause();
-         } else if (currentState == 'stopped') {
-           periodTimer.stop();
-           globalTimer.stop();
-         } else if (currentState == 'playing' && laggedState == 'paused') {
-           periodTimer.start();
-           globalTimer.start();
-         } else if (periodSeconds && globalSeconds) {
-           if (periodTimer.getStatus() !== 'started') {
-             this.set('periodDisplaySeconds', periodSeconds);
-             periodTimer.start(periodSeconds + 1);
-           }
-           if (globalTimer.getStatus() !== 'started') {
-             this.set('globalDisplaySeconds', globalSeconds);
-             globalTimer.start(globalSeconds + 1);
-           }
-         }
-         console.log('ending status', periodTimer.getStatus(), globalTimer.getStatus());
-       },
-
-       _workingPeriods: function(periods) {
-         console.log('set working periods', periods);
-         if (periods && this.workingPeriods) {
-           this.splice.apply(this, ['workingPeriods', 0, this.workingPeriods.length].concat(_.cloneDeep(periods)));
-         }
-         
-       },
-
-       _maxPeriod: function(periods) {
-         return periods.length - 1;
-       },
-
-       _periodSeconds: function(periods, currentPeriod, maxPeriod) {
-         if (periods[currentPeriod]) {
-           if (!periods[currentPeriod].totalSeconds) this.currentPeriod = Math.min(maxPeriod, currentPeriod + 1);
-           return periods[currentPeriod].totalSeconds;  
-         }
-         return 0;
-       },
-
-       _globalSeconds: function(periods) {
-         return periods.reduce(function(seconds, period) {
-           return seconds += (period.recordedSeconds || period.totalSeconds);
-         }, 0);
-       },
-
-       _period: function(periods, currentPeriod) {
-         return periods[currentPeriod];
-       },
-
-       _periodTickHandler: function(ms) {
-         var s = Math.round(ms/1000) - 1;
-         var period = this.workingPeriods[this.currentPeriod];
-        //  console.log('period', s);
-         this.set('periodDisplaySeconds', period.type == 'stopwatch' ? period.totalSeconds - s : s);
-         if (s == 0 && this.currentPeriod < this.maxPeriod) {
-           this.advance();
-           this.periodTimer.stop();
-           this.currentPeriod += 1;
-         }
-         
-       },
-
-       _globalTickHandler: function(ms) {
-         var s = Math.round(ms/1000) - 1;
-        //  console.log('global', s);
-         this.set('globalDisplaySeconds', s);
-         if (s == 0) this.stop();
        },
 
        // Functions
@@ -230,24 +104,12 @@
          this.fire('end');
        },
 
-       advance: function() {
-         var period = this.workingPeriods[this.currentPeriod];
-         
-         if (period.type == 'stopwatch') {
-           period.remainingSeconds = Math.round(this.periodTimer.getDuration()/1000);
-           period.recordedSeconds = period.totalSeconds - period.remainingSeconds;
-           period.totalSeconds -= period.remainingSeconds;
+       previous: function() {
+         this.fire('previous');
+       },
 
-           var remainingGlobalSeconds = Math.round(this.globalTimer.getDuration()/1000);
-           var globalSeconds = remainingGlobalSeconds - period.remainingSeconds;
-
-           this.globalTimer.stop();
-           this.globalTimer.start(globalSeconds);
-         }
-         if (this.currentPeriod < this.maxPeriod) {
-           this.periodTimer.stop();
-           this.currentPeriod += 1;
-         }
+       next: function() {
+         this.fire('next');
        }
 
     });

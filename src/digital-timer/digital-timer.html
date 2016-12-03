@@ -1,5 +1,9 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../shared-styles.html">
+
+<script src="../../bower_components/lodash/lodash.js"></script>
 
 <dom-module id="digital-timer">
   <template>
@@ -8,7 +12,12 @@
         display: block;
       }
     </style>
-    <h3>Current Cycle: [[currentCycle]]</h3>
+    <h3>Display Cycle: [[Title]]</h3>
+    <p>Seconds: <digital-clock total-seconds="[[seconds]]"></digital-clock></p>
+    <p>Cycle Seconds: <digital-clock total-seconds="[[cycleSeconds]]"></digital-clock></p>
+    <p>Cycle Percentages: [[cyclePercentages]]</p>
+    <p>Seconds Percentage: [[secondsPercentage]]</p>
+    
   </template>
   <script>
     Polymer({
@@ -16,33 +25,45 @@
 
        properties: {
          title: String,
-         cycles: Array,
-         currentPeriod: Number,
          seconds: Number,
-         periods: {
+         cycleSeconds: Number,
+         cycle: Array,
+         cyclePercentages: {
            type: Array,
-           computed: '_periods(cycles, cycles.length)'
+           value: []
          },
-         currentCycle: {
+         secondsPercentage: {
            type: Number,
-           computed: '_currentCycle(currentPeriod, cycles, cycles.length)'
+           computed: '_secondsPercentage(cycleSeconds, cycle, cycle.splices)'
          }
        },
 
        // Observers
-       _periods: function(cycles) {
-         return cycles.reduce(function(periods, cycle) {
-           return periods.concat(cycle);
-         }, []);
+       observers: [
+         '_cyclePercentages(cycle, cycle.splices)'
+       ],
+
+       _cyclePercentages: function(cycle) {
+         var totalSeconds = cycle.seconds || this.getCycleSeconds(cycle);
+         console.log('cyclePercentages', totalSeconds);
+         var percentages = cycle.map(function(period) {
+           return  Math.round((period.totalSeconds/totalSeconds) * 100) / 100;
+         }.bind(this));
+
+         this.splice.apply(this, ['cyclePercentages', 0, this.cyclePercentages.length].concat(percentages));
+         console.log('percentages', this.cyclePercentages);
        },
 
-       _currentCycle: function(currentPeriod, cycles) {
-         var count = 0;
-         for (var i = 0; i < cycles.length; i ++) {
-           count += cycles[i].length;
-           if (count >= currentPeriod) return i;
-         }
-         throw new Error('exceeded max period');
+       _secondsPercentage: function(cycleSeconds, cycle) {
+         var totalSeconds = cycle.seconds || this.getCycleSeconds(cycle);
+         return Math.round((cycleSeconds/totalSeconds) * 100) / 100;
+       },
+
+       // Functions
+       getCycleSeconds: function(cycle) {
+         return cycle.reduce(function(s, period) {
+           return s + period.totalSeconds;
+         }, 0);
        }
 
     });
