@@ -53,13 +53,6 @@
     <app-route route="{{subroute}}" pattern="/:state" data="{{subrouteData}}"></app-route>
     <app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
 
-    <paper-material elevation="1">
-      <h3>[[timer.name]]</h3>
-      <h3>total seconds: [[timer.totalSeconds]]</h3>
-      <p>state: [[state]]</p>
-      <p>seconds: [[seconds]]</p>
-    </paper-material>
-
     <iron-pages selected="[[state]]" attr-for-selected="name" fallback-selection="stopped" role="main">
       <timer-stopped id="timerStopped" name="stopped" timer-key="[[timerKey]]" timer="[[timer]]"></timer-stopped>
       <timer-playing id="timerPlaying" name="playing" seconds="[[seconds]]" periods="[[workingPeriods]]"></timer-playing>

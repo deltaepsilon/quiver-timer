@@ -1,67 +1,179 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
 
 <link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../shared-styles.html">
+<link rel="import" href="../color-wheel.html">
 
 <script src="../../bower_components/lodash/lodash.js"></script>
+<script src="../../bower_components/d3/d3.js"></script>
 
 <dom-module id="digital-timer">
   <template>
     <style include="shared-styles">
       :host {
         display: block;
+        overflow: hidden;
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+      }
+      
+      #chartWrapper {
+        position: relative;
       }
     </style>
-    <h3>Display Cycle: [[title]]</h3>
-    <p>Seconds: <digital-clock total-seconds="[[seconds]]"></digital-clock></p>
-    <p>Cycle Seconds: <digital-clock total-seconds="[[cycleSeconds]]"></digital-clock></p>
-    <ul>
-      <!--<template is="dom-repeat" items="[[cyclePercentages]]" as="percentage">
-        <li>[[percentage]]</li>  
-      </template>-->
-    </ul>
-    <p>Seconds Percentage: [[secondsPercentage]]</p>
-    
+
+    <div id="chartWrapper" class="flex layout vertical center-justified center">
+      <div class="pinned layout vertical center-justified center">
+        <h3>[[title]]</h3>
+        <digital-clock total-seconds="[[seconds]]"></digital-clock>
+      </div>
+      <div id="chart"></div>
+    </div>
+
   </template>
   <script>
     Polymer({
        is: "digital-timer",
+
+       behaviors: [
+         Polymer.IronResizableBehavior,
+         QuiverColorWheel
+       ],
 
        properties: {
          title: String,
          seconds: Number,
          cycleSeconds: Number,
          cycle: Array,
-         cyclePercentages: {
-           type: Array,
-           value: []
-         },
          secondsPercentage: {
            type: Number,
            computed: '_secondsPercentage(cycleSeconds, cycle, cycle.splices)'
-         }
+         },
+         pie: {
+           type: Object,
+           value: function() {
+             return d3.pie()
+              .value(function(period) {
+                return period.percentage;
+              })
+              .sort(null);
+           }
+         },
+         accumulatedPie: {
+           type: Object,
+           value: function() {
+             return d3.pie()
+              .value(function(period) {
+                return period.accumulatedPercentage;
+              })
+              .sort(null);
+           }
+         },
+         height: Number,
+         width: Number,
+         innerCircle: Object,
+         outerCircle: Object
        },
+      
+      // Listeners
+      listeners: {
+        'iron-resize': 'resize'
+      },
+
+      resize: function() {
+        if (!this.debouncedResize) { // Debounced functions must be local, not shared
+          this.debouncedResize = _.debounce(this.setDimensions.bind(this), 50);
+        }
+        this.debouncedResize();
+      },
+
 
        // Observers
        observers: [
-         '_cyclePercentages(cycle, cycle.splices)'
+         '_chart(width, height, cycle, cycle.splices)',
+         '_chartSeconds(secondsPercentage, cycle, cycle.splices)'
        ],
 
-       _cyclePercentages: function(cycle) {
-         var totalSeconds = cycle.seconds || this.getCycleSeconds(cycle);
-         var percentages = cycle.map(function(period) {
-           return  Math.round((period.totalSeconds/totalSeconds) * 100) / 100;
-         }.bind(this));
-        //  if (this.title == 'Cycle') {
-        //    debugger;
-        //  }
+       getPeriods: function(maxPercentage, cycle) {
+         maxPercentage = maxPercentage || 0;
 
-         this.splice.apply(this, ['cyclePercentages', 0, this.cyclePercentages.length].concat(percentages));
+         var totalSeconds = cycle.seconds || this.getCycleSeconds(cycle);
+         var accumulatedPercentage = 0;
+         var periods = cycle.map(function(period) {
+           period.percentage = this.round(period.totalSeconds/totalSeconds);
+
+           if (accumulatedPercentage + period.percentage <= maxPercentage) {
+             period.accumulatedPercentage = period.percentage;
+           } else {
+             period.accumulatedPercentage = Math.max(0, this.round(maxPercentage - accumulatedPercentage));
+           }
+
+           accumulatedPercentage = accumulatedPercentage + period.percentage;
+           
+           return period;
+         }.bind(this));
+
+         var roundingError = this.round(1 - periods.reduce(function(i, p) {
+           return i + p.percentage;
+         }, 0));
+
+         periods.push({
+           accumulatedPercentage: this.round(1 - periods.reduce(function(i, p) {
+             return i + p.accumulatedPercentage;
+           }, 0)) - roundingError
+         });
+
+         
+
+         return periods;
        },
 
        _secondsPercentage: function(cycleSeconds, cycle) {
          var totalSeconds = cycle.seconds || this.getCycleSeconds(cycle);
-         return Math.round((cycleSeconds/totalSeconds) * 100) / 100;
+         return this.round(1 - cycleSeconds/totalSeconds);
+       },
+
+       _chart: function(width, height, cycle) {
+         this.emptyChart();
+         
+         var periods = this.getPeriods(this.secondsPercentage, cycle);
+         var minDimension = Math.min(width, height) - 8; // Prevent clipping in vert layouts 
+         var w = minDimension;
+         var h = minDimension;
+         var arcWidth = minDimension * .1;
+         var outerRadiusArc = w/2;
+         var innerRadiusArc = outerRadiusArc - arcWidth;
+         var shadowWidth = arcWidth;
+         var outerRadiusArcShadow = innerRadiusArc + 1;
+         var innerRadiusArcShadow = innerRadiusArc - shadowWidth;
+         var color = d3.scaleOrdinal().range(this.colorWheel);
+
+         var svg = d3.select(this.$.chart)
+          .append('svg')
+          .attr('width', w)
+          .attr('height', h)
+          .attr('class', 'shadow')
+          .append('g')
+          .attr('transform', 'translate('+w/2+','+h/2+')');       
+         
+         var colorWheel = this.colorWheel;
+         this.outerCircle = this.createChart(periods, this.accumulatedPie, svg, outerRadiusArc, innerRadiusArc, function(d, i){
+           return !d.data.color ? '#FFFFFF' : color(colorWheel[d.data.color]);
+         }, 'outerCircle'); 
+         
+         this.innerCircle = this.createChart(periods, this.pie, svg, outerRadiusArcShadow, innerRadiusArcShadow, function(d, i){
+          var c = d3.hsl(color(colorWheel[d.data.color]));
+          return d3.hsl((c.h + 5), (c.s + .07), (c.l - .15));
+         }, 'innerCircle');
+        
+       },
+
+       _chartSeconds: function(secondsPercentage, cycle) {
+         var periods = this.getPeriods(secondsPercentage, cycle);
+         if (this.outerCircle) {
+           this.outerCircle.update(periods);
+        }
        },
 
        // Functions
@@ -69,6 +181,57 @@
          return cycle.reduce(function(s, period) {
            return s + period.totalSeconds;
          }, 0);
+       },
+
+       createChart: function(periods, pie, svg, outerRadius, innerRadius, fillFunction, className) {
+         var tau = 2 * Math.PI;
+         var path = svg.selectAll('.' + className);
+         path.transition()
+          .duration(1000)
+          .attrTween('d', function(d) {
+            var interpolate = d3.interpolate({startAngle: 0, endAngle: 0}, d);
+            return function(t) {
+              return arc(interpolate(t));
+            };
+          });
+
+         function update(data) {
+            var arc = d3.arc()
+              .innerRadius(innerRadius)
+              .outerRadius(outerRadius);
+
+            path.data(pie(data))
+              .enter()
+              .append('path')
+              .attr('class', className)
+              .attr('d', arc)
+              .attr('fill', fillFunction);
+
+            return {
+              path: path,
+              arc: arc,
+              update: update
+            };
+         };
+         return update(periods);
+       },
+
+       emptyChart: function() {
+         var chart = this.$.chart;
+         var children = chart.children;
+         var i = children.length;
+         while (i--) {
+           chart.removeChild(children[i]);
+         }
+       },
+
+       setDimensions: function() {
+         this.width = this.offsetWidth;
+         this.height = this.offsetHeight;
+       },
+
+       round: function(p) {
+         return Math.round(p * 10000) / 10000;
        }
 
     });

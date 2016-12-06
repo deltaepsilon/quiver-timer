@@ -45,13 +45,18 @@
 
       #wrapper {
         padding: 1rem;
+        top: 4rem;
       }
 
       [current-period="0"] .invisible-first-period {
         visibility: none;
       }
-    </style>
 
+      .timer {
+        margin: 1rem;
+      }
+    </style>
+<!--
     <paper-material elevation="1">
       <p>periodIndex: [[periodIndex]]</p>
       <p>period.totalSeconds: [[period.totalSeconds]]</p>
@@ -59,22 +64,25 @@
       <p>globalCycles: [[globalCycles]]</p>
       <p>cycles: [[periodCycles]]</p>
       <p>period cycle seconds: [[periodCycleSeconds]]</p>
-    </paper-material>
+    </paper-material>-->
 
-    <div id="wrapper" type$="[[period.type]]" current-period$="[[currentPeriod]]">
-      <paper-item>
+    <div id="wrapper" class="pinned" type$="[[period.type]]" current-period$="[[currentPeriod]]">
+      <!--<paper-item>
         <paper-item-body two-line>
           <div class="layout horizontal justified">
             <strong>[[title]]</strong>
-            <!--<paper-icon-button class="show-stopwatch" icon="av:skip-next" on-click="next"></paper-icon-button>-->
+            <paper-icon-button class="show-stopwatch" icon="av:skip-next" on-click="next"></paper-icon-button>
           </div>
           <div secondary>
             <digital-clock total-seconds="[[globalSeconds]]"></digital-clock>
           </div>
         </paper-item-body>
-      </paper-item>
-      <digital-timer id="globalTimer" title="Global" seconds="[[seconds]]" cycle-seconds="[[seconds]]" cycle="[[globalCycle]]"></digital-timer>
-      <digital-timer id="periodTimer" title="Cycle" seconds="[[periodSeconds]]" cycle-seconds="[[periodCycleSeconds]]" cycle="[[periodCycle]]"></digital-timer>
+      </paper-item>-->
+      <div class$="layout [[position]]" style="height: calc(100% - 5rem)">
+        <digital-timer id="globalTimer" class="timer flex" title="Global" seconds="[[seconds]]" cycle-seconds="[[seconds]]" cycle="[[globalCycle]]"></digital-timer>
+        <digital-timer id="periodTimer" class="timer flex" title="Cycle" seconds="[[periodSeconds]]" cycle-seconds="[[periodCycleSeconds]]" cycle="[[periodCycle]]"></digital-timer>  
+      </div>
+      
       <div class="bottom-sheet layout horizontal justified center">
         <paper-icon-button class="invisible-first-period" icon="av:skip-previous" on-click="previous"></paper-icon-button>
         <a href$="/timer/[[timerKey]]/paused">
@@ -96,8 +104,17 @@
          periods: {
            type: Array,
            value: []
+         },
+         position: {
+           type: String,
+           value: 'vertical'
          }
        },
+
+       attached: function() {
+         this.resize();
+         window.addEventListener('resize', this.resize.bind(this));
+       },      
 
        // Functions
        stop: function() {
@@ -110,8 +127,15 @@
 
        next: function() {
          this.fire('next');
-       }
+       },
 
+       resize: function() {
+         if (document.body.offsetWidth > document.body.offsetHeight) {
+           this.position = 'horizontal';
+         } else {
+           this.position = 'vertical';
+         }
+       }
     });
   </script>
 </dom-module>
