@@ -151,9 +151,11 @@
 
        _timer: function(timerKey, timers) {
          var timer = timers[timerKey];
-         timer.periods = timer.periods.map(function(period, i) {
-          return period.color = Math.round(i/18%1*18), period;  
-         });
+         if (timer && timer.periods) {
+           timer.periods = timer.periods.map(function(period, i) {
+             return period.color = Math.round(i/18%1*18), period;  
+           });
+         }
          return timer;
        },
 
@@ -203,21 +205,49 @@
        },
 
        previous: function() {
-         var prevSeconds = this.period.totalSeconds - this.periodSeconds + 2;
-         if (prevSeconds < 5 && this.periodIndex) {
-           prevSeconds += this.timer.periods[this.periodIndex - 1].totalSeconds;
+         var i = this.getPeriodIndex();
+         var remaining = this.getRemainingPeriods(i).reduce(function(s, p) {
+           return s + p.totalSeconds;
+         }, 0);
+         var current = this.getPeriod(i).totalSeconds;
+         var s = remaining + current + 2;
+         var diff = s - this.seconds; 
+         if (diff < 5 && i) {
+           s = Math.min(this.workingPeriods.seconds, s + this.workingPeriods[i - 1].totalSeconds);
          }
+         this.seconds = s;
          this.clock.stop();
-         this.clock.start(this.seconds + prevSeconds);
+         this.clock.start(s);
        },
 
        next: function() {
          this.clock.stop();
-         this.clock.start(this.seconds - this.periodSeconds + 2);
+         var s = this.getRemainingPeriods().reduce(function(s, p) {
+           return s + p.totalSeconds;
+         }, 0);
+         this.clock.start(s + 2);
        },
 
        tickHandler: function(ms) {
          this.seconds = Math.round(ms/1000) - 1;
+       },
+
+       getPeriodIndex: function() {
+         var seconds = this.seconds;
+         var i = this.workingPeriods.length;
+         while (i--) {
+           seconds -= this.workingPeriods[i].totalSeconds;
+           if (seconds <= 0) break;
+         }
+         return i;
+       },
+
+       getPeriod: function(i) {
+         return this.workingPeriods[typeof i == 'undefined' ? this.getPeriodIndex() : i];
+       },
+
+       getRemainingPeriods: function(i) {
+         return this.workingPeriods.slice((typeof i == 'undefined' ? this.getPeriodIndex() : i) + 1);
        }
     });
   </script>

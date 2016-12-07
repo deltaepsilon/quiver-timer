@@ -13,7 +13,7 @@
     </style>
     <paper-dialog id="editNameDialog" with-backdrop always-on-top="false">
       <form id="form" is="iron-form">
-        <paper-input label="Name" value="{{name}}" type="text" autofocus tabindex="0" required auto-validate on-value-changed="validate"></paper-input>
+        <paper-input id="name" label="Name" value="{{name}}" type="text" autofocus tabindex="0" required auto-validate on-value-changed="validate" autofocus></paper-input>
         <div class="buttons">
           <paper-button dialog-dismiss tabindex="2">cancel</paper-button>
           <paper-button tabindex="1" on-click="editName" item-name="[[name]]" disabled$="[[invalid]]">save</paper-button>
@@ -32,7 +32,7 @@
        open: function(e) {
          var dialog = this.$.editNameDialog;
          var callback = e.detail.callback; 
-         this.name = e.detail.name;
+         this.name = '';
          this.editName = function(e) {
           callback(e.target.itemName);
           dialog.close();

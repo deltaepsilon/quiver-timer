@@ -147,7 +147,10 @@
       var i = periodCycles.length;
       while (i--) {
         let periodSeconds = periodCycles[i].seconds;
-        if (seconds > periodSeconds) seconds -= periodSeconds; continue;
+        if (seconds > periodSeconds) {
+          seconds -= periodSeconds; 
+          continue;
+        } 
         break;
       }
       return seconds;

@@ -2,8 +2,8 @@
 <link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
 
 <link rel="import" href="../digital-clock/digital-clock.html">
+<link rel="import" href="../font-fill/font-fill.html">
 <link rel="import" href="../shared-styles.html">
-<link rel="import" href="../color-wheel.html">
 
 <script src="../../bower_components/lodash/lodash.js"></script>
 <script src="../../bower_components/d3/d3.js"></script>
@@ -21,12 +21,25 @@
       #chartWrapper {
         position: relative;
       }
+
+      #textWrapper h3 {
+        font-size: 2em;
+        line-height: 1em;
+        padding: 0;
+        margin: 0;
+      }
+
+      #textWrapper digital-clock {
+        margin: 0;
+        padding: 0;
+      }
     </style>
 
     <div id="chartWrapper" class="flex layout vertical center-justified center">
-      <div class="pinned layout vertical center-justified center">
-        <h3>[[title]]</h3>
-        <digital-clock total-seconds="[[seconds]]"></digital-clock>
+      <div id="textWrapper" class="pinned layout vertical center-justified center" style$="font-size: [[fontSize]]px;">
+        <digital-clock total-seconds="[[globalSeconds]]"></digital-clock>
+        <font-fill text="[[title]]" style="width: 6em; height: 2em; text-align: center;"></font-fill>
+        <digital-clock total-seconds="[[periodSeconds]]"></digital-clock>
       </div>
       <div id="chart"></div>
     </div>
@@ -36,19 +49,22 @@
     Polymer({
        is: "digital-timer",
 
-       behaviors: [
-         Polymer.IronResizableBehavior,
-         QuiverColorWheel
-       ],
+       behaviors: [Polymer.IronResizableBehavior],
 
        properties: {
-         title: String,
-         seconds: Number,
-         cycleSeconds: Number,
-         cycle: Array,
-         secondsPercentage: {
+         globalSeconds: Number,
+         globalCycleSeconds: Number,
+         globalCycle: Array,
+         globalPercentage: {
            type: Number,
-           computed: '_secondsPercentage(cycleSeconds, cycle, cycle.splices)'
+           computed: '_percentage(globalCycleSeconds, globalCycle, globalCycle.splices)'
+         },
+         periodCycle: Array,
+         periodCycleSeconds: Number,
+         periodSeconds: Number,
+         periodPercentage: {
+           type: Number,
+           computed: '_percentage(periodCycleSeconds, periodCycle, periodCycle.splices)'
          },
          pie: {
            type: Object,
@@ -72,8 +88,22 @@
          },
          height: Number,
          width: Number,
-         innerCircle: Object,
-         outerCircle: Object
+         fontSize: {
+           type: Number,
+           computed: '_fontSize(height, width)'
+         },
+         title: {
+           type: String,
+           computed: '_title(globalSeconds, globalCycle, globalCycle.splices)'
+         },
+         globalInnerCircle: Object,
+         globalOuterCircle: Object,
+         periodInnerCircle: Object,
+         periodOuterCircle: Object,
+         colorWheel: {
+           type: Array,
+           value: []
+         }
        },
       
       // Listeners
@@ -91,9 +121,89 @@
 
        // Observers
        observers: [
-         '_chart(width, height, cycle, cycle.splices)',
-         '_chartSeconds(secondsPercentage, cycle, cycle.splices)'
+         '_chart(width, height, globalCycle, periodCycle, globalCycle.splices, periodCycle.splices)',
+         '_chartUpdate(globalPercentage, globalCycle, globalOuterCircle, globalCycle.splices)',
+         '_chartUpdate(periodPercentage, periodCycle, periodOuterCircle, periodCycle.splices)'
        ],
+
+       _fontSize: function(h, w) {
+         var min = Math.min(h, w);
+         return min * .08;
+       },
+
+       _title: function(globalSeconds, globalCycle) {
+         var i = this.getPeriodIndex(globalSeconds, globalCycle);
+         var period = globalCycle[i];
+         return period.name;
+       },
+
+       _percentage: function(cycleSeconds, cycle) {
+         var totalSeconds = cycle.seconds || this.getCycleSeconds(cycle);
+         return this.round(1 - cycleSeconds/totalSeconds);
+       },
+
+       _chart: function(width, height, globalCycle, periodCycle) {
+         this.emptyChart();
+         
+         
+         var minDimension = Math.max(0, Math.min(width, height)); // Prevent clipping in vert layouts 
+         var w = minDimension;
+         var h = minDimension;
+         var arcWidth = minDimension * .08;
+         var outerRadiusArc = w/2;
+         var innerRadiusArc = outerRadiusArc - arcWidth;
+         var shadowWidth = minDimension * .02;
+         var outerRadiusArcShadow = innerRadiusArc + 1;
+         var innerRadiusArcShadow = innerRadiusArc - shadowWidth;
+         var color = d3.scaleOrdinal().range(this.colorWheel);
+         var colorWheel = this.colorWheel;
+
+         var svg = d3.select(this.$.chart)
+          .append('svg')
+          .attr('width', w)
+          .attr('height', h)
+          .attr('class', 'shadow')
+          .append('g')
+          .attr('transform', 'translate('+w/2+','+h/2+')');
+         
+         function outerCircleFill(d, i) {
+           return !d.data.color ? 'transparent' : color(d.data.color);
+         };
+
+         function innerCircleFill(d, i) {
+           var c = d3.hsl(color(d.data.color));
+          return d3.hsl((c.h + 5), (c.s + .07), (c.l - .15));
+         };
+         
+         
+         var globalPeriods = this.getPeriods(this.globalPercentage, globalCycle);
+
+         this.globalOuterCircle = this.createChart(globalPeriods, this.accumulatedPie, svg, outerRadiusArc, innerRadiusArc, outerCircleFill, 'globalOuterCircle'); 
+         
+         this.globalInnerCircle = this.createChart(globalPeriods, this.pie, svg, outerRadiusArcShadow, innerRadiusArcShadow, innerCircleFill, 'globalInnerCircle');
+
+         var periodPeriods = this.getPeriods(this.periodPercentage, periodCycle);
+         var periodInset = minDimension * .1;
+
+         this.periodOuterCircle = this.createChart(periodPeriods, this.accumulatedPie, svg, outerRadiusArc - periodInset, innerRadiusArc - periodInset, outerCircleFill, 'periodOuterCircle'); 
+         
+         this.periodInnerCircle = this.createChart(periodPeriods, this.pie, svg, outerRadiusArcShadow - periodInset, innerRadiusArcShadow - periodInset, innerCircleFill, 'periodInnerCircle');
+        
+       },
+
+       _chartUpdate: function(percentage, cycle, circle) {
+         circle.update(this.getPeriods(percentage, cycle));
+       },
+
+       // Functions
+       getPeriodIndex: function(seconds, periods) {
+         var i = periods.length;
+         while (i--) {
+           seconds -= periods[i].totalSeconds
+           if (seconds <= 0) break;
+         }
+         return i;
+       },
 
        getPeriods: function(maxPercentage, cycle) {
          maxPercentage = maxPercentage || 0;
@@ -101,6 +211,7 @@
          var totalSeconds = cycle.seconds || this.getCycleSeconds(cycle);
          var accumulatedPercentage = 0;
          var periods = cycle.map(function(period) {
+           if (!period) return;
            period.percentage = this.round(period.totalSeconds/totalSeconds);
 
            if (accumulatedPercentage + period.percentage <= maxPercentage) {
@@ -119,64 +230,15 @@
          }, 0));
 
          periods.push({
+           name: 'Done',
            accumulatedPercentage: this.round(1 - periods.reduce(function(i, p) {
              return i + p.accumulatedPercentage;
            }, 0)) - roundingError
          });
 
-         
-
          return periods;
        },
 
-       _secondsPercentage: function(cycleSeconds, cycle) {
-         var totalSeconds = cycle.seconds || this.getCycleSeconds(cycle);
-         return this.round(1 - cycleSeconds/totalSeconds);
-       },
-
-       _chart: function(width, height, cycle) {
-         this.emptyChart();
-         
-         var periods = this.getPeriods(this.secondsPercentage, cycle);
-         var minDimension = Math.min(width, height) - 8; // Prevent clipping in vert layouts 
-         var w = minDimension;
-         var h = minDimension;
-         var arcWidth = minDimension * .1;
-         var outerRadiusArc = w/2;
-         var innerRadiusArc = outerRadiusArc - arcWidth;
-         var shadowWidth = arcWidth;
-         var outerRadiusArcShadow = innerRadiusArc + 1;
-         var innerRadiusArcShadow = innerRadiusArc - shadowWidth;
-         var color = d3.scaleOrdinal().range(this.colorWheel);
-
-         var svg = d3.select(this.$.chart)
-          .append('svg')
-          .attr('width', w)
-          .attr('height', h)
-          .attr('class', 'shadow')
-          .append('g')
-          .attr('transform', 'translate('+w/2+','+h/2+')');       
-         
-         var colorWheel = this.colorWheel;
-         this.outerCircle = this.createChart(periods, this.accumulatedPie, svg, outerRadiusArc, innerRadiusArc, function(d, i){
-           return !d.data.color ? '#FFFFFF' : color(colorWheel[d.data.color]);
-         }, 'outerCircle'); 
-         
-         this.innerCircle = this.createChart(periods, this.pie, svg, outerRadiusArcShadow, innerRadiusArcShadow, function(d, i){
-          var c = d3.hsl(color(colorWheel[d.data.color]));
-          return d3.hsl((c.h + 5), (c.s + .07), (c.l - .15));
-         }, 'innerCircle');
-        
-       },
-
-       _chartSeconds: function(secondsPercentage, cycle) {
-         var periods = this.getPeriods(secondsPercentage, cycle);
-         if (this.outerCircle) {
-           this.outerCircle.update(periods);
-        }
-       },
-
-       // Functions
        getCycleSeconds: function(cycle) {
          return cycle.reduce(function(s, period) {
            return s + period.totalSeconds;
@@ -185,8 +247,13 @@
 
        createChart: function(periods, pie, svg, outerRadius, innerRadius, fillFunction, className) {
          var tau = 2 * Math.PI;
-         var path = svg.selectAll('.' + className);
-         path.transition()
+         var paths = getPaths();
+         var arc = d3.arc()
+            .innerRadius(innerRadius)
+            .outerRadius(outerRadius);
+         
+         
+         paths.transition()
           .duration(1000)
           .attrTween('d', function(d) {
             var interpolate = d3.interpolate({startAngle: 0, endAngle: 0}, d);
@@ -194,21 +261,32 @@
               return arc(interpolate(t));
             };
           });
-
-         function update(data) {
-            var arc = d3.arc()
-              .innerRadius(innerRadius)
-              .outerRadius(outerRadius);
-
-            path.data(pie(data))
+          paths.data(pie(periods))
               .enter()
               .append('path')
               .attr('class', className)
               .attr('d', arc)
               .attr('fill', fillFunction);
 
+
+         function getPaths() {
+           return svg.selectAll('.' + className);
+         };
+         function update(periods) {
+           if (periods.length > 2) {
+             periods = periods.filter(function(p) {
+               return p.type !== 'prepare';
+             });
+           }
+           
+           getPaths()
+            .data(pie(periods))
+            .attr('d', arc)
+            .attr('fill', fillFunction);
+              
+
             return {
-              path: path,
+              paths: paths,
               arc: arc,
               update: update
             };

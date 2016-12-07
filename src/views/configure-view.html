@@ -301,8 +301,12 @@
 
       addPeriod: function(type) {
         if (!this.periodsData.value) this.periodsData.value = [];
+        if (type == 'prepare' && !this.periodsData.value.filter(function(period) {
+          return !!period.type == 'prepare';
+        })) return;
         this.periodsData.value.push(this.getPeriodDefault(type, true));
         this._periodsSave();
+        
       },
 
       updatePeriod: function(index, period) {

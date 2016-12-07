@@ -1,0 +1,66 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="font-fill">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        position: relative;
+      }
+      
+      #wrapper {
+        /*background: gold;*/
+      }
+
+      #content {
+        /*background: blue;*/
+        line-height: 1em;
+        white-space: nowrap;
+      }
+    </style>
+    <div id="wrapper" class="pinned layout horizontal center-justified center" style$="font-size: [[fontSize]]em;">
+      <span id="content">[[text]]</span>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: "font-fill",
+
+      properties: {
+        text: {
+          type: String,
+          observer: 'resize'
+        },
+        fontSize: {
+          type: Number,
+          value: .25
+        }
+      },
+
+      behaviors: [Polymer.IronResizableBehavior],
+
+      // Listeners
+      listeners: {
+        'iron-resize': 'resize'
+      },
+
+      resize: function() {
+        if (!this.debouncedResize) { // Debounced functions must be local, not shared
+          this.debouncedResize = _.debounce(this.setFontSize.bind(this), 50);
+        }
+        this.debouncedResize();
+      },
+
+      setFontSize: function() {
+        var wRatio = this.$.content.offsetWidth / this.$.wrapper.offsetWidth;
+        var hRatio = this.$.content.offsetHeight / this.$.wrapper.offsetHeight;
+        if (wRatio || hRatio) {
+          this.fontSize = this.fontSize / Math.max(wRatio, hRatio);
+        }
+      }
+    });
+  </script>
+</dom-module>
