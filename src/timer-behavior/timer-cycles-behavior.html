@@ -92,10 +92,12 @@
 
         var remaining = periods.slice(i);
         var half = Math.round(remaining.length / 2);
+        var matches;
+        var multiplier;
 
         for (var j = half; j > 1; j--) {
-          let matches = findMatch(remaining, j);
-          let multiplier = matches.multiplier;
+          matches = findMatch(remaining, j);
+          multiplier = matches.multiplier;
           if (multiplier > 1 && hasVariation(remaining.slice(0, matches.count))) { // Handle multi-period cycles
             while (multiplier--) {
               cycles.push(remaining.slice(0, matches.count)); // Push copies onto cycles
@@ -106,8 +108,8 @@
         }
 
         // Handle single-period cycles
-        var matches = findMatch(remaining, 1);
-        var multiplier = matches.multiplier;
+        matches = findMatch(remaining, 1);
+        multiplier = matches.multiplier;
         while (multiplier--) {
           cycles.push(remaining.slice(0, 1));
         }
@@ -145,8 +147,9 @@
 
     _periodCycleSeconds: function(seconds, periodCycles) {
       var i = periodCycles.length;
+      var periodSeconds;
       while (i--) {
-        let periodSeconds = periodCycles[i].seconds;
+        periodSeconds = periodCycles[i].seconds;
         if (seconds > periodSeconds) {
           seconds -= periodSeconds; 
           continue;
@@ -162,8 +165,9 @@
 
     _periodCycle: function(seconds, periodCycles) {
       var i = periodCycles.length;
+      var periodSeconds;
       while (i--) {
-        let periodSeconds = periodCycles[i].seconds;
+        periodSeconds = periodCycles[i].seconds;
         if (seconds > periodSeconds) {
           seconds -= periodSeconds; 
           continue;
