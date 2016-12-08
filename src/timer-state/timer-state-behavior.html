@@ -1,0 +1,42 @@
+<script>
+  TimerStateBehavior = {
+    properties: {
+      timerKey: Number,
+      seconds: Number,
+      periods: {
+        type: Array,
+        value: []
+      },
+      position: {
+        type: String,
+        value: 'vertical'
+      }
+    },
+
+    attached: function() {
+      this.resize();
+      window.addEventListener('resize', this.resize.bind(this));
+    },      
+
+    // Functions
+    stop: function() {
+      this.fire('end');
+    },
+
+    previous: function() {
+      this.fire('previous');
+    },
+
+    next: function() {
+      this.fire('next');
+    },
+
+    resize: function() {
+      if (document.body.offsetWidth > document.body.offsetHeight) {
+        this.position = 'horizontal';
+      } else {
+        this.position = 'vertical';
+      }
+    }
+  }
+</script>

@@ -55,8 +55,8 @@
 
     <iron-pages selected="[[state]]" attr-for-selected="name" fallback-selection="stopped" role="main">
       <timer-stopped id="timerStopped" name="stopped" timer-key="[[timerKey]]" timer="[[timer]]"></timer-stopped>
-      <timer-playing id="timerPlaying" name="playing" seconds="[[seconds]]" periods="[[workingPeriods]]"></timer-playing>
-      <timer-paused id="timerPaused" name="paused" seconds="[[seconds]]" periods="[[workingPeriods]]"></timer-paused>
+      <timer-playing id="timerPlaying" name="playing" timer-key="[[timerKey]]" seconds="[[seconds]]" periods="[[workingPeriods]]"></timer-playing>
+      <timer-paused id="timerPaused" name="paused" timer-key="[[timerKey]]" seconds="[[seconds]]" periods="[[workingPeriods]]"></timer-paused>
     </iron-pages>
   </template>
   <script>
@@ -118,6 +118,7 @@
               break;
            case state == 'paused':
               this.pause();
+              this.$.timerPaused.refresh();
               break;
            case state == 'stopped':
               this.stop();
@@ -215,6 +216,7 @@
          if (diff < 5 && i) {
            s = Math.min(this.workingPeriods.seconds, s + this.workingPeriods[i - 1].totalSeconds);
          }
+         s = Math.min(s, this.workingPeriods.seconds);
          this.seconds = s;
          this.clock.stop();
          this.clock.start(s);

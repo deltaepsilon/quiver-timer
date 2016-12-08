@@ -17,6 +17,54 @@
         @apply(--layout-vertical);
         @apply(--layout-center);
       }
+
+      .show-prepare {
+        display: none;
+      }
+
+      .show-work {
+        display: none;
+      }
+
+      .show-rest {
+        display: none;
+      }
+
+      .show-stopwatch {
+        display: none;
+      }
+
+      [type="prepare"] .show-prepare {
+        display: inherit;
+      }
+
+      [type="work"] .show-work {
+        display: inherit;
+      }
+
+      [type="rest"] .show-rest {
+        display: inherit;
+      }
+
+      [type="stopwatch"] .show-stopwatch {
+        display: inherit;
+      }
+
+      [type="prepare"] .hide-prepare {
+        visibility: hidden;
+      }
+
+      [type="work"] .hide-work {
+        visibility: hidden;
+      }
+
+      [type="rest"] .hide-rest {
+        visibility: hidden;
+      }
+
+      [type="stopwatch"] .hide-stopwatch {
+        visibility: hidden;
+      }
       
       #chartWrapper {
         position: relative;
@@ -35,10 +83,10 @@
       }
     </style>
 
-    <div id="chartWrapper" class="flex layout vertical center-justified center">
+    <div id="chartWrapper" class="flex layout vertical center-justified center" type$="[[period.type]]">
       <div id="textWrapper" class="pinned layout vertical center-justified center" style$="font-size: [[fontSize]]px;">
-        <digital-clock total-seconds="[[globalSeconds]]"></digital-clock>
-        <font-fill text="[[title]]" style="width: 6em; height: 2em; text-align: center;"></font-fill>
+        <digital-clock class="hide-prepare" total-seconds="[[globalSeconds]]"></digital-clock>
+        <font-fill id="fontFill" text="[[period.name]]" style="width: 6em; height: 2em; text-align: center;"></font-fill>
         <digital-clock total-seconds="[[periodSeconds]]"></digital-clock>
       </div>
       <div id="chart"></div>
@@ -92,9 +140,9 @@
            type: Number,
            computed: '_fontSize(height, width)'
          },
-         title: {
-           type: String,
-           computed: '_title(globalSeconds, globalCycle, globalCycle.splices)'
+         period: {
+           type: Object,
+           computed: '_period(globalSeconds, globalCycle, globalCycle.splices)'
          },
          globalInnerCircle: Object,
          globalOuterCircle: Object,
@@ -131,10 +179,9 @@
          return min * .08;
        },
 
-       _title: function(globalSeconds, globalCycle) {
+       _period: function(globalSeconds, globalCycle) {
          var i = this.getPeriodIndex(globalSeconds, globalCycle);
-         var period = globalCycle[i];
-         return period.name;
+         return globalCycle[i];
        },
 
        _percentage: function(cycleSeconds, cycle) {
@@ -143,6 +190,7 @@
        },
 
        _chart: function(width, height, globalCycle, periodCycle) {
+         if (!width || !height) return console.log(width, height);
          this.emptyChart();
          
          
@@ -167,7 +215,10 @@
           .attr('transform', 'translate('+w/2+','+h/2+')');
          
          function outerCircleFill(d, i) {
-           return !d.data.color ? 'transparent' : color(d.data.color);
+           // Only filler arcs should be transparent
+           if (!d.data.totalSeconds) return 'transparent';
+           if (!d.data.color) return 'gray';
+           return color(d.data.color);
          };
 
          function innerCircleFill(d, i) {
@@ -273,7 +324,7 @@
            return svg.selectAll('.' + className);
          };
          function update(periods) {
-           if (periods.length > 2) {
+           if (periods.length > 2 && className != 'periodOuterCircle') {
              periods = periods.filter(function(p) {
                return p.type !== 'prepare';
              });
@@ -310,6 +361,14 @@
 
        round: function(p) {
          return Math.round(p * 10000) / 10000;
+       },
+
+       refresh: function(width, height, globalCycle, periodCycle) {
+         setTimeout(function() {
+           this.fire('iron-resize');
+           this.$.fontFill.fire('iron-resize');
+           this._chart(this.width, this.height, this.globalCycle, this.periodCycle);  
+         }.bind(this), 100);
        }
 
     });

@@ -6,8 +6,10 @@
 
 <link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../digital-timer/digital-timer.html">
-<link rel="import" href="../timer-behavior/timer-cycles-behavior.html">
+<link rel="import" href="../timer-state/timer-state-behavior.html">
 <link rel="import" href="../shared-styles.html">
+
+<link rel="import" href="../timer-behavior/timer-cycles-behavior.html">
 <link rel="import" href="../color-wheel.html">
 
 <script src="../../bower_components/timer.js/dist/timer.js"></script>
@@ -18,30 +20,6 @@
     <style include="shared-styles">
       :host {
         display: block;
-      }
-
-      .show-work {
-        display: none;
-      }
-
-      .show-rest {
-        display: none;
-      }
-
-      .show-stopwatch {
-        display: none;
-      }
-
-      [type="work"] .show-work {
-        display: inherit;
-      }
-
-      [type="rest"] .show-rest {
-        display: inherit;
-      }
-
-      [type="stopwatch"] .show-stopwatch {
-        display: inherit;
       }
 
       #wrapper {
@@ -57,28 +35,7 @@
         margin: 1rem;
       }
     </style>
-<!--
-    <paper-material elevation="1">
-      <p>periodIndex: [[periodIndex]]</p>
-      <p>period.totalSeconds: [[period.totalSeconds]]</p>
-      <p>periodSeconds: [[periodSeconds]]</p>
-      <p>globalCycles: [[globalCycles]]</p>
-      <p>cycles: [[periodCycles]]</p>
-      <p>period cycle seconds: [[periodCycleSeconds]]</p>
-    </paper-material>-->
-
     <div id="wrapper" class="pinned" type$="[[period.type]]" current-period$="[[currentPeriod]]">
-      <!--<paper-item>
-        <paper-item-body two-line>
-          <div class="layout horizontal justified">
-            <strong>[[title]]</strong>
-            <paper-icon-button class="show-stopwatch" icon="av:skip-next" on-click="next"></paper-icon-button>
-          </div>
-          <div secondary>
-            <digital-clock total-seconds="[[globalSeconds]]"></digital-clock>
-          </div>
-        </paper-item-body>
-      </paper-item>-->
       <div class$="layout [[position]]" style="height: calc(100% - 5rem)">
         <digital-timer id="timer" class="timer flex" global-seconds="[[seconds]]" period-seconds="[[periodSeconds]]" global-cycle-seconds="[[seconds]]" global-cycle="[[globalCycle]]" period-cycle-seconds="[[periodCycleSeconds]]" period-cycle="[[periodCycle]]" color-wheel="[[colorWheel]]"></digital-timer>  
       </div>
@@ -97,45 +54,8 @@
     Polymer({
        is: "timer-playing",
 
-       behaviors: [TimerCyclesBehavior, QuiverColorWheel],
+       behaviors: [TimerStateBehavior, TimerCyclesBehavior, QuiverColorWheel],
 
-       properties: {
-         seconds: Number,
-         periods: {
-           type: Array,
-           value: []
-         },
-         position: {
-           type: String,
-           value: 'vertical'
-         }
-       },
-
-       attached: function() {
-         this.resize();
-         window.addEventListener('resize', this.resize.bind(this));
-       },      
-
-       // Functions
-       stop: function() {
-         this.fire('end');
-       },
-
-       previous: function() {
-         this.fire('previous');
-       },
-
-       next: function() {
-         this.fire('next');
-       },
-
-       resize: function() {
-         if (document.body.offsetWidth > document.body.offsetHeight) {
-           this.position = 'horizontal';
-         } else {
-           this.position = 'vertical';
-         }
-       }
     });
   </script>
 </dom-module>
