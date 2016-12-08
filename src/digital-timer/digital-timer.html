@@ -86,7 +86,7 @@
     <div id="chartWrapper" class="flex layout vertical center-justified center" type$="[[period.type]]">
       <div id="textWrapper" class="pinned layout vertical center-justified center" style$="font-size: [[fontSize]]px;">
         <digital-clock class="hide-prepare" total-seconds="[[globalSeconds]]"></digital-clock>
-        <font-fill id="fontFill" text="[[period.name]]" style="width: 6em; height: 2em; text-align: center;"></font-fill>
+        <font-fill id="fontFill" text="[[title]]" style="width: 6em; height: 2em; text-align: center;"></font-fill>
         <digital-clock total-seconds="[[periodSeconds]]"></digital-clock>
       </div>
       <div id="chart"></div>
@@ -144,6 +144,10 @@
            type: Object,
            computed: '_period(globalSeconds, globalCycle, globalCycle.splices)'
          },
+         title: {
+           type: String,
+           value: 'Press Play'
+         },
          globalInnerCircle: Object,
          globalOuterCircle: Object,
          periodInnerCircle: Object,
@@ -169,6 +173,7 @@
 
        // Observers
        observers: [
+         '_title(period.name)',
          '_chart(width, height, globalCycle, periodCycle, globalCycle.splices, periodCycle.splices)',
          '_chartUpdate(globalPercentage, globalCycle, globalOuterCircle, globalCycle.splices)',
          '_chartUpdate(periodPercentage, periodCycle, periodOuterCircle, periodCycle.splices)'
@@ -189,8 +194,12 @@
          return this.round(1 - cycleSeconds/totalSeconds);
        },
 
+       _title: function(name) {
+         return this.title = name;
+       },
+
        _chart: function(width, height, globalCycle, periodCycle) {
-         if (!width || !height) return console.log(width, height);
+         if (!width || !height) return;
          this.emptyChart();
          
          
@@ -363,12 +372,12 @@
          return Math.round(p * 10000) / 10000;
        },
 
-       refresh: function(width, height, globalCycle, periodCycle) {
-         setTimeout(function() {
-           this.fire('iron-resize');
-           this.$.fontFill.fire('iron-resize');
-           this._chart(this.width, this.height, this.globalCycle, this.periodCycle);  
-         }.bind(this), 100);
+       refresh: function() {
+        setTimeout(function() {
+          this.fire('iron-resize');
+          this.$.fontFill.fire('iron-resize');
+          this.fire('refresh'); 
+        }.bind(this), 100);  
        }
 
     });

@@ -21,40 +21,89 @@
       :host {
         display: block;
       }
-
+      
       #wrapper {
         padding: 1rem;
         top: 4rem;
       }
-
+      
       [current-period="0"] .invisible-first-period {
         visibility: none;
       }
-
+      
       .timer {
         margin: 1rem;
       }
-    </style>
-    <div id="wrapper" class="pinned" type$="[[period.type]]" current-period$="[[currentPeriod]]">
-      <div class$="layout [[position]]" style="height: calc(100% - 5rem)">
-        <digital-timer id="timer" class="timer flex" global-seconds="[[seconds]]" period-seconds="[[periodSeconds]]" global-cycle-seconds="[[seconds]]" global-cycle="[[globalCycle]]" period-cycle-seconds="[[periodCycleSeconds]]" period-cycle="[[periodCycle]]" color-wheel="[[colorWheel]]"></digital-timer>  
-      </div>
       
-      <div class="bottom-sheet layout horizontal justified center">
-        <paper-icon-button class="invisible-first-period" icon="av:skip-previous" on-click="previous"></paper-icon-button>
-        <a href$="/timer/[[timerKey]]/paused">
-          <paper-fab icon="av:pause"></paper-fab>
-        </a>
-        <paper-icon-button icon="av:skip-next" on-click="next"></paper-icon-button>
+      .show-playing {
+        display: none;
+      }
+      
+      .show-paused {
+        display: none;
+      }
+      
+      [state="playing"] .show-playing {
+        display: inherit;
+      }
+      
+      [state="paused"] .show-paused {
+        display: inherit;
+      }
+    </style>
+    <div id="wrapper" class="pinned" type$="[[period.type]]" current-period$="[[currentPeriod]]" state$="[[state]]">
+      <div class$="layout [[position]]" style="height: calc(100% - 5rem)">
+        <digital-timer id="timer" class="timer flex" global-seconds="[[seconds]]" period-seconds="[[periodSeconds]]" global-cycle-seconds="[[seconds]]"
+          global-cycle="[[globalCycle]]" period-cycle-seconds="[[periodCycleSeconds]]" period-cycle="[[periodCycle]]" color-wheel="[[colorWheel]]"></digital-timer>
+      </div>
+
+      <div class="show-playing">
+        <div class="bottom-sheet layout horizontal justified center">
+          <paper-icon-button class="invisible-first-period" icon="av:skip-previous" on-click="previous"></paper-icon-button>
+          <a href$="/timer/[[timerKey]]/paused">
+            <paper-fab icon="av:pause"></paper-fab>
+          </a>
+          <paper-icon-button icon="av:skip-next" on-click="next"></paper-icon-button>
+        </div>
+      </div>
+
+      <div class="show-paused">
+        <div class="bottom-sheet layout horizontal justified center">
+          <paper-icon-button icon="av:replay" on-click="refresh"></paper-icon-button>
+          <a href$="/timer/[[timerKey]]/playing">
+            <paper-fab icon="av:play-arrow"></paper-fab>
+          </a>
+          <a href$="/timer/[[timerKey]]/stopped">
+            <paper-icon-button icon="av:stop"></paper-icon-button>
+          </a>
+        </div>
       </div>
     </div>
-    
   </template>
   <script>
     Polymer({
        is: "timer-playing",
 
        behaviors: [TimerStateBehavior, TimerCyclesBehavior, QuiverColorWheel],
+
+       properties: {
+         state: String
+       },
+
+       observers: ['_state(state)'],
+
+       _state: function(state) {
+         if (state == 'stopped') this.clear();
+       },
+
+       // Functions
+       refresh: function() {
+         this.$.timer.refresh();
+       },
+
+       clear: function() {
+         this.$.timer.emptyChart();
+       }
 
     });
   </script>

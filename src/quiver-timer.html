@@ -140,7 +140,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
             <div main-title style="text-transform: capitalize;">[[pageTitle]]</div>
             <paper-button class="tertiary" on-click="clearLocalStorage" style="margin-right: 5rem;">Reset</paper-button>
-            <timer-fab id="timerFab" page="[[page]]" payload="[[timerFabPayload]]" style="position: absolute; top: 37px; right: 2rem;"></timer-fab>
+            <timer-fab id="timerFab" page="[[page]]" url="[[timerFabPayload.url]]" icon="[[timerFabPayload.icon]]" callback="[[timerFabPayload.callback]]" style="position: absolute; top: 37px; right: 2rem;"></timer-fab>
           </app-toolbar>
         </app-header>
 
@@ -236,7 +236,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _timerFab: function(e) {
-        this.timerFabPayload = e.detail;
+        var payload = e.detail;
+        this.timerFabPayload = {
+          icon: payload.icon || false,
+          url: payload.url || false,
+          callback: payload.callback || false
+        };
       },
 
       // Functions

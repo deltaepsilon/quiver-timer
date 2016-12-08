@@ -53,10 +53,9 @@
     <app-route route="{{subroute}}" pattern="/:state" data="{{subrouteData}}"></app-route>
     <app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
 
-    <iron-pages selected="[[state]]" attr-for-selected="name" fallback-selection="stopped" role="main">
+    <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="stopped" role="main">
       <timer-stopped id="timerStopped" name="stopped" timer-key="[[timerKey]]" timer="[[timer]]"></timer-stopped>
-      <timer-playing id="timerPlaying" name="playing" timer-key="[[timerKey]]" seconds="[[seconds]]" periods="[[workingPeriods]]"></timer-playing>
-      <timer-paused id="timerPaused" name="paused" timer-key="[[timerKey]]" seconds="[[seconds]]" periods="[[workingPeriods]]"></timer-paused>
+      <timer-playing id="timerPlaying" name="playing" state="[[state]]" timer-key="[[timerKey]]" seconds="[[seconds]]" periods="[[workingPeriods]]"></timer-playing>
     </iron-pages>
   </template>
   <script>
@@ -100,10 +99,6 @@
          }
        },
 
-       attached: function() {
-         this.stop();
-       },
-
        //  Observers
        observers: [
          '_timerFab(state)',
@@ -114,13 +109,15 @@
        _timerFab: function(state) {
          switch (true) {
            case state == 'playing':
+              this.page = 'playing';
               this.play();
               break;
            case state == 'paused':
+              this.page = 'playing';
               this.pause();
-              this.$.timerPaused.refresh();
               break;
            case state == 'stopped':
+              this.page = 'stopped';
               this.stop();
               break;
          }
@@ -135,9 +132,7 @@
            if (clock.getDuration()) {
              clock.start();
            } else {
-             clock.start(periods.reduce(function(s, period) {
-               return s += period.totalSeconds;
-             }, 1));
+             clock.start(this.getTotalSeconds(periods) + 1);
            }
          }
        },
@@ -171,9 +166,9 @@
          play: 'play',
          pause: 'pause',
          stop: 'stop',
-         end: 'end',
          previous: 'previous',
-         next: 'next'
+         next: 'next',
+         refresh: 'refresh'
        },
 
        play: function() {
@@ -183,10 +178,11 @@
 
        pause: function() {
          this.state = 'paused';
-         this.fire('timerFab', {
-           icon: 'av:play-arrow',
-           url: '/timer/' + this.timerKey + '/playing'
-         });
+         this.fire('timerFab');
+        //  this.fire('timerFab', {
+        //    icon: 'av:play-arrow',
+        //    url: '/timer/' + this.timerKey + '/playing'
+        //  });
        },
 
        stop: function() {
@@ -195,21 +191,12 @@
            icon: 'av:play-arrow',
            url: '/timer/' + this.timerKey + '/playing'
          });
-       },
-
-       end: function() {
-         var timerView = this;
-         this.fire('timerFab', {
-           icon: 'av:stop',
-           url: '/timer/' + this.timerKey + '/stopped'
-         });
+         this.refresh(); 
        },
 
        previous: function() {
          var i = this.getPeriodIndex();
-         var remaining = this.getRemainingPeriods(i).reduce(function(s, p) {
-           return s + p.totalSeconds;
-         }, 0);
+         var remaining = this.getTotalSeconds(this.getRemainingPeriods(i));
          var current = this.getPeriod(i).totalSeconds;
          var s = remaining + current + 2;
          var diff = s - this.seconds; 
@@ -219,19 +206,30 @@
          s = Math.min(s, this.workingPeriods.seconds);
          this.seconds = s;
          this.clock.stop();
-         this.clock.start(s);
+         this.clock.start(this.seconds);
        },
 
        next: function() {
+         this.seconds = this.getTotalSeconds(this.getRemainingPeriods());
          this.clock.stop();
-         var s = this.getRemainingPeriods().reduce(function(s, p) {
-           return s + p.totalSeconds;
-         }, 0);
-         this.clock.start(s + 2);
+         this.clock.start(this.seconds);
+       },
+
+       refresh: function() {
+         var s = this.getTotalSeconds();
+         this.clock.stop();
+         if (s) this.seconds = s;
        },
 
        tickHandler: function(ms) {
          this.seconds = Math.round(ms/1000) - 1;
+       },
+
+       // Functions
+       getTotalSeconds: function(periods) {
+         return (periods || this.workingPeriods).reduce(function(s, p) {
+           return s + p.totalSeconds;
+         }, 0);
        },
 
        getPeriodIndex: function() {

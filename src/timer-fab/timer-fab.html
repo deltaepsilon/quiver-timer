@@ -30,11 +30,15 @@
          page: String,
          icon: {
            type: String,
-           computed: '_icon(page, payload.icon)'
+           value: ''
          },
          url: {
            type: String,
-           computed: '_url(page, payload.url)'
+           value: ''
+         },
+         callback: {
+           type: Object,
+           value: false
          },
          hidden: {
            type: Boolean,
@@ -43,8 +47,7 @@
          hideUrl: {
            type: Boolean,
            computed: '_hideUrl(url)'
-         },
-         payload: Object
+         }
        },
 
        _icon: function(page, icon) {
@@ -64,8 +67,7 @@
        },
 
        _handleClick: function(e) {
-         if (this.payload && this.payload.callback) return this.payload.callback();
-        //  if (page == 'timers') return this.fire('addTimer');;         
+         if (this.callback && typeof this.callback == 'function') return this.callback();         
        }
     });
   </script>
