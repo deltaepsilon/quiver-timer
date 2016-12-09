@@ -39,7 +39,8 @@
     observers: [
       '_globalCycles(periods, periods.splices)',
       '_periodCycles(periods, periods.splices)',
-      '_periodCycle(seconds, periodCycles)'
+      '_periodCycle(seconds, periodCycles)',
+      '_flash(periodSeconds)'
     ],
 
     getCycleSeconds: function(cycle) {
@@ -60,7 +61,8 @@
 
         var i = a.length;
         while (i--) {
-          if (a[i].type !== b[i].type || a[i].totalSeconds !== b[i].totalSeconds || a[i].name !== b[i].name) return false;
+          if (a[i].type !== b[i].type || a[i].totalSeconds !== b[i].totalSeconds) return false;
+          // if (a[i].type !== b[i].type || a[i].totalSeconds !== b[i].totalSeconds || a[i].name !== b[i].name) return false;
         }
         return true;
       };
@@ -179,5 +181,11 @@
         this.periodCycle.seconds = periodCycles[i].seconds;
       }
     },
+
+    _flash: function(periodSeconds) {
+      if (periodSeconds == 3) {
+        this.fire('flash');
+      }
+    }
   };
 </script>

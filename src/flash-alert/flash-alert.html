@@ -1,0 +1,54 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="flash-alert">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+    <audio id="audio" src$="[[src]]"></audio>
+  </template>
+  <script>
+    Polymer({
+       is: "flash-alert",
+
+       properties: {
+         flash: Boolean,
+         sound: Boolean,
+         soundFile: String,
+         src: {
+           type: String,
+           computed: '_src(soundFile)'
+         }
+       },
+
+       _src: function(soundFile) {
+         return soundFile ? '../../sounds/' + soundFile + '.mp3' : '';
+       },
+
+       fireFlash: function() {
+         var target = document.body;
+         var style = 'background-color: black; color: white;'
+         function cycle() {
+           return new Promise(function(resolve) {
+             target.setAttribute('style', style);
+             setTimeout(function() {
+               target.removeAttribute('style');
+               setTimeout(resolve, 1000);
+             }, 500);  
+           });
+         };
+         cycle()
+          .then(cycle)
+          .then(cycle);
+       },
+
+       fireSound: function() {
+         this.$.audio.play();
+       }
+    });
+  </script>
+</dom-module>

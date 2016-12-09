@@ -1,0 +1,118 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../../bower_components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="../../bower_components/app-pouchdb/app-pouchdb-document.html">
+<link rel="import" href="../shared-styles.html">
+
+<script src="../../bower_components/lodash/lodash.js"></script>
+
+<dom-module id="settings-dialog">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+    <app-pouchdb-document id="settings" db-name="quiver-timer" doc-id="settings" data="{{settingsData}}" zero-value="{loaded:false}"></app-pouchdb-document>
+    <div id="sounds">
+      <audio id="chime" src="../../sounds/chime.mp3"></audio>
+      <audio id="chirp" src="../../sounds/chirp.mp3"></audio>
+      <audio id="heartbeat" src="../../sounds/heartbeat.mp3"></audio>
+      <audio id="reverb-chime" src="../../sounds/reverb-chime.mp3"></audio>  
+    </div>
+    
+    <paper-dialog id="dialog" with-backdrop always-on-top="false">
+      <form id="form" is="iron-form">
+        
+        <paper-item>
+          <paper-toggle-button checked="{{settingsData.flash}}">Flash Alerts</paper-toggle-button>  
+        </paper-item>
+        <paper-item>
+          <paper-toggle-button checked="{{settingsData.sound}}">Sound Alerts</paper-toggle-button>  
+        </paper-item>
+        <paper-item>
+          <paper-radio-group class="layout vertical" selected="{{settingsData.soundFile}}" on-selected-changed="play">
+            <paper-radio-button disabled$="[[disabled]]" name="chime">Chime</paper-radio-button>
+            <paper-radio-button disabled$="[[disabled]]" name="chirp">Chirp</paper-radio-button>
+            <paper-radio-button disabled$="[[disabled]]" name="heartbeat">Heartbeat</paper-radio-button>
+            <paper-radio-button disabled$="[[disabled]]" name="reverb-chime">Reverb Chime</paper-radio-button>
+          </paper-radio-group>
+        </paper-item>
+        
+        <div class="buttons">
+          <paper-button tabindex="1" on-click="close">close</paper-button>
+        </div>
+      </form>
+    </paper-dialog>
+  </template>
+  <script>
+    Polymer({
+       is: "settings-dialog",
+
+       properties: {
+         defaultSettings: {
+           type: Object,
+           value: {
+             flash: true,
+             sound: true,
+             soundFile: 'chime'
+           }
+         },
+         settingsData: Object,
+         settings: {
+           type: Object,
+           computed: '_settings(settingsData, settingsData.*)',
+           notify: true
+         },
+         disabled: {
+           type: Boolean,
+           computed: '_disabled(settings.sound)'
+         }
+       },
+
+       // Observers
+       observers: ['_settingsData(settingsData, defaultSettings, settingsData.*)'],
+
+       _settingsData: function(settingsData, defaultSettings) {
+         if (settingsData._rev && !settingsData.loaded) {
+           this.set('settingsData.loaded', true);
+         } else if (settingsData.loaded && typeof settingsData.flash == 'undefined') {
+           this.set('settingsData.flash', defaultSettings.flash);
+           this.set('settingsData.sound', defaultSettings.sound);
+           this.set('settingsData.soundFile', defaultSettings.soundFile);
+         }
+       },
+
+       _settings: function(settingsData) {
+         return _.omit(settingsData, ['_rev', '_id', 'loaded']);
+       },
+
+       _disabled: function(sound) {
+         return !sound;
+       },
+
+       // Functions
+       open: function(e) {
+         this.$.dialog.open();
+       },
+
+       close: function() {
+         this.$.dialog.close();
+       },
+
+       play: function(e) {
+         if (!this.$.dialog.opened) return;
+
+         this.$.sounds.querySelectorAll('audio').forEach(function(el) {
+           el.pause();
+         });
+         this.$.sounds.querySelector('#' + e.detail.value).play();
+       }
+    });
+  </script>
+</dom-module>

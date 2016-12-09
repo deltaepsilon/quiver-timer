@@ -206,7 +206,7 @@
          var minDimension = Math.max(0, Math.min(width, height)); // Prevent clipping in vert layouts 
          var w = minDimension;
          var h = minDimension;
-         var arcWidth = minDimension * .08;
+         var arcWidth = minDimension * .06;
          var outerRadiusArc = w/2;
          var innerRadiusArc = outerRadiusArc - arcWidth;
          var shadowWidth = minDimension * .02;
@@ -243,7 +243,7 @@
          this.globalInnerCircle = this.createChart(globalPeriods, this.pie, svg, outerRadiusArcShadow, innerRadiusArcShadow, innerCircleFill, 'globalInnerCircle');
 
          var periodPeriods = this.getPeriods(this.periodPercentage, periodCycle);
-         var periodInset = minDimension * .1;
+         var periodInset = minDimension * .08;
 
          this.periodOuterCircle = this.createChart(periodPeriods, this.accumulatedPie, svg, outerRadiusArc - periodInset, innerRadiusArc - periodInset, outerCircleFill, 'periodOuterCircle'); 
          

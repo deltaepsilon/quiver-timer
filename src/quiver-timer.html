@@ -28,6 +28,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="timer-fab/timer-fab.html">
 <link rel="import" href="dialogs/item-name-dialog.html">
 <link rel="import" href="dialogs/period-select-sheet.html">
+<link rel="import" href="dialogs/settings-dialog.html">
+<link rel="import" href="flash-alert/flash-alert.html">
 
 <dom-module id="quiver-timer">
   <template>
@@ -121,6 +123,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-location id="appLocation" route="{{route}}" on-location-changed="_locationChanged"></app-location>
     <app-route id="appRoute" route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
     <app-scrollpos-control selected="{{page}}"></app-scrollpos-control>
+    <flash-alert id="flashAlert" flash="[[settings.flash]]" sound="[[settings.sound]]" sound-file="[[settings.soundFile]]"></flash-alert>
 
     <app-drawer-layout fullbleed>
       <!-- Drawer content -->
@@ -139,8 +142,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <app-toolbar>
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
             <div main-title style="text-transform: capitalize;">[[pageTitle]]</div>
-            <paper-button class="tertiary" on-click="clearLocalStorage" style="margin-right: 5rem;">Reset</paper-button>
-            <timer-fab id="timerFab" page="[[page]]" url="[[timerFabPayload.url]]" icon="[[timerFabPayload.icon]]" callback="[[timerFabPayload.callback]]" style="position: absolute; top: 37px; right: 2rem;"></timer-fab>
+            <paper-icon-button icon="settings" on-click="openSettings"></paper-icon-button>
+            <!--<paper-button class="tertiary" on-click="clearLocalStorage" style="margin-right: 5rem;">Reset</paper-button>-->
+            <timer-fab id="timerFab" page="[[page]]" url="[[timerFabPayload.url]]" icon="[[timerFabPayload.icon]]" callback="[[timerFabPayload.callback]]" style="position: absolute; top: 37px; right: 4rem;"></timer-fab>
           </app-toolbar>
         </app-header>
 
@@ -153,6 +157,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </app-header-layout>
     </app-drawer-layout>
     <item-name-dialog id="itemNameDialog"></item-name-dialog>
+    <settings-dialog id="settingsDialog" settings="{{settings}}"></settings-dialog>
     <period-select-sheet id="periodSelectSheet" show="[[showPeriodSelectSheet]]" show-bulk-edits="[[showBulkEdits]]" payload="[[periodSelectSheetPayload]]"></period-select-sheet>
   </template>
 
@@ -173,6 +178,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         session: {
           type: String,
           value: '123456'
+        },
+        settings: {
+          type: Object,
+          value: {
+            flash: true,
+            sound: true,
+            soundFile: 'chime'
+          }
         }
       },
 
@@ -210,7 +223,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         back: '_back',
         scrollIntoView: '_scrollIntoView',
         openDialog: '_openDialog',
-        timerFab: '_timerFab'
+        timerFab: '_timerFab',
+        flash: '_flash'
       },
 
       _goTo: function(e) {
@@ -244,6 +258,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
       },
 
+      _flash: function() {
+        if (this.settings.flash) {
+          this.$.flashAlert.fireFlash();
+        }
+        if (this.settings.sound) {
+          this.$.flashAlert.fireSound();
+        }
+      },
+
       // Functions
       clearLocalStorage: function() {
         localStorage.clear();
@@ -252,6 +275,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       toggleConfigureSheet: function(e) {
         this.showBulkEdits = e.detail.value;
+      },
+
+      openSettings: function() {
+        this.$.settingsDialog.open();
       }
     });
   </script>
