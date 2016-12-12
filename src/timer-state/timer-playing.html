@@ -72,7 +72,6 @@
           <a href$="/timer/[[timerKey]]/playing">
             <paper-fab icon="av:play-arrow"></paper-fab>
           </a>
-          <paper-icon-button icon="av:hearing" on-click="fireSound"></paper-icon-button>
           <a href$="/timer/[[timerKey]]/stopped">
             <paper-icon-button icon="av:stop"></paper-icon-button>
           </a>
@@ -103,12 +102,7 @@
 
        clear: function() {
          this.$.timer.emptyChart();
-       },
-
-       fireSound: function() {
-         this.fire('sound');
        }
-
     });
   </script>
 </dom-module>

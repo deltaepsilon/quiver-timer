@@ -10,25 +10,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>my-view1</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-    <script src="../bower_components/web-component-tester/browser.js"></script>
+  <title>my-view1</title>
 
-    <!-- Import the element to test -->
-    <link rel="import" href="../src/timer-behavior/timer-cycles-behavior.html">
-  </head>
-  <body>
-    <test-fixture id="basic">
-      <template>
-      </template>
-    </test-fixture>
+  <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../bower_components/web-component-tester/browser.js"></script>
 
-    <script>
+  <!-- Import the element to test -->
+  <link rel="import" href="../src/timer-behavior/timer-cycles-behavior.html">
+</head>
+
+<body>
+  <test-fixture id="basic">
+    <template>
+    </template>
+  </test-fixture>
+
+  <script>
       suite('TimerCyclesBehavior tests', function() {
         var home;
 
@@ -529,53 +531,198 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           "totalSeconds": 610,
           "updated": 1480175249394
         };
+        var fiveByFive = {
+          "name": "5x5 New Names",
+          "periods": [
+            {
+              "name": "Prepare",
+              "minutes": 0,
+              "seconds": 0,
+              "totalSeconds": 0,
+              "icon": "av:snooze",
+              "type": "prepare",
+              "isPrepare": true,
+              "timestamp": 1481251599457,
+              "displayIcon": "av:snooze"
+            },
+            {
+              "name": "One",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1481564878923,
+              "displayIcon": "hourglass-empty",
+              "selected": false
+            },
+            {
+              "name": "Rest",
+              "seconds": 0,
+              "minutes": 3,
+              "totalSeconds": 180,
+              "icon": "av:pause-circle-outline",
+              "type": "rest",
+              "isRest": true,
+              "timestamp": 1481564882101,
+              "displayIcon": "av:pause-circle-outline",
+              "selected": false
+            },
+            {
+              "name": "Two",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1481564878923,
+              "displayIcon": "hourglass-empty",
+              "selected": false
+            },
+            {
+              "name": "Rest",
+              "seconds": 0,
+              "minutes": 3,
+              "totalSeconds": 180,
+              "icon": "av:pause-circle-outline",
+              "type": "rest",
+              "isRest": true,
+              "timestamp": 1481564882101,
+              "displayIcon": "av:pause-circle-outline",
+              "selected": false
+            },
+            {
+              "name": "Three",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1481564878923,
+              "displayIcon": "hourglass-empty",
+              "selected": false
+            },
+            {
+              "name": "Rest",
+              "seconds": 0,
+              "minutes": 3,
+              "totalSeconds": 180,
+              "icon": "av:pause-circle-outline",
+              "type": "rest",
+              "isRest": true,
+              "timestamp": 1481564882101,
+              "displayIcon": "av:pause-circle-outline",
+              "selected": false
+            },
+            {
+              "name": "Four",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1481564878923,
+              "displayIcon": "hourglass-empty",
+              "selected": false
+            },
+            {
+              "name": "Rest",
+              "seconds": 0,
+              "minutes": 3,
+              "totalSeconds": 180,
+              "icon": "av:pause-circle-outline",
+              "type": "rest",
+              "isRest": true,
+              "timestamp": 1481564882101,
+              "displayIcon": "av:pause-circle-outline",
+              "selected": false
+            },
+            {
+              "name": "Five",
+              "seconds": 0,
+              "minutes": 1,
+              "totalSeconds": 60,
+              "icon": "hourglass-empty",
+              "type": "work",
+              "isWork": true,
+              "timestamp": 1481564878923,
+              "displayIcon": "hourglass-empty",
+              "selected": false
+            },
+            {
+              "name": "Rest",
+              "seconds": 0,
+              "minutes": 3,
+              "totalSeconds": 180,
+              "icon": "av:pause-circle-outline",
+              "type": "rest",
+              "isRest": true,
+              "timestamp": 1481564882101,
+              "displayIcon": "av:pause-circle-outline",
+              "selected": false
+            }
+          ],
+          "totalSeconds": 1200,
+          "updated": 1481565033147
+        };
 
-        // test('Number in circle should be 1', function() {
-        //   var circle = Polymer.dom(home.root).querySelector('.circle');
-        //   assert.equal(circle.textContent, '1');
-        // })
+        test('5x5', function() { // Test nested sub-cycles. Should find the smallest indivisible sub-cycle.
+          var cycles = TimerCyclesBehavior._periodCycles(fiveByFive.periods);
+          assert.equal(6, cycles.length);
+          cycles.forEach(function(cycle, i) {
+            if (i == 0) assert.equal(1, cycle.length);
+            else assert.equal(2, cycle.length); 
+          });
+        });
 
         test('Global Cycles', function() {
           var subCycleEmomCycles = TimerCyclesBehavior._globalCycles(subCycleEmom.periods);
           var threeCyclesCycles = TimerCyclesBehavior._globalCycles(threeCycles.periods);
           var tenMinuteEmomCycles = TimerCyclesBehavior._globalCycles(tenMinuteEmom.periods);
-          assert.equal(subCycleEmomCycles.length, 1);
-          assert.equal(threeCyclesCycles.length, 1);
-          assert.equal(tenMinuteEmomCycles.length, 1);
-          assert.equal(subCycleEmomCycles[0].length, subCycleEmom.periods.length);
-          assert.equal(threeCyclesCycles[0].length, threeCycles.periods.length);
-          assert.equal(tenMinuteEmomCycles[0].length, tenMinuteEmom.periods.length);
+          assert.equal(1, subCycleEmomCycles.length);
+          assert.equal(1, threeCyclesCycles.length);
+          assert.equal(1, tenMinuteEmomCycles.length);
+          assert.equal(subCycleEmom.periods.length, subCycleEmomCycles[0].length);
+          assert.equal(threeCycles.periods.length, threeCyclesCycles[0].length);
+          assert.equal(tenMinuteEmom.periods.length, tenMinuteEmomCycles[0].length);
         });
 
         test('Sub-cycle EMOM', function() {
-          var cycles = TimerCyclesBehavior._cycles(subCycleEmom.periods);
-          assert.equal(cycles.length, 4);
-          assert.equal(cycles[0].length, 1);
-          assert.equal(cycles[1].length, 5);
-          assert.equal(cycles[2].length, 5);
-          assert.equal(cycles[3].length, 1);
+          var cycles = TimerCyclesBehavior._periodCycles(subCycleEmom.periods);
+          assert.equal(4, cycles.length);
+          assert.equal(1, cycles[0].length);
+          assert.equal(5, cycles[1].length);
+          assert.equal(5, cycles[2].length);
+          assert.equal(1, cycles[3].length);
         });
 
         test('Three Cycles', function() {
-          var cycles = TimerCyclesBehavior._cycles(threeCycles.periods);
-          assert.equal(cycles.length, 5);
-          assert.equal(cycles[0].length, 1);
-          assert.equal(cycles[1].length, 4);
-          assert.equal(cycles[2].length, 4);
-          assert.equal(cycles[3].length, 4);
-          assert.equal(cycles[4].length, 1);
+          var cycles = TimerCyclesBehavior._periodCycles(threeCycles.periods);
+          assert.equal(8, cycles.length);
+          assert.equal(1, cycles[0].length);
+          assert.equal(2, cycles[1].length);
+          assert.equal(2, cycles[2].length);
+          assert.equal(2, cycles[3].length);
+          assert.equal(2, cycles[4].length);
+          assert.equal(2, cycles[5].length);
+          assert.equal(2, cycles[6].length);
+          assert.equal(1, cycles[7].length);
         });
 
         test('10 Minute EMOM', function() {
-          var cycles = TimerCyclesBehavior._cycles(tenMinuteEmom.periods);
-          assert.equal(cycles.length, 11);
+          var cycles = TimerCyclesBehavior._periodCycles(tenMinuteEmom.periods);
+          assert.equal(11, cycles.length);
           cycles.forEach(function(cycle) {
-            assert.equal(cycle.length, 1);  
+            assert.equal(1, cycle.length);  
           });
         });
 
-
       });
     </script>
-  </body>
+</body>
+
 </html>

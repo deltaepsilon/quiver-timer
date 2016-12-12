@@ -199,9 +199,18 @@
          var i = this.getPeriodIndex();
          var remaining = this.getTotalSeconds(this.getRemainingPeriods(i));
          var current = this.getPeriod(i).totalSeconds;
-         var s = remaining + current + 2;
-         var diff = s - this.seconds; 
+         var s = remaining + current;
+         var diff = s - this.seconds;
+         var currentPeriodIndex = i; 
+         
          if (diff < 5 && i) {
+           currentPeriodIndex = i - 1;
+           
+           // Reset stopwatches
+           if (i > 0 && this.workingPeriods[currentPeriodIndex].type == 'stopwatch') {
+             this.workingPeriods[currentPeriodIndex].totalSeconds = this.timer.periods[currentPeriodIndex].totalSeconds;
+           }
+
            s = Math.min(this.workingPeriods.seconds, s + this.workingPeriods[i - 1].totalSeconds);
          }
          s = Math.min(s, this.workingPeriods.seconds);
@@ -211,7 +220,16 @@
        },
 
        next: function() {
-         this.seconds = this.getTotalSeconds(this.getRemainingPeriods());
+         var periodIndex = this.getPeriodIndex();
+         var period = this.getPeriod(periodIndex);
+         var remainingSeconds = this.getTotalSeconds(this.getRemainingPeriods()); 
+         
+
+         if (period.type == 'stopwatch') {
+           this.workingPeriods[periodIndex].totalSeconds = period.totalSeconds - (this.seconds - remainingSeconds); 
+         }
+
+         this.seconds = remainingSeconds;
          this.clock.stop();
          this.clock.start(this.seconds);
        },

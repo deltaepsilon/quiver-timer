@@ -50,9 +50,16 @@
     },
 
     _globalCycles: function(periods) {
-      this.splice.apply(this, ['globalCycles', 0, this.globalCycles.length, periods]);
-      this.splice.apply(this, ['globalCycle', 0, this.globalCycle.length].concat(periods));
+      if (this.splice) { // Null check for tests
+        this.splice.apply(this, ['globalCycles', 0, this.globalCycles.length, periods]);
+        this.splice.apply(this, ['globalCycle', 0, this.globalCycle.length].concat(periods));
+      } else {
+        this.globalCycles = [periods];
+        this.globalCycle = periods;
+      }
+      
       this.globalCycles[0].seconds = this.getCycleSeconds(periods);
+      return this.globalCycles; // Return for testing purposes
     },
 
     _periodCycles: function(periods) {
@@ -88,26 +95,41 @@
         return false;
       };
 
+      // Used within findSubCycles and periods.reduce(...)
       var nextMatch = 0;
+      function setNextMatch(i) {
+        nextMatch = i;
+      };
+      function getNextMatch() {
+        return nextMatch;
+      };
+      
+      function findSubCycles(remaining, i, j) {
+        var cycles = [];
+        var matches = findMatch(remaining, j);
+        var multiplier = matches.multiplier;
+        if (multiplier > 1 && hasVariation(remaining.slice(0, matches.count))) { // Handle multi-period cycles
+          while (multiplier--) {
+            cycles.push(remaining.slice(0, matches.count)); // Push copies onto cycles
+          }
+          setNextMatch(i + matches.count * matches.multiplier);
+          return cycles;
+        }
+      };
+       
       var periodCycles = periods.reduce(function(cycles, period, i) {
-        if (i < nextMatch) return cycles; // Enable match skipping
+        if (i < getNextMatch()) return cycles; // Enable match skipping
 
         var remaining = periods.slice(i);
         var half = Math.round(remaining.length / 2);
-        var matches;
-        var multiplier;
+        var subCycles;
 
         for (var j = half; j > 1; j--) {
-          matches = findMatch(remaining, j);
-          multiplier = matches.multiplier;
-          if (multiplier > 1 && hasVariation(remaining.slice(0, matches.count))) { // Handle multi-period cycles
-            while (multiplier--) {
-              cycles.push(remaining.slice(0, matches.count)); // Push copies onto cycles
-            }
-            nextMatch = i + matches.count * matches.multiplier;
-            return cycles;
-          } 
+          // Continue to find sub-cycles until the smallest indivisible sub-cycle
+          subCycles = findSubCycles(remaining, i, j) || subCycles;
         }
+
+        if (subCycles) return cycles.concat(subCycles);
 
         // Handle single-period cycles
         matches = findMatch(remaining, 1);
@@ -122,7 +144,11 @@
         return cycle.seconds = this.getCycleSeconds(cycle), cycle;
       }.bind(this));
 
-      this.splice.apply(this, ['periodCycles', 0, this.periodCycles.length].concat(periodCycles));
+      if (this.splice) { // Null check for testing
+        this.splice.apply(this, ['periodCycles', 0, this.periodCycles.length].concat(periodCycles));
+      } else {
+        return periodCycles;
+      }
     },
 
     _periodIndex: function(seconds, periods) {
