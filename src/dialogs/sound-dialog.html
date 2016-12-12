@@ -1,0 +1,43 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="sound-dialog">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+    
+    <paper-dialog id="dialog" with-backdrop always-on-top="false">
+      <h3>Enable mobile audio</h3>
+      <div class="buttons">
+        <paper-button tabindex="2" on-click="close">disable</paper-button>
+        <paper-button tabindex="1" on-click="confirm">enable</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+  <script>
+    Polymer({
+       is: "sound-dialog",
+
+       // Functions
+       open: function(e) {
+         this.$.dialog.open();
+       },
+
+       close: function() {
+         this.fire('disableSound');
+         this.$.dialog.close();
+       },
+
+       confirm: function() {
+         this.fire('sound');
+         this.$.dialog.close();
+       }
+    });
+  </script>
+</dom-module>

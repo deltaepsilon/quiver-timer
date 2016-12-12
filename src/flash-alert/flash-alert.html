@@ -47,7 +47,27 @@
        },
 
        fireSound: function() {
-         this.$.audio.play();
+         var flashAlert = this;
+         var audio = this.$.audio;
+         function handler() {
+           audio.removeEventListener('canplaythrough', handler);
+           audio.volume = 1;
+           audio.play()
+            .catch(function() {
+              flashAlert.fire('enableSound');
+            });
+         };
+         
+         audio.load();
+         audio.addEventListener('canplaythrough', handler);
+       },
+
+       testSound: function() {
+         this.$.audio.volume = 0;
+         this.$.audio.play()
+          .catch(function(err) {
+            this.fire('enableSound');
+          }.bind(this));
        }
     });
   </script>

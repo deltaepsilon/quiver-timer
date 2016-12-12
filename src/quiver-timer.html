@@ -29,6 +29,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="dialogs/item-name-dialog.html">
 <link rel="import" href="dialogs/period-select-sheet.html">
 <link rel="import" href="dialogs/settings-dialog.html">
+<link rel="import" href="dialogs/sound-dialog.html">
 <link rel="import" href="flash-alert/flash-alert.html">
 
 <dom-module id="quiver-timer">
@@ -158,6 +159,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </app-drawer-layout>
     <item-name-dialog id="itemNameDialog"></item-name-dialog>
     <settings-dialog id="settingsDialog" settings="{{settings}}"></settings-dialog>
+    <sound-dialog id="soundDialog"></sound-dialog>
     <period-select-sheet id="periodSelectSheet" show="[[showPeriodSelectSheet]]" show-bulk-edits="[[showBulkEdits]]" payload="[[periodSelectSheetPayload]]"></period-select-sheet>
   </template>
 
@@ -224,7 +226,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         scrollIntoView: '_scrollIntoView',
         openDialog: '_openDialog',
         timerFab: '_timerFab',
-        flash: '_flash'
+        flash: '_flash',
+        sound: '_sound',
+        testSound: '_testSound',
+        enableSound: '_enableSound',
+        disableSound: '_disableSound'
       },
 
       _goTo: function(e) {
@@ -265,6 +271,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (this.settings.sound) {
           this.$.flashAlert.fireSound();
         }
+      },
+
+      _sound: function() {
+        this.$.flashAlert.fireSound();
+      },
+
+      _testSound: function() {
+        this.$.flashAlert.testSound();
+      },
+
+      _enableSound: function() {
+        this.$.soundDialog.open();
+      },
+
+      _disableSound: function() {
+        this.$.settingsDialog.disableSound();
       },
 
       // Functions
