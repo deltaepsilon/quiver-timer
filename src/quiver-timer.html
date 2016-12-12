@@ -36,61 +36,54 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style include="shared-styles">
       :host {
-        --app-primary-color: #673AB7;
-        --app-secondary-color: #212121;
-        --dark-primary-color: #512DA8;
-        --default-primary-color: #673AB7;
-        --light-primary-color: #D1C4E9;
-        --text-primary-color: #FFFFFF;
-        --accent-color: #009688;
-        --primary-background-color: #D1C4E9;
-        --primary-text-color: #212121;
-        --secondary-text-color: #757575;
-        --disabled-text-color: #BDBDBD;
-        --divider-color: #BDBDBD;
+        --color-rich-black: #080705;
+        --color-maastricht-blue: #011627;
+        --color-metallic-seaweed: #1C898E;
+        --color-gainsboro: #DDD1D9;
+        --color-medium-candy-apple-red: #E01130;
+        --color-white: #FFFFFF;
+
+        --app-primary-color: var(--color-metallic-seaweed);
+        --app-secondary-color: var(--color-gainsboro);
+
+        --primary-color: var(--color-metallic-seaweed);
+        --secondary-color: var(--color-gainsboro);
+        --dark-primary-color: var(--color-maastricht-blue);
+        --default-primary-color: var(--color-metallic-seaweed);
+        --light-primary-color: var(--color-gainsboro);
+        --accent-color: var(--color-medium-candy-apple-red);
+        --primary-background-color: var(--color-gainsboro);
+        --primary-text-color: var(--color-white);
+        --secondary-text-color: var(--color-white);
+        --disabled-text-color: var(--color-gainsboro);
+        --divider-color: var(--color-maastricht-blue);
+
         /* Components */
         /* paper-drawer-panel */
-        --drawer-menu-color: #ffffff;
-        --drawer-border-color: 1px solid #ccc;
-        --drawer-toolbar-border-color: 1px solid rgba(0, 0, 0, 0.22);
+        --drawer-menu-color: var(--color-gainsboro);
+        --drawer-border-color: 1px solid var(--color-maastricht-blue);
+        --drawer-toolbar-border-color: 1px solid var(--color-maastricht-blue);
         /* paper-menu */
-        --paper-menu-background-color: #fff;
-        --menu-link-color: #111111;
+        --paper-menu-background-color: var(--color-gainsboro);
+        --menu-link-color: var(--color-maastricht-blue);
         /* paper-input */
         /*--paper-input-container-color: rgba(255, 255, 255, 0.64);
         --paper-input-container-focus-color: rgba(255, 255, 255, 1);
         --paper-input-container-input-color: #fff;*/
-        --paper-input-container-color: rgba(103, 58, 183, .64);
-        --paper-input-container-focus-color: rgba(103, 58, 183, 1);
-        --paper-input-container-input-color: #212121;
+        --paper-input-container-color: var(--color-maastricht-blue);
+        --paper-input-container-focus-color: var(--color-metallic-seaweed);
+        --paper-input-container-input-color: var(--color-rich-black);
         /* paper-dialog */
-        --paper-dialog-background-color: #fff;
+        --paper-dialog-background-color: var(--color-rich-black);
+        --paper-dialog-color: var(--color-white);
         /* paper-button */
-        --paper-button-primary: #673AB7;
-        --paper-button-secondary: #009688;
-        --paper-button-tertiary: #212121;
+        --paper-button-primary: var(--color-medium-candy-apple-red);
+        --paper-button-secondary: var(--color-metallic-seaweed);
+        --paper-button-tertiary: var(--color-maastricht-blue);
         /*paper-checkbox*/
-        --paper-checkbox-checked-color: #212121;
-        /* MD color wheel */
-        --md-red: #F44336;
-        --md-pink: #ff4081;
-        --md-purple: #7B1FA2;
-        --md-deep-purple: #7C4DFF;
-        --md-indigo: #3F51B5;
-        --md-blue: #448AFF;
-        --md-light-blue: #03A9F4;
-        --md-cyan: #00BCD4;
-        --md-teal: #009688;
-        --md-green: #4CAF50;
-        --md-light-green: #8BC34A;
-        --md-lime: #CDDC39;
-        --md-yellow: #FFEB3B;
-        --md-amber: #FFC107;
-        --md-orange: #FF9800;
-        --md-deep-orange: #FF5722;
-        --md-brown: #795548;
-        --md-grey: #9E9E9E;
-        --md-blue-grey: #607D8D;
+        --paper-checkbox-checked-color: var(--color-maastricht-blue);
+        /*paper-toggle*/
+        
         display: block;
       }
       
