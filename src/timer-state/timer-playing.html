@@ -49,11 +49,34 @@
       [state="paused"] .show-paused {
         display: inherit;
       }
+/*
+      .show-stopwatch {
+        display: none;
+      }
+
+      [type="stopwatch"] .show-stopwatch {
+        display: inherit;
+      }*/
+      .total-seconds {
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+        left: 1rem;
+        font-size: 3vh;
+
+        @apply(--layout-horizontal);
+      }
     </style>
     <div id="wrapper" class="pinned" type$="[[period.type]]" current-period$="[[currentPeriod]]" state$="[[state]]">
-      <div class$="layout [[position]]" style="height: calc(100% - 5rem)">
+      <div class$="layout [[position]]" style="height: calc(100% - 4rem)">
         <digital-timer id="timer" class="timer flex" global-seconds="[[seconds]]" period-seconds="[[periodSeconds]]" global-cycle-seconds="[[seconds]]"
           global-cycle="[[globalCycle]]" period-cycle-seconds="[[periodCycleSeconds]]" period-cycle="[[periodCycle]]" color-wheel="[[colorWheel]]"></digital-timer>
+      </div>
+
+      <div class="total-seconds">
+        <digital-clock total-seconds="[[totalPeriodSeconds]]"></digital-clock>
+        <div class="flex"></div>
+        <digital-clock total-seconds="[[totalGlobalSeconds]]"></digital-clock>
       </div>
 
       <div class="show-playing">

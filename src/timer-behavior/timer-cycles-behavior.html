@@ -32,6 +32,14 @@
       periodCycle: {
         type: Array,
         value: []
+      },
+      totalGlobalSeconds: {
+        type: Number,
+        computed: '_totalGlobalSeconds(globalCycle, globalCycle.splices)'
+      },
+      totalPeriodSeconds: {
+        type: Number,
+        computed: '_totalPeriodSeconds(period.totalSeconds)'
       }
     },
 
@@ -40,7 +48,7 @@
       '_globalCycles(periods, periods.splices)',
       '_periodCycles(periods, periods.splices)',
       '_periodCycle(seconds, periodCycles)',
-      '_flash(periodSeconds)'
+      '_flash(periodSeconds, period.totalSeconds, period.type)'
     ],
 
     getCycleSeconds: function(cycle) {
@@ -170,6 +178,9 @@
         if (i == periodIndex) break;
         seconds -= periods[i].totalSeconds;
       }
+      if (periods[periodIndex] && periods[periodIndex].type == 'stopwatch') {
+        seconds = periods[periodIndex].totalSeconds - seconds;
+      }
       return seconds;
     },
 
@@ -208,10 +219,25 @@
       }
     },
 
-    _flash: function(periodSeconds) {
-      if (periodSeconds == 3) {
+    _flash: function(periodSeconds, periodTotalSeconds, periodType) {
+      var threshold = 3;
+      if (periodType == 'stopwatch') {
+        if (periodTotalSeconds - periodSeconds == threshold) {
+          this.fire('flash');
+        }
+      } else if (periodSeconds == threshold) {
         this.fire('flash');
       }
+    },
+
+    _totalGlobalSeconds: function(globalCycle) {
+      return globalCycle.reduce(function(s, p) {
+        return s + p.totalSeconds;
+      }, 0);
+    },
+
+    _totalPeriodSeconds: function(totalSeconds) {
+      return totalSeconds;
     }
   };
 </script>
