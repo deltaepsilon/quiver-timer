@@ -2,6 +2,7 @@ bower_components/
 build/
 node_modules/
 
+.firebaserc
 .DS_Store
 *.json
 *.log

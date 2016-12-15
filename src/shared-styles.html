@@ -13,10 +13,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bower_components/paper-styles/shadow.html">
 
+<script src="https://use.typekit.net/tqj8tfb.js"></script>
+<script>try{Typekit.load({ async: true });}catch(e){}</script>
+
 <!-- shared styles for all views -->
 <dom-module id="shared-styles">
 	<template>
 		<style include="iron-flex iron-flex-alignment">
+
 			.card {
 				margin: 24px;
 				padding: 16px;
@@ -39,10 +43,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 			
 			h1 {
-				margin: 16px 0;
-				color: #212121;
-				font-size: 22px;
+				color: var(--primary-text-color);
+				font-size: 10vw;
+				font-family: 'Brothers';
+				line-height: 10vw;
+				margin: 0;
 			}
+
+			p {
+        width: 480px;
+        max-width: calc(100% - 2rem);
+      }
 
 			aside {
 				color: var(--secondary-text-color);
@@ -67,6 +78,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				width: calc(100% - 4rem);
 				margin: 16px auto;
 				background: white;
+				color: var(--dark-primary-color);
 			}
 
 			paper-material[selected] {
@@ -91,6 +103,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			paper-button.tertiary {
 				background: var(--paper-button-tertiary);
+				color: var(--secondary-text-color);
+			}
+
+			paper-button.tertiary {
+				background: var(--paper-button-tertiary);
+				color: var(--secondary-text-color);
+			}
+
+			paper-button.google {
+				background: var(--paper-button-google);
+				color: var(--secondary-text-color);
+			}
+
+			paper-button.facebook {
+				background: var(--paper-button-facebook);
 				color: var(--secondary-text-color);
 			}
 
@@ -138,12 +165,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			.bottom-sheet {
-				position: absolute;
+				position: fixed;
 				bottom: 0;
 				left: 0;
 				right: 0;
 				background: white;
 				padding: 1rem;
+				color: var(--dark-primary-color);
 				@apply(--shadow-elevation-16dp);
 			}
 
@@ -161,6 +189,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         bottom: 0;
         left: 0;
       }
+
+			.text-work {
+				color: var(--accent-color);
+			}
+
+			.text-rest {
+				color: var(--primary-color);
+			}
+
+			.text-stopwatch {
+				color: var(--dark-primary-color);
+			}
+
+			.button-work {
+				background-color: var(--accent-color);
+				color: var(--secondary-text-color);
+			}
+			
+			.button-rest {
+				background-color: var(--primary-color);
+				color: var(--secondary-text-color);
+			}
+			
+			.button-stopwatch {
+				background-color: var(--dark-primary-color);
+				color: var(--secondary-text-color);
+			}
 		</style>
 	</template>
 </dom-module>

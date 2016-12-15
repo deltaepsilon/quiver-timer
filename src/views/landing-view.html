@@ -1,0 +1,95 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-icons/av-icons.html">
+<link rel="import" href="../font-fill/font-fill.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="landing-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      .top-quarter {
+        height: 25vh;
+        @apply(--layout-vertical);
+        @apply(--layout-center-justified);
+      }
+
+      .bottom-quarter {
+        height: 25vh;
+        @apply(--layout-vertical);
+        @apply(--layout-end-justified);
+      }
+
+      .half {
+        height: 50vh;
+      }
+
+      h1 {
+        font-size: 10vw;
+        line-height: 10vw;
+        margin: 0;
+      }
+
+      h3 {
+        margin-bottom: 0;
+      }
+
+      .subhead {
+        margin: 0;
+        text-align: center;
+      }
+      
+      iframe {
+        margin-bottom: 2rem;
+        max-width: calc(100% - 2rem);
+      }
+      
+      .icon {
+        @apply(--layout-vertical);
+        @apply(--layout-center-justified);
+      }
+
+      .icon iron-icon {
+        width: 50vw;
+        height: 50vh;
+      }
+      aside {
+        text-align: center;
+      }
+    </style>
+    <div class="layout vertical center">
+      <div class="top-quarter layout ">
+        <h1>Quiver Timer</h1>
+        <h4 class="subhead">A better timer app</h4>  
+      </div>
+      <a class="icon half" href="/timers">
+        <iron-icon icon="av:play-circle-outline"></iron-icon>
+      </a>
+      <div class="bottom-quarter">
+        <aside>Click to start ☝️</aside>  
+      </div>
+      
+      <h3>HIIT / Tabata</h3>
+      <p>
+        Great for <strong>High-Intensity Interval Training</strong>. Set up any combination of work and rest periods. Stay in Beast Mode.
+      </p>
+      <iframe src="//giphy.com/embed/8yi5MTYV3lVde" width="480" height="395" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+      <h3>Crossfit</h3>
+      <p>
+        Do you have trouble remembering how many push press reps to hit on the second round of your 20-minute AMRAP? Build out your entire workout with Quiver Timer and stay at your anaerobic threshold until you puke.
+      </p>
+      <iframe src="//giphy.com/embed/mwQpUOLTjpePC" width="480" height="480" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+
+      
+    </div>
+    
+  </template>
+  <script>
+    Polymer({
+       is: "landing-view",
+    });
+  </script>
+</dom-module>

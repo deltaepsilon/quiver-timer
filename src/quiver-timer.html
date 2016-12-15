@@ -9,12 +9,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
-<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
-<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
-<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
-<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
-<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-layout/app-grid/app-grid-style.html">
+<link rel="import" href="../bower_components/app-layout/app-box/app-box.html">
+
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
@@ -22,9 +19,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/app-layout/app-scrollpos-control/app-scrollpos-control.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+
 <link rel="import" href="icons.html">
 
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="controllers/nav-controller.html">
+<link rel="import" href="controllers/auth-controller.html">
 <link rel="import" href="timer-fab/timer-fab.html">
 <link rel="import" href="dialogs/item-name-dialog.html">
 <link rel="import" href="dialogs/period-select-sheet.html">
@@ -32,9 +35,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="dialogs/sound-dialog.html">
 <link rel="import" href="flash-alert/flash-alert.html">
 
+<script src="../bower_components/lodash/lodash.js"></script>
+
+<!-- Firestore -->
+<script src="https://www.gstatic.com/firebasejs/3.5.0/firebase.js"></script>
+<script src="https://storage.cloud.google.com/firebase-preview-drop/web/firestore/0.2.1/firestore.js"></script>
+
+
 <dom-module id="quiver-timer">
   <template>
-    <style include="shared-styles">
+    <style include="app-grid-style shared-styles">
       :host {
         --color-rich-black: #080705;
         --color-maastricht-blue: #011627;
@@ -42,22 +52,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --color-gainsboro: #DDD1D9;
         --color-medium-candy-apple-red: #E01130;
         --color-white: #FFFFFF;
-
+        
         --app-primary-color: var(--color-metallic-seaweed);
         --app-secondary-color: var(--color-gainsboro);
-
+        
         --primary-color: var(--color-metallic-seaweed);
-        --secondary-color: var(--color-gainsboro);
-        --dark-primary-color: var(--color-maastricht-blue);
-        --default-primary-color: var(--color-metallic-seaweed);
-        --light-primary-color: var(--color-gainsboro);
-        --accent-color: var(--color-medium-candy-apple-red);
-        --primary-background-color: var(--color-gainsboro);
         --primary-text-color: var(--color-white);
+        --primary-background-color: var(--color-gainsboro);
+        --dark-primary-color: var(--color-maastricht-blue);
+        --light-primary-color: var(--color-gainsboro);
+        --default-primary-color: var(--color-metallic-seaweed);
+        
+        --secondary-color: var(--color-gainsboro);
         --secondary-text-color: var(--color-white);
+        
+        --accent-color: var(--color-medium-candy-apple-red);
+
         --disabled-text-color: var(--color-gainsboro);
         --divider-color: var(--color-maastricht-blue);
-
         /* Components */
         /* paper-drawer-panel */
         --drawer-menu-color: var(--color-gainsboro);
@@ -70,9 +82,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         /*--paper-input-container-color: rgba(255, 255, 255, 0.64);
         --paper-input-container-focus-color: rgba(255, 255, 255, 1);
         --paper-input-container-input-color: #fff;*/
-        --paper-input-container-color: var(--color-maastricht-blue);
+        --paper-input-container-color: var(--color-white);
         --paper-input-container-focus-color: var(--color-metallic-seaweed);
-        --paper-input-container-input-color: var(--color-rich-black);
+        --paper-input-container-input-color: var(--color-white);
         /* paper-dialog */
         --paper-dialog-background-color: var(--color-rich-black);
         --paper-dialog-color: var(--color-white);
@@ -80,95 +92,101 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-button-primary: var(--color-medium-candy-apple-red);
         --paper-button-secondary: var(--color-metallic-seaweed);
         --paper-button-tertiary: var(--color-maastricht-blue);
+        --paper-button-google: var(--color-medium-candy-apple-red);
+        --paper-button-facebook: var(--color-metallic-seaweed);
         /*paper-checkbox*/
         --paper-checkbox-checked-color: var(--color-maastricht-blue);
         /*paper-toggle*/
+        /*app-grid*/
+        --app-grid-columns: 1;
+        /*--app-grid-item-height: 33%;*/
+        display: block;
+
+        --paper-icon-item: {
+          color: var(--dark-primary-color);  
+        }
+
+        /*--paper-checkbox-checked-background-color: var(--color-gainsboro);*/
+        --paper-checkbox-unchecked-color: var(--color-white);
+        --paper-checkbox-checked-color: var(--color-white);
+        --paper-checkbox-checkmark-color: var(--dark-primary-color);
         
-        display: block;
+
+        --paper-item-body-secondary: {
+          color: var(--dark-primary-color);
+        }
       }
       
-      app-header {
-        color: #fff;
-        background-color: var(--app-primary-color);
+      #main {
+        padding: 1rem;
       }
-      
-      app-header paper-icon-button {
-        --paper-icon-button-ink-color: white;
-      }
-      
-      .drawer-list {
-        margin: 0 20px;
-      }
-      
-      .drawer-list a {
-        display: block;
-        padding: 0 16px;
-        text-decoration: none;
-        color: var(--app-secondary-color);
-        line-height: 40px;
-      }
-      
-      .drawer-list a.iron-selected {
-        color: black;
-        font-weight: bold;
+
+      landing-view {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
       }
     </style>
 
-    <app-location id="appLocation" route="{{route}}" on-location-changed="_locationChanged"></app-location>
-    <app-route id="appRoute" route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
-    <app-scrollpos-control selected="{{page}}"></app-scrollpos-control>
-    <flash-alert id="flashAlert" flash="[[settings.flash]]" sound="[[settings.sound]]" sound-file="[[settings.soundFile]]"></flash-alert>
+<iron-ajax auto url="/env.client.json" handle-as="json" last-response="{{rawEnv}}"></iron-ajax>
+<app-location id="appLocation" route="{{route}}" on-location-changed="_locationChanged"></app-location>
+<app-route id="appRoute" route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+<app-scrollpos-control selected="{{page}}"></app-scrollpos-control>
+<flash-alert id="flashAlert" flash="[[settings.flash]]" sound="[[settings.sound]]" sound-file="[[settings.soundFile]]"></flash-alert>
+<auth-controller id="authController" firebase="[[firebase]]" login-endpoint="[[model.user.write.login]]" connected="[[connected]]"
+  page="[[page]]" user="{{user}}"></auth-controller>
+<paper-toast id="toast"></paper-toast>
 
-    <app-drawer-layout fullbleed>
-      <!-- Drawer content -->
-      <app-drawer>
-        <app-toolbar>Menu</app-toolbar>
-        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="timers" href="/timers">Timers</a>
-          <a name="configure" href="/configure/new">New Timer</a>
-        </iron-selector>
-      </app-drawer>
 
-      <!-- Main content -->
-      <app-header-layout id="appHeaderLayout" has-scrolling-region>
+<!-- Main content -->
+<div id="main" class="app-grid">
+  <nav-controller page="[[page]]"></nav-controller>
+  <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="fourohfour" role="main">
+    <landing-view id="landingView" name="landing"></landing-view>
+    <login-view id="loginView" name="login" user="[[user]]"></login-view>
+    <timers-view id="timersView" name="timers" session="[[session]]"></timers-view>
+    <timer-view id="timerView" name="timer" local-route="[[subroute]]" session="[[session]]"></timer-view>
+    <configure-view id="configureView" local-route="[[subroute]]" session="[[session]]" name="configure" title="{{configureTitle}}"
+      on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
+    <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
+  </iron-pages>
+</div>
 
-        <app-header condenses reveals effects="waterfall">
-          <app-toolbar>
-            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            <div main-title style="text-transform: capitalize;">[[pageTitle]]</div>
-            <paper-icon-button icon="settings" on-click="openSettings"></paper-icon-button>
-            <!--<paper-button class="tertiary" on-click="clearLocalStorage" style="margin-right: 5rem;">Reset</paper-button>-->
-            <timer-fab id="timerFab" page="[[page]]" url="[[timerFabPayload.url]]" icon="[[timerFabPayload.icon]]" callback="[[timerFabPayload.callback]]" style="position: absolute; top: 37px; right: 4rem;"></timer-fab>
-          </app-toolbar>
-        </app-header>
+<!-- Dialogs -->
+<item-name-dialog id="itemNameDialog"></item-name-dialog>
+<settings-dialog id="settingsDialog" settings="{{settings}}"></settings-dialog>
+<sound-dialog id="soundDialog"></sound-dialog>
 
-        <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="fourohfour" role="main">
-          <timers-view id="timersView" name="timers" session="[[session]]"></timers-view>
-          <timer-view id="timerView" name="timer" local-route="[[subroute]]" session="[[session]]"></timer-view>
-          <configure-view id="configureView" local-route="[[subroute]]" session="[[session]]" name="configure" title="{{configureTitle}}" on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
-          <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
-        </iron-pages>
-      </app-header-layout>
-    </app-drawer-layout>
-    <item-name-dialog id="itemNameDialog"></item-name-dialog>
-    <settings-dialog id="settingsDialog" settings="{{settings}}"></settings-dialog>
-    <sound-dialog id="soundDialog"></sound-dialog>
-    <period-select-sheet id="periodSelectSheet" show="[[showPeriodSelectSheet]]" show-bulk-edits="[[showBulkEdits]]" payload="[[periodSelectSheetPayload]]"></period-select-sheet>
-  </template>
+<!-- Bottom sheet -->
+<period-select-sheet id="periodSelectSheet" show="[[showPeriodSelectSheet]]" show-bulk-edits="[[showBulkEdits]]" payload="[[periodSelectSheetPayload]]"></period-select-sheet>
+</template>
 
-  <script>
+<script>
     Polymer({
       is: 'quiver-timer',
 
       properties: {
+        firebase: {
+          type: Object,
+          computed: '_firebase(env.firebaseConfig)'
+        },
+        env: {
+          type: Object,
+          computed: '_env(rawEnv)'
+        },
+        model: {
+          type: Object,
+          computed: '_model(rawEnv, env.firebaseConfig, env.environment)'
+        },
+        connected: {
+          type: Boolean,
+          value: false
+        },
         page: {
           type: String,
           reflectToAttribute: true,
           observer: '_pageChanged'
-        },
-        pageTitle: {
-          type: String,
-          computed: '_pageTitle(page)'
         },
         session: {
           type: String,
@@ -185,36 +203,65 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       // Computed
-      _pageTitle: function(page) {
-        return 'Quiver Timer';
+      _firebase: function (firebaseConfig) {
+        firebase.initializeApp(firebaseConfig);
+        return firebase;
+      },
+
+      _env: function (env) {
+        return _.merge(env.defaults, env[location.hostname.split('.').join(':')]);
+      },
+
+      _model: function (env, firebaseEnv, environment) {
+        function normalizeModel(model) {
+          var keys = Object.keys(model);
+          var i = keys.length;
+          var result = {};
+          var key;
+          var item;
+          while (i--) {
+            key = keys[i];
+            item = model[key];
+            result[key] = typeof item == 'string' ? firebaseEnv.root + '/' + environment + item : normalizeModel(item);
+          }
+          return result;
+        };
+        return normalizeModel(env.model);
       },
 
       // Observers
       observers: [
+        '_connected(firebase)',
         '_routePageChanged(routeData.page)'
       ],
 
-      _routePageChanged: function(page) {
-        this.page = page || 'timers';
+      _connected: function (firebase) {
+        firebase.database().ref().child('.info/connected').on('value', function (snap) {
+          this.connected = snap.val();
+        }.bind(this));
+      },
+
+      _routePageChanged: function (page) {
+        this.page = page || 'landing';
         this.showPeriodSelectSheet = page == 'configure';
         if (page == 'timers' && this.$.timersView.attached) this.$.timersView.attached();
         if (page == 'timer' && this.$.timerView.attached) this.$.timerView.attached();
         if (page == 'configure' && this.$.configureView.attached) this.$.configureView.attached();
       },
 
-      _pageChanged: function(page) {
+      _pageChanged: function (page) {
         // Load page import on demand. Show 404 page if fails
         var resolvedPageUrl = this.resolveUrl('views/' + page + '-view.html');
         this.importHref(resolvedPageUrl, null, this._showPage404, true);
       },
 
-      _showPage404: function() {
+      _showPage404: function () {
         this.page = 'fourohfour';
       },
 
       // Listeners
       listeners: {
-        goTo: '_goTo',
+        redirect: '_redirect',
         back: '_back',
         scrollIntoView: '_scrollIntoView',
         openDialog: '_openDialog',
@@ -223,32 +270,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         sound: '_sound',
         testSound: '_testSound',
         enableSound: '_enableSound',
-        disableSound: '_disableSound'
+        disableSound: '_disableSound',
+        login: '_login',
+        logout: '_logout',
+        openSettings: 'openSettings',
+        error: '_error'
       },
 
-      _goTo: function(e) {
-        var state = e.detail.state || {};
-        var title = e.detail.title || '';
-        var url = e.detail.url || '/';
-        setTimeout(function() {
-          window.history.pushState(state, title, url);
-          window.dispatchEvent(new Event('location-changed'));  
-        });
+      _redirect: function (e) {
+        this.set('route.path', e.detail);
       },
 
-      _back: function() {
+      _back: function () {
         window.history.go(-1);
       },
 
-      _scrollIntoView: function(e) {
-        e.detail.scrollIntoView({behavior: 'smooth'});
+      _scrollIntoView: function (e) {
+        e.detail.scrollIntoView({ behavior: 'smooth' });
       },
 
-      _openDialog: function(e) {
+      _openDialog: function (e) {
         this.$[e.detail.id].open(e);
       },
 
-      _timerFab: function(e) {
+      _timerFab: function (e) {
         var payload = e.detail;
         this.timerFabPayload = {
           icon: payload.icon || false,
@@ -257,7 +302,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
       },
 
-      _flash: function() {
+      _flash: function () {
         if (this.settings.flash) {
           this.$.flashAlert.fireFlash();
         }
@@ -266,34 +311,63 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _sound: function() {
+      _sound: function () {
         this.$.flashAlert.fireSound();
       },
 
-      _testSound: function() {
+      _testSound: function () {
         this.$.flashAlert.testSound();
       },
 
-      _enableSound: function() {
+      _enableSound: function () {
         this.$.soundDialog.open();
       },
 
-      _disableSound: function() {
+      _disableSound: function () {
         this.$.settingsDialog.disableSound();
       },
 
+      _login: function (e) {
+        var provider = e.detail;
+        if (provider == 'google') {
+          this.$.authController.google();
+        } else if (provider == 'facebook') {
+          this.$.authController.facebook();
+        }
+      },
+
+      _logout: function () {
+        this.$.authController.logout();
+      },
+
+      _error: function (e) {
+        this.alert(e.detail.toString(), 5000);
+      },
+
       // Functions
-      clearLocalStorage: function() {
+      clearLocalStorage: function () {
         localStorage.clear();
         location = location.pathname + '?now=' + Date.now();
       },
 
-      toggleConfigureSheet: function(e) {
+      toggleConfigureSheet: function (e) {
         this.showBulkEdits = e.detail.value;
       },
 
-      openSettings: function() {
+      openSettings: function () {
         this.$.settingsDialog.open();
+      },
+
+      alert: function (message, duration) {
+        var tempDuration = this.$.toast.duration;
+        if (duration) {
+          this.$.toast.duration = duration;
+        }
+        this.$.toast.text = message;
+        this.$.toast.show();
+        setTimeout(function () {
+          this.$.toast.duration = tempDuration;
+        }.bind(this), tempDuration);
       }
     });
   </script>

@@ -22,9 +22,9 @@
           <paper-icon-button icon="content-copy" on-click="duplicate"></paper-icon-button>
         </template>
         <template is="dom-if" if="[[!showBulkEdits]]">
-          <paper-icon-button icon="hourglass-empty" on-click="addWork"></paper-icon-button>
-          <paper-icon-button icon="av:pause-circle-outline" on-click="addRest"></paper-icon-button>
-          <paper-icon-button icon="custom:stopwatch" on-click="addStopwatch"></paper-icon-button>
+          <paper-icon-button class="text-work" icon="hourglass-empty" on-click="addWork"></paper-icon-button>
+          <paper-icon-button class="text-rest" icon="av:pause-circle-outline" on-click="addRest"></paper-icon-button>
+          <paper-icon-button class="text-stopwatch" icon="custom:stopwatch" on-click="addStopwatch"></paper-icon-button>
         </template> 
       </div>
     </template>

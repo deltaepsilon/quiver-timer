@@ -1,0 +1,83 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="login-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+      
+      h1 {
+        font-size: 10vw;
+        line-height: 10vw;
+        margin: 0;
+      }
+
+      .third {
+        height: 33.3vh;
+      }
+
+      div, iframe {
+        max-width: 100%;
+      }
+
+      p {
+        text-align: center;
+      }
+    </style>
+
+    <div class="layout vertical center">
+      <div class="third layout vertical center-justified">
+        <h1>Login 👇</h1>  
+      </div>
+      <div class="third layout vertical start-justified">
+        <paper-button class="google" on-click="google" style="margin-bottom: 2rem;">Login with Google</paper-button>
+        <paper-button class="facebook" on-click="facebook">Login with Facebook</paper-button>
+      </div>
+      <div class="third">
+        <p>
+          My name is <a href="https://www.chrisesplin.com">Chris</a>. I'm building Quiver Timer to be the best timer app of all time. I know. It's probably not a life's work, but it's ambitious enough for now.
+        </p>
+        <p>
+          I also crash my bike. A lot. 👇
+        </p>
+      </div>
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/rI5jOVqBvos" frameborder="0" allowfullscreen></iframe>
+      
+      
+
+
+
+    </div>
+    
+  </template>
+  <script>
+    Polymer({
+       is: "login-view",
+
+       properties: {
+         user: {
+           type: Object,
+           observer: '_user'
+         }
+       },
+
+       // Observers
+       _user: function(user) {
+         if (user) this.fire('redirect', '/timers');
+       },
+
+       // Functions
+       google: function() {
+         this.fire('login', 'google');
+       },
+
+       facebook: function() {
+         this.fire('login', 'facebook');
+       },
+    });
+  </script>
+</dom-module>

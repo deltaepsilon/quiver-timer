@@ -1,0 +1,97 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-icons/hardware-icons.html">
+
+<link rel="import" href="../icons.html">
+
+<script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+
+<dom-module id="nav-controller">
+  <template>
+    <style include="iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+      }
+
+      .hidden {
+        visibility: hidden;
+      }
+
+      a {
+        color: var(--primary-text-color);
+      }
+    </style>
+<div class="layout horizontal justified" style="position: relative; z-index: 1;">
+<a href="/timers" class$="[[arrowClass]]">
+  <paper-icon-button icon="arrow-back"></paper-icon-button>
+</a>
+<div class="">
+  <button is="google-cast-button"></button>
+  <paper-icon-button icon="hardware:cast" on-click="cast"></paper-icon-button>
+  <paper-icon-button class$="[[exitClass]]" icon="extended:exit" on-click="logout"></paper-icon-button>
+  <paper-icon-button class$="[[settingsClass]]" icon="settings" on-click="openSettings"></paper-icon-button>
+</div>
+
+</div>
+</template>
+<script>
+  Polymer({
+    is: "nav-controller",
+
+    properties: {
+      page: String,
+      arrowClass: {
+        type: Boolean,
+        computed: '_arrowClass(page)'
+      },
+      settingsClass: {
+        type: Boolean,
+        computed: '_settingsClass(page)'
+      },
+      exitClass: {
+        type: Boolean,
+        computed: '_settingsClass(page)'
+      }
+    },
+
+    attached: function () {
+      window.__onGCastApiAvailable = function (isAvailable) {
+        if (isAvailable) {
+          cast.framework.CastContext.getInstance().setOptions({
+            receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+            autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+          });
+
+        }
+      }
+    },
+
+    _arrowClass: function (page) {
+      var showPages = ['timer', 'configure', 'fourohfour'];
+      return !!~showPages.indexOf(page) ? 'show' : 'hidden';
+    },
+
+    _settingsClass: function (page) {
+      var showPages = ['timers', 'timer', 'configure'];
+      return !!~showPages.indexOf(page) ? 'show' : 'hidden';
+    },
+
+    openSettings: function () {
+      this.fire('openSettings');
+    },
+
+    logout: function () {
+      this.fire('logout');
+    },
+
+    cast: function () {
+      console.log('cast');
+    },
+
+    getCastSession: function() {
+      return cast.framework.CastContext.getInstance().getCurrentSession();
+    }
+  });
+</script>
+</dom-module>

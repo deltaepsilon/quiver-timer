@@ -20,353 +20,374 @@
     <style include="shared-styles color-wheel">
       :host {
         display: block;
+        --paper-fab-background: var(--primary-color);
       }
+
       #periods-wrapper {
+        position: relative;
         @apply(--shadow-elevation-2dp);
+      }
+
+      #title-wrapper {
+        position: relative;
+        top: -34px;
+        left: 44px;
+        width: calc(100vw - 13rem);
+        z-index: 1;
+      }
+
+      #title {
+        margin: 0;
+      }
+
+      #save {
+        position: absolute;
+        right: 13px;
+        top: -28px;
+        z-index: 1;
       }
     </style>
 
-    <app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
+<app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
 
-    <app-pouchdb-document id="periodsStorage" db-name="quiver-timer" doc-id="periods" data="{{periodsData}}"></app-pouchdb-document>
-    <app-pouchdb-document id="timerNameStorage" db-name="quiver-timer" doc-id="timer-name" data="{{timerNameData}}"></app-pouchdb-document>
-    <app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
+<app-pouchdb-document id="periodsStorage" db-name="quiver-timer" doc-id="periods" data="{{periodsData}}"></app-pouchdb-document>
+<app-pouchdb-document id="timerNameStorage" db-name="quiver-timer" doc-id="timer-name" data="{{timerNameData}}"></app-pouchdb-document>
+<app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
 
-    <paper-material elevation="1" class="layout horizontal justified">
-      <h3 on-click="editName">[[timerName]]</h3>
-      <digital-clock total-seconds="[[totalSeconds]]" style="margin: 21px 50px 0 0;"></digital-clock>
-    </paper-material>
-    <div style="padding: 0rem 1rem 6rem;">
-      <div id="periods-wrapper">
-        <template id="periods" is="dom-repeat" items="{{periods}}" as="period">
-          <configure-period class="divided" period="{{period}}" rev="[[period._rev]]" on-period-updated="updatePeriodHandler" index="[[index]]" periods-count="[[periods.length]]"></configure-period>
-        </template>  
-      </div>  
-      <div class="layout horizontal end-justified" style="padding: 30px 24px;" hidden$="[[!showSelectAll]]">
-        <paper-checkbox id="toggleCheckbox" on-checked-changed="toggleSelectAll"></paper-checkbox>  
-      </div>
-    </div>
+<div id="title-wrapper" class="layout vertical">
+  <h3 id="title" on-click="editName">[[timerName]]</h3>
+  <digital-clock id="totalSeconds" total-seconds="[[totalSeconds]]"></digital-clock>
+</div>
+
+
+
+<div style="padding: 0rem 1rem 6rem;">
+<div id="periods-wrapper">
+  <paper-fab id="save" icon="save" on-click="save"></paper-fab>
+  <template id="periods" is="dom-repeat" items="{{periods}}" as="period">
+    <configure-period class="divided" period="{{period}}" rev="[[period._rev]]" on-period-updated="updatePeriodHandler" index="[[index]]"
+      periods-count="[[periods.length]]"></configure-period>
   </template>
-  <script>
-    var newTimerName = 'New Timer';
-    Polymer({
-      is: "configure-view",
+</div>
+<div class="layout horizontal end-justified" style="padding: 30px 24px;" hidden$="[[!showSelectAll]]">
+<paper-checkbox id="toggleCheckbox" on-checked-changed="toggleSelectAll"></paper-checkbox>
+</div>
+</div>
+</template>
+<script>
+  var newTimerName = 'New Timer';
+  Polymer({
+    is: "configure-view",
 
-      behaviors: [TimerDefaults],
+    behaviors: [TimerDefaults],
 
-      properties: {
-        localRoute: Object,
-        session: String,
-        title: {
-          type: String,
-          notify: true,
-          computed: '_title(timerName)'
-        },
-        timerKey: {
-          type: String,
-          computed: '_timerKey(routeData.timerKey)'
-        },
-        timersData: Object,
-        timers: {
-          type: Array,
-          computed: '_value(timersData.value)'
-        },
-        timerNameData: Object,
-        timerName: {
-          type: String,
-          computed: '_timerName(timerNameData.value)'
-        },
-        periodsData: Object,
-        periods: {
-          type: Array,
-          computed: '_periods(periodsData, periodsData._rev)'
-        },
-        totalSeconds: {
-          type: Number,
-          computed: '_totalSeconds(periods, periodsData._rev)'
-        },
-        selected: {
-          type: Array,
-          value: [],
-          notify: true
-        },
-        bulk: {
-          type: Boolean,
-          computed: '_bulk(periods, periodsData.value)',
-          notify: true
-        },
-        sheetPayload: {
-          type: Object,
-          notify: true
-        },
-        storageReady: Boolean,
-        showSelectAll: {
-          type: Boolean,
-          computed: '_showSelectAll(periods.length)'
-        }
+    properties: {
+      localRoute: Object,
+      session: String,
+      title: {
+        type: String,
+        notify: true,
+        computed: '_title(timerName)'
       },
-
-      attached: function() {
-        console.log('attached configure view'); 
-        this.fire('timerFab', {
-          icon: 'save',
-          url: '/timers',
-          callback: this.save.bind(this)
-        });
-        this.sheetPayload = this._sheetPayload();
+      timerKey: {
+        type: String,
+        computed: '_timerKey(routeData.timerKey)'
       },
-
-      _title: function(name) {
-        return name;
+      timersData: Object,
+      timers: {
+        type: Array,
+        computed: '_value(timersData.value)'
       },
-
-      // Observers
-      observers: [
-        '_setEditing(routeData.timerKey, timersData)'
-      ],
-
-      _setEditing: function(timerKey, timersData) {
-        if (timersData.value && timersData.value[timerKey]) {
-          this.set('timerNameData.value', timersData.value[timerKey].name);
-          this.set('periodsData.value', timersData.value[timerKey].periods); 
-
-        }
+      timerNameData: Object,
+      timerName: {
+        type: String,
+        computed: '_timerName(timerNameData.value)'
       },
-
-      _timerKey: function(timerKey) {
-        return timerKey;
+      periodsData: Object,
+      periods: {
+        type: Array,
+        computed: '_periods(periodsData, periodsData._rev)'
       },
-
-      _value: function(value) {
-        return value;
+      totalSeconds: {
+        type: Number,
+        computed: '_totalSeconds(periods, periodsData._rev)'
       },
-
-      _timerName: function(value) {
-        return value || newTimerName;
+      selected: {
+        type: Array,
+        value: [],
+        notify: true
       },
-
-      _periods: function(periodsData) {
-        if (periodsData.value && periodsData.value.length) return _.clone(periodsData.value || []);
-        this.addDefaultPeriod();
+      bulk: {
+        type: Boolean,
+        computed: '_bulk(periods, periodsData.value)',
+        notify: true
       },
-
-      _totalSeconds: function(periods) {
-        return !periods ? 0 : periods.reduce(function(seconds, period) {
-          return seconds + period.totalSeconds;
-        }, 0);
+      sheetPayload: {
+        type: Object,
+        notify: true
       },
+      storageReady: Boolean,
+      showSelectAll: {
+        type: Boolean,
+        computed: '_showSelectAll(periods.length)'
+      }
+    },
 
-      _bulk: function(periods) {
-        return !periods ? false : !!periods.find(function(period) {
-          return period.selected;
-        });
-      },
+    attached: function () {
+      this.sheetPayload = this._sheetPayload();
+    },
 
-      _sheetPayload: function() {
-        return {
-          cancel: this.clearSelected.bind(this),
-          duplicate: this.duplicateSelected.bind(this),
-          delete: this.deleteSelected.bind(this),
-          addWork: this.addWork.bind(this),
-          addRest: this.addRest.bind(this),
-          addStopwatch: this.addStopwatch.bind(this),
-        };
-      },
+    _title: function (name) {
+      return name;
+    },
 
-      _showSelectAll: function(i) {
-        return i > 2;
-      },
+    // Observers
+    observers: [
+      '_setEditing(routeData.timerKey, timersData)'
+    ],
 
-      // Listeners
-      listeners: {
-        moveUp: 'moveUp',
-        moveDown: 'moveDown',
-        delete: 'delete',
-        select: 'select'
-      },
+    _setEditing: function (timerKey, timersData) {
+      if (timersData.value && timersData.value[timerKey]) {
+        this.set('timerNameData.value', timersData.value[timerKey].name);
+        this.set('periodsData.value', timersData.value[timerKey].periods);
 
-      moveUp: function(e) {
-        if (e.detail < 1) return console.log('skipping up');
-        var index = e.detail.index;
-        var period = this._cleanPeriod(this.periods[index]);
-        this.periodsData.value.splice(index, 1);
-        this.periodsData.value.splice(index - 1, 0, period);
-        setTimeout(e.detail.callback);
-        this._periodsSave();
-      },
+      }
+    },
 
-      moveDown: function(e) {
-        if (e.detail >= this.periods.length - 1) return console.log('skipping up');
-        var index = e.detail.index;
-        var period = this._cleanPeriod(this.periods[index]);
-        this.periodsData.value.splice(index, 1);
-        this.periodsData.value.splice(index + 1, 0, period);
-        setTimeout(e.detail.callback);
-        this._periodsSave();
-      },
+    _timerKey: function (timerKey) {
+      return timerKey;
+    },
 
-      delete: function(e) {
-        this.periodsData.value.splice(e.detail, 1);
-        this._periodsSave();
-      },
+    _value: function (value) {
+      return value;
+    },
 
-      updatePeriodHandler: function(e) {
-        var period = _.clone(e.detail.period);
-        var target = e.target;
-        if (e.detail.refresh) {
-          this.updatePeriod(e.detail.index, period);
-        } else {
-          this.periods[e.detail.index] = period;
-        }
-      },
+    _timerName: function (value) {
+      return value || newTimerName;
+    },
 
-      toggleSelectAll: function(e) {
-        return e.target.checked ? this.selectAll() : setTimeout(this.clearSelected.bind(this));
-      },
+    _periods: function (periodsData) {
+      if (periodsData.value && periodsData.value.length) return _.clone(periodsData.value || []);
+      this.addDefaultPeriod();
+    },
 
-      // Functions
-      _cleanPeriod: function(period) {
-        return _.omit(_.clone(period), ['select', 'deselect']);
-      },
+    _totalSeconds: function (periods) {
+      return !periods ? 0 : periods.reduce(function (seconds, period) {
+        return seconds + period.totalSeconds;
+      }, 0);
+    },
 
-      _periodsSave: _.debounce(function() {
-        this.periodsData.value = this.periodsData.value.map(function(period) {
-          return this._cleanPeriod(period);
-        }.bind(this));
+    _bulk: function (periods) {
+      return !periods ? false : !!periods.find(function (period) {
+        return period.selected;
+      });
+    },
+
+    _sheetPayload: function () {
+      return {
+        cancel: this.clearSelected.bind(this),
+        duplicate: this.duplicateSelected.bind(this),
+        delete: this.deleteSelected.bind(this),
+        addWork: this.addWork.bind(this),
+        addRest: this.addRest.bind(this),
+        addStopwatch: this.addStopwatch.bind(this),
+      };
+    },
+
+    _showSelectAll: function (i) {
+      return i > 2;
+    },
+
+    // Listeners
+    listeners: {
+      moveUp: 'moveUp',
+      moveDown: 'moveDown',
+      delete: 'delete',
+      select: 'select'
+    },
+
+    moveUp: function (e) {
+      if (e.detail < 1) return console.log('skipping up');
+      var index = e.detail.index;
+      var period = this._cleanPeriod(this.periods[index]);
+      this.periodsData.value.splice(index, 1);
+      this.periodsData.value.splice(index - 1, 0, period);
+      setTimeout(e.detail.callback);
+      this._periodsSave();
+    },
+
+    moveDown: function (e) {
+      if (e.detail >= this.periods.length - 1) return console.log('skipping up');
+      var index = e.detail.index;
+      var period = this._cleanPeriod(this.periods[index]);
+      this.periodsData.value.splice(index, 1);
+      this.periodsData.value.splice(index + 1, 0, period);
+      setTimeout(e.detail.callback);
+      this._periodsSave();
+    },
+
+    delete: function (e) {
+      this.periodsData.value.splice(e.detail, 1);
+      this._periodsSave();
+    },
+
+    updatePeriodHandler: function (e) {
+      var period = _.clone(e.detail.period);
+      var target = e.target;
+      if (e.detail.refresh) {
+        this.updatePeriod(e.detail.index, period);
+      } else {
+        this.periods[e.detail.index] = period;
+      }
+    },
+
+    toggleSelectAll: function (e) {
+      return e.target.checked ? this.selectAll() : setTimeout(this.clearSelected.bind(this));
+    },
+
+    // Functions
+    _cleanPeriod: function (period) {
+      return _.omit(_.clone(period), ['select', 'deselect']);
+    },
+
+    _periodsSave: _.debounce(function () {
+      this.periodsData.value = this.periodsData.value.map(function (period) {
+        return this._cleanPeriod(period);
+      }.bind(this));
+      this.notifyPath('periodsData.value');
+    }, 50),
+
+    reset: function () {
+      this.timerNameData.value = newTimerName;
+      this.notifyPath('timerNameData.value');
+      if (this.periodsData && this.periodsData.value) {
+        this.periodsData.value.splice(0, this.periodsData.value.length);
         this.notifyPath('periodsData.value');
-      }, 50),
+      }
+      this.splice('periods', 0, this.periods.length);
+    },
 
-      reset: function() {
-        this.timerNameData.value = newTimerName;
-        this.notifyPath('timerNameData.value');
-        if (this.periodsData && this.periodsData.value) {
-          this.periodsData.value.splice(0, this.periodsData.value.length);
-          this.notifyPath('periodsData.value');
+    save: function () {
+      var timer = {
+        name: this.timerName,
+        periods: this.periodsData.value.map(function (period) {
+          return this._cleanPeriod(period);
+        }.bind(this)),
+        totalSeconds: this.totalSeconds,
+        updated: Date.now()
+      };
+      if (!this.timersData.value) this.timersData.value = [];
+      if (this.timerKey != 'new') {
+        this.timersData.value.splice(+this.timerKey, 1, timer);
+      } else {
+        this.timersData.value.push(timer);
+      }
+      this.notifyPath('timersData.value')
+      this.reset();
+      this.fire('back');
+      // this.fire('goTo', {
+      //   state: {},
+      //   title: 'Timers',
+      //   url: '/timers'
+      // });  
+    },
+
+    editName: function () {
+      this.fire('openDialog', {
+        id: 'itemNameDialog',
+        name: this.timerName,
+        callback: function (name) {
+          this.set('timerNameData.value', name || 'Fred Timer');
+        }.bind(this)
+      });
+    },
+
+    addWork: function () {
+      this.addPeriod('work');
+    },
+
+    addRest: function () {
+      this.addPeriod('rest');
+    },
+
+    addStopwatch: function () {
+      this.addPeriod('stopwatch');
+    },
+
+    addDefaultPeriod: _.debounce(function () {
+      setTimeout(function () {
+        this.addPeriod('prepare');
+      }.bind(this));
+    }, 50),
+
+    addPeriod: function (type) {
+      if (!this.periodsData.value) this.periodsData.value = [];
+      if (type == 'prepare' && !this.periodsData.value.filter(function (period) {
+        return !!period.type == 'prepare';
+      })) return;
+      this.periodsData.value.push(this.getPeriodDefault(type, true));
+      this._periodsSave();
+
+    },
+
+    updatePeriod: function (index, period) {
+      this.periodsData.value[index] = this._cleanPeriod(period);
+      this._periodsSave();
+    },
+
+    selectAll: function () {
+      this.periodsData.value.forEach(function (period, index) {
+        if (period.type !== 'prepare') {
+          period.selected = true;
         }
-        this.splice('periods', 0, this.periods.length);
-      },
-
-      save: function() {
-        var timer = {
-          name: this.timerName,
-          periods: this.periodsData.value.map(function(period) {
-            return this._cleanPeriod(period);
-          }.bind(this)),
-          totalSeconds: this.totalSeconds,
-          updated: Date.now()
-        };
-        if (!this.timersData.value) this.timersData.value = [];
-        if (this.timerKey != 'new') {
-          this.timersData.value.splice(+this.timerKey, 1, timer);
-        } else {
-          this.timersData.value.push(timer);
+      }.bind(this));
+      this.periods.forEach(function (period, index) {
+        if (period.type !== 'prepare') {
+          period.selected = true;
+          period.select();
         }
-        this.notifyPath('timersData.value')
-        this.reset();
-        this.fire('back');
-        // this.fire('goTo', {
-        //   state: {},
-        //   title: 'Timers',
-        //   url: '/timers'
-        // });  
-      },
+      }.bind(this));
+      this._periodsSave();
+    },
 
-      editName: function() {
-        this.fire('openDialog', {
-          id: 'itemNameDialog',
-          name: this.timerName,
-          callback: function(name) {
-            this.set('timerNameData.value', name || 'Fred Timer');
-          }.bind(this)
-        });
-      },
-
-      addWork: function() {
-        this.addPeriod('work');
-      },
-
-      addRest: function() {
-        this.addPeriod('rest');
-      },
-
-      addStopwatch: function() {
-        this.addPeriod('stopwatch');
-      },
-
-      addDefaultPeriod: _.debounce(function() {
-        setTimeout(function() {
-          this.addPeriod('prepare');
-        }.bind(this));
-      }, 50),
-
-      addPeriod: function(type) {
-        if (!this.periodsData.value) this.periodsData.value = [];
-        if (type == 'prepare' && !this.periodsData.value.filter(function(period) {
-          return !!period.type == 'prepare';
-        })) return;
-        this.periodsData.value.push(this.getPeriodDefault(type, true));
-        this._periodsSave();
-        
-      },
-
-      updatePeriod: function(index, period) {
-        this.periodsData.value[index] = this._cleanPeriod(period);
-        this._periodsSave();
-      },
-
-      selectAll: function() {
-        this.periodsData.value.forEach(function(period, index) {
-          if (period.type !== 'prepare') {
-            period.selected = true;
-          } 
-        }.bind(this));
-        this.periods.forEach(function(period, index) {
-          if (period.type !== 'prepare') {
-            period.selected = true;
-            period.select();
-          } 
-        }.bind(this));
-        this._periodsSave();
-      },
-
-      clearSelected: _.debounce(function() {
-        if (!this.periodsData.value) return;
-        this.periodsData.value.forEach(function(period, index) {
-          if (period.type !== 'prepare') { 
-            period.selected = false;
-          }
-        }.bind(this));
-        this.periods.forEach(function(period, index) {
-          if (period.type !== 'prepare') { 
-            period.selected = false;
-            period.deselect();
-          }
-        }.bind(this));
-        this._periodsSave();
-        this.$.toggleCheckbox.set('checked', false);
-      }, 50),
-
-      duplicateSelected: function(e) {
-        this.periods.forEach(function(period, index) {
-          if (period.selected) {
-            var newPeriod = this._cleanPeriod(this.periodsData.value[index]);
-            newPeriod.selected = false;
-            this.periodsData.value.push(newPeriod);
-          }
-        }.bind(this));
-        this.clearSelected();
-      },
-
-      deleteSelected: function() {
-        var i = this.periods.length;
-        while (i--) {
-          if (this.periods[i].selected) {
-            this.periodsData.value.splice(i, 1);
-          } 
+    clearSelected: _.debounce(function () {
+      if (!this.periodsData.value) return;
+      this.periodsData.value.forEach(function (period, index) {
+        if (period.type !== 'prepare') {
+          period.selected = false;
         }
-        this.clearSelected();
-      },
+      }.bind(this));
+      this.periods.forEach(function (period, index) {
+        if (period.type !== 'prepare') {
+          period.selected = false;
+          period.deselect();
+        }
+      }.bind(this));
+      this._periodsSave();
+      this.$.toggleCheckbox.set('checked', false);
+    }, 50),
 
-    });
-  </script>
+    duplicateSelected: function (e) {
+      this.periods.forEach(function (period, index) {
+        if (period.selected) {
+          var newPeriod = this._cleanPeriod(this.periodsData.value[index]);
+          newPeriod.selected = false;
+          this.periodsData.value.push(newPeriod);
+        }
+      }.bind(this));
+      this.clearSelected();
+    },
+
+    deleteSelected: function () {
+      var i = this.periods.length;
+      while (i--) {
+        if (this.periods[i].selected) {
+          this.periodsData.value.splice(i, 1);
+        }
+      }
+      this.clearSelected();
+    },
+
+  });
+</script>
 </dom-module>

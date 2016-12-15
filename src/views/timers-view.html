@@ -9,6 +9,7 @@
 <link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
 
 <link rel="import" href="../gesture-service/gesture-service.html">
 <link rel="import" href="../digital-clock/digital-clock.html">
@@ -34,85 +35,97 @@
         left: 0;
         background: white;
       }
+
+      #add {
+        position: absolute;
+        bottom: 2rem;
+        right: 2rem;
+      }
     </style>
 
-    <app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
+<app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
 
-    <template is="dom-if" if="[[timers.length]]">
-      <paper-material class="list" elevation="1">
-        <template is="dom-repeat" items="[[timers]]" as="timer">
-          <div>
-            <paper-icon-item two-line>
-              <a class="flex layout horizontal center-justified" href="/timer/[[index]]/stopped" item-icon>
-                <paper-icon-button icon="av:play-circle-outline"></paper-icon-button>
-              </a>
-              <paper-item-body>
-                <div class="layout horizontal justified center">
-                  <div class="flex">
-                    <div>
-                      <strong>[[timer.name]]</strong>  
-                    </div>
-                    <div secondary>
-                      <digital-clock total-seconds="[[timer.totalSeconds]]"></digital-clock>
-                    </div>  
-                  </div>
-                  <paper-menu-button>
-                    <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
-                    <paper-menu class="dropdown-content">
-                      <paper-item>
-                        <a href="/configure/[[index]]">
-                          <paper-icon-button icon="editor:mode-edit"></paper-icon-button>
-                        </a>  
-                      </paper-item>
-                      <paper-item>
-                        <paper-icon-button icon="delete" on-click="delete" index="[[index]]"></paper-icon-button>  
-                      </paper-item>
-                    </paper-menu>
-                  </paper-menu-button>  
+<a id="add" href="/configure/new">
+  <paper-fab icon="add"></paper-fab>
+</a>
+
+
+
+<template is="dom-if" if="[[timers.length]]">
+  <paper-material class="list" elevation="1">
+    <template is="dom-repeat" items="[[timers]]" as="timer">
+      <div>
+        <paper-icon-item two-line>
+          <a class="flex layout horizontal center-justified" href="/timer/[[index]]/stopped" item-icon>
+            <paper-icon-button icon="av:play-circle-outline"></paper-icon-button>
+          </a>
+          <paper-item-body>
+            <div class="layout horizontal justified center">
+              <div class="flex">
+                <div>
+                  <strong>[[timer.name]]</strong>
                 </div>
-              </paper-item-body>
-            </paper-icon-item>
-          </div>
-        </template>
-      </paper-material>
+                <div secondary>
+                  <digital-clock total-seconds="[[timer.totalSeconds]]"></digital-clock>
+                </div>
+              </div>
+              <paper-menu-button>
+                <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
+                <paper-menu class="dropdown-content">
+                  <paper-item>
+                    <a href="/configure/[[index]]">
+                      <paper-icon-button icon="editor:mode-edit"></paper-icon-button>
+                    </a>
+                  </paper-item>
+                  <paper-item>
+                    <paper-icon-button icon="delete" on-click="delete" index="[[index]]"></paper-icon-button>
+                  </paper-item>
+                </paper-menu>
+              </paper-menu-button>
+            </div>
+          </paper-item-body>
+        </paper-icon-item>
+      </div>
     </template>
-  </template>
-  <script>
+  </paper-material>
+</template>
+</template>
+<script>
     Polymer({
-       is: "timers-view",
+      is: "timers-view",
 
-       properties: {
-         timersData: Object,
-         timers: {
-           type: Array,
-           computed: '_timers(timersData.value)'
-         }
-       },
+      properties: {
+        timersData: Object,
+        timers: {
+          type: Array,
+          computed: '_timers(timersData.value)'
+        }
+      },
 
-       attached: function() {
-         this.fire('timerFab', {
-           icon: 'add',
-           url: '/configure/new'
-         });
-       },
+      attached: function () {
+        this.fire('timerFab', {
+          icon: 'add',
+          url: '/configure/new'
+        });
+      },
 
       // Observers
-      _timers: function(timers) {
+      _timers: function (timers) {
         return timers || [];
       },
 
       //  Listeners
-      _dataChanged: function(e) {
+      _dataChanged: function (e) {
         this.splice.apply(this, ['timers', 0, this.timers.length].concat(e.detail.value));
         var timers = e.detail.value;
         if (!timers.length) {
-          // console.log('goTo temporarily disabled');
-          //  this.fire('goTo', {url: '/configure/new'});
+          // console.log('redirect temporarily disabled');
+          //  this.fire('redirect', '/configure/new);
         }
       },
 
       // Functions
-      delete: function(e) {
+      delete: function (e) {
         this.timersData.value.splice(+e.target.index, 1);
         this.notifyPath('timersData.value');
       }

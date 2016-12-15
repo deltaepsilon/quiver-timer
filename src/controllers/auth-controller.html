@@ -1,0 +1,86 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="auth-controller">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+  </template>
+  <script>
+    Polymer({
+       is: "auth-controller",
+
+       properties: {
+         firebase: Object,
+         loginEndpoint: String,
+         user: {
+           type: Object,
+           notify: true 
+         },
+         connected: {
+           type: Boolean,
+           value: false
+         },
+         page: String,
+         loginPages: {
+           type: Array,
+           value: ['timers', 'timer', 'configure']
+         }
+       },
+
+       // Observers
+       observers: [
+         '_firebase(firebase, loginEndpoint)',
+         '_redirect(connected, user, page, loginPages)'
+      ],
+       
+       _firebase: function(firebase, loginEndpoint) {
+         firebase.auth().onAuthStateChanged(function(user) {
+           this.user = user;
+         }.bind(this));
+       },
+
+       _redirect: function(connected, user, page, loginPages) {
+         if (connected && !user && !!~loginPages.indexOf(page)) {
+           this.fire('redirect', '/login');
+         }
+       },
+
+       // Functions
+       logout: function() {
+         this.firebase.auth().signOut();
+       },
+
+       google: function() {
+         var provider = new this.firebase.auth.GoogleAuthProvider();
+         provider.addScope('profile');
+         provider.addScope('email');
+         this.signInWithPopupProvider(provider);
+       },
+
+       facebook: function() {
+         var provider = new this.firebase.auth.FacebookAuthProvider();
+         provider.addScope('public_profile');
+         provider.addScope('email');
+         this.signInWithPopupProvider(provider);
+       },
+
+       signInWithPopupProvider: function(provider) {
+         return this.firebase.auth().signInWithPopup(provider)
+          .catch(function(err) {
+            console.log('err', err);
+            if (err.code == 'auth/account-exists-with-different-credential') {
+              this.fire('error', 'Account already exists with this email. Try other login method.');
+            } else {
+              this.fire('error', err.toString());
+            }
+          }.bind(this));
+       }
+
+
+    });
+  </script>
+</dom-module>
