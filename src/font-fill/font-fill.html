@@ -1,9 +1,11 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
 <dom-module id="font-fill">
   <template>
-    <style>
+    <style include="iron-flex iron-flex-alignment">
       :host {
         display: block;
         position: relative;
@@ -18,8 +20,16 @@
         line-height: 1em;
         white-space: nowrap;
       }
+
+      .pinned {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+      }
     </style>
-    <div id="wrapper" class="pinned layout horizontal center-justified center" style$="font-size: [[fontSize]]em;">
+    <div id="wrapper" class="pinned layout horizontal center-justified center">
       <span id="content">[[text]]</span>
     </div>
   </template>
@@ -46,8 +56,9 @@
       },
 
       resize: function() {
+        this.$.content.setAttribute('style', 'font-size: 1em; color: transparent');
         if (!this.debouncedResize) { // Debounced functions must be local, not shared
-          this.debouncedResize = _.debounce(this.setFontSize.bind(this), 50);
+          this.debouncedResize = _.debounce(this.setFontSize.bind(this), 100);
         }
         this.debouncedResize();
       },
@@ -56,8 +67,9 @@
         var wRatio = this.$.content.offsetWidth / this.$.wrapper.offsetWidth;
         var hRatio = this.$.content.offsetHeight / this.$.wrapper.offsetHeight;
         if (wRatio || hRatio) {
-          this.fontSize = this.fontSize / Math.max(wRatio, hRatio);
+          this.fontSize = 1 / Math.max(wRatio, hRatio);
         }
+        this.$.content.setAttribute('style', 'font-size: ' + this.fontSize + 'em;');
       }
     });
   </script>

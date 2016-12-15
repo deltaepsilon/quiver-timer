@@ -36,7 +36,8 @@
       }
       
       .color-block {
-        padding: 1.5rem
+        padding: 1rem;
+        border-radius: 50%;
       }
 
       #title a {
@@ -57,7 +58,7 @@
 </div>
 
 <paper-material class="list" elevation="1">
-  <a id="top-fab" href$="/timer/[[timerKey]]/playing">
+  <a id="top-fab" style="left: 13px;" href$="/timer/[[timerKey]]/playing">
     <paper-fab icon="av:play-arrow"></paper-fab>
   </a>
   <template is="dom-repeat" items="[[timer.periods]]" as="period">

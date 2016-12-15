@@ -18,6 +18,10 @@
         visibility: hidden;
       }
 
+      .none {
+        display: none;
+      }
+
       a {
         color: var(--primary-text-color);
       }
@@ -30,10 +34,10 @@
 <a href="/timers" class$="[[arrowClass]]">
   <paper-icon-button icon="arrow-back"></paper-icon-button>
 </a>
+<paper-icon-button class$="[[castClass]]" icon="hardware:cast" on-click="cast"></paper-icon-button>
 <h3 id="title">[[pageTitle]]</h3>
 <div class="flex layout horizontal end-justified">
   <button is="google-cast-button"></button>
-  <paper-icon-button class$="[[castClass]]" icon="hardware:cast" on-click="cast"></paper-icon-button>
   <paper-icon-button class$="[[exitClass]]" icon="extended:exit" on-click="logout"></paper-icon-button>
   <paper-icon-button class$="[[settingsClass]]" icon="settings" on-click="openSettings"></paper-icon-button>
 </div>
@@ -46,17 +50,18 @@
 
     properties: {
       page: String,
+      tail: Object,
       pageTitle: {
         type: String,
         computed: '_pageTitle(page)'
       },
       arrowClass: {
         type: Boolean,
-        computed: '_arrowClass(page)'
+        computed: '_arrowClass(page, tail)'
       },
       castClass: {
         type: Boolean,
-        computed: '_castClass(page)'
+        computed: '_castClass(page, tail)'
       },
       exitClass: {
         type: Boolean,
@@ -85,14 +90,16 @@
       return ''
     },
 
-    _arrowClass: function (page) {
+    _arrowClass: function (page, tail) {
       var showPages = ['timer', 'configure', 'fourohfour'];
+      if (tail.path.match(/playing/)) return 'none';
       return !!~showPages.indexOf(page) ? 'show' : 'hidden';
     },
 
-    _castClass: function (page) {
+    _castClass: function (page, tail) {
       var showPages = ['timer'];
-      return !!~showPages.indexOf(page) ? 'show' : 'hidden';
+      if (tail.path.match(/stopped/)) return 'none';
+      return !!~showPages.indexOf(page) ? 'show' : 'none';
     },
 
     _settingsClass: function (page) {

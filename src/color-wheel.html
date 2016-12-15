@@ -229,13 +229,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: var(--md-text-light);
       }
     </style>
-  </template>
-  <script>
+</template>
+<script>
     QuiverColorWheel = {
       properties: {
-         colorWheel: {
-           type: Array,
-           value: [
+        colorWheel: {
+          type: Array,
+          value: [
             '#F44336',
             '#ff4081',
             '#7B1FA2',
@@ -255,9 +255,82 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             '#795548',
             '#9E9E9E',
             '#607D8D'
-           ]
-         }
-       }
+          ]
+        },
+        prepareColor: {
+          type: String,
+          value: '#F0F757'
+        },
+        workColors: {
+          type: Array,
+          value: [
+            '#006BA6',
+            '#0496FF',
+            '#FFBC42',
+            '#D81159',
+            '#8F2D56',
+            '#522B29',
+            '#37FF8B',
+            '#51D6FF',
+            '#8D9EC6',
+            '#A06B9A',
+            '#495375',
+            '#A5855E',
+            '#FC8679',
+            '#1C4859',
+            '#331C0E',
+            '#017F0D',
+            '#485884',
+            '#131F3A'
+          ]
+        },
+        restColors: {
+          type: Array,
+          value: [
+            '#EDFAEF',
+            '#BDC8C4',
+            '#7A8487',
+            '#626D72',
+            '#404863',
+            '#ECEEEF',
+            '#C1C1C4',
+            '#858487',
+            '#6F7072',
+            '#514E63',
+            '#EBE4EF',
+            '#C5BBC4',
+            '#8F8487',
+            '#7B7272',
+            '#605463',
+            '#EFEFEF',
+            '#C6C6C6',
+            '#7F8387'
+          ]
+        },
+        stopwatchColors: {
+          type: Array,
+          value: [
+            '#000000',
+            '#FFFFFF',
+            '#111111',
+            '#EEEEEE',
+            '#222222',
+            '#DDDDDD',
+            '#333333',
+            '#CCCCCC',
+            '#444444',
+            '#BBBBBB',
+            '#555555',
+            '#AAAAAA',
+            '#666666',
+            '#A1A1A1',
+            '#777777',
+            '#B2B2B2',
+            '#999999',
+            '#C3C3C3'
+          ]
+        }
+      }
     };
   </script>
 </dom-module>

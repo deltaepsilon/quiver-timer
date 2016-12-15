@@ -227,11 +227,13 @@
            // Only filler arcs should be transparent
            if (!d.data.totalSeconds) return 'transparent';
            if (!d.data.color) return 'gray';
-           return color(d.data.color);
+           return d3.color(d.data.color);
+          //  return color(d.data.color);
          };
 
          function innerCircleFill(d, i) {
-           var c = d3.hsl(color(d.data.color));
+          //  var c = d3.hsl(color(d.data.color));
+          var c = d3.hsl(d3.color(d.data.color));
           return d3.hsl((c.h + 5), (c.s + .07), (c.l - .15));
          };
          
