@@ -58,7 +58,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         
         --primary-color: var(--color-metallic-seaweed);
         --primary-text-color: var(--color-white);
-        --primary-background-color: var(--color-gainsboro);
+        --primary-background-color: var(--color-white);
         --dark-primary-color: var(--color-maastricht-blue);
         --light-primary-color: var(--color-gainsboro);
         --default-primary-color: var(--color-metallic-seaweed);
@@ -76,8 +76,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --drawer-border-color: 1px solid var(--color-maastricht-blue);
         --drawer-toolbar-border-color: 1px solid var(--color-maastricht-blue);
         /* paper-menu */
-        --paper-menu-background-color: var(--color-gainsboro);
-        --menu-link-color: var(--color-maastricht-blue);
+        --paper-menu-background-color: var(--color-white);
         /* paper-input */
         /*--paper-input-container-color: rgba(255, 255, 255, 0.64);
         --paper-input-container-focus-color: rgba(255, 255, 255, 1);
@@ -274,7 +273,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         login: '_login',
         logout: '_logout',
         openSettings: 'openSettings',
-        error: '_error'
+        error: '_error',
+        restoreDefaults: 'restoreDefaults'
       },
 
       _redirect: function (e) {
@@ -368,6 +368,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         setTimeout(function () {
           this.$.toast.duration = tempDuration;
         }.bind(this), tempDuration);
+      },
+
+      restoreDefaults: function() {
+        this.$.timersView.restoreDefaults();
       }
     });
   </script>

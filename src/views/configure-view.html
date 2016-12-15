@@ -28,24 +28,7 @@
         @apply(--shadow-elevation-2dp);
       }
 
-      #title-wrapper {
-        position: relative;
-        top: -34px;
-        left: 44px;
-        width: calc(100vw - 13rem);
-        z-index: 1;
-      }
-
-      #title {
-        margin: 0;
-      }
-
-      #save {
-        position: absolute;
-        right: 13px;
-        top: -28px;
-        z-index: 1;
-      }
+      
     </style>
 
 <app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
@@ -54,16 +37,14 @@
 <app-pouchdb-document id="timerNameStorage" db-name="quiver-timer" doc-id="timer-name" data="{{timerNameData}}"></app-pouchdb-document>
 <app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
 
-<div id="title-wrapper" class="layout vertical">
+<div id="top-title" class="layout vertical">
   <h3 id="title" on-click="editName">[[timerName]]</h3>
   <digital-clock id="totalSeconds" total-seconds="[[totalSeconds]]"></digital-clock>
 </div>
 
-
-
 <div style="padding: 0rem 1rem 6rem;">
 <div id="periods-wrapper">
-  <paper-fab id="save" icon="save" on-click="save"></paper-fab>
+  <paper-fab id="top-fab" icon="save" on-click="save"></paper-fab>
   <template id="periods" is="dom-repeat" items="{{periods}}" as="period">
     <configure-period class="divided" period="{{period}}" rev="[[period._rev]]" on-period-updated="updatePeriodHandler" index="[[index]]"
       periods-count="[[periods.length]]"></configure-period>

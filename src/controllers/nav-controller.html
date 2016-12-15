@@ -21,14 +21,19 @@
       a {
         color: var(--primary-text-color);
       }
+
+      #title {
+        margin: 7px 0 0;
+      }
     </style>
 <div class="layout horizontal justified" style="position: relative; z-index: 1;">
 <a href="/timers" class$="[[arrowClass]]">
   <paper-icon-button icon="arrow-back"></paper-icon-button>
 </a>
-<div class="">
+<h3 id="title">[[pageTitle]]</h3>
+<div class="flex layout horizontal end-justified">
   <button is="google-cast-button"></button>
-  <paper-icon-button icon="hardware:cast" on-click="cast"></paper-icon-button>
+  <paper-icon-button class$="[[castClass]]" icon="hardware:cast" on-click="cast"></paper-icon-button>
   <paper-icon-button class$="[[exitClass]]" icon="extended:exit" on-click="logout"></paper-icon-button>
   <paper-icon-button class$="[[settingsClass]]" icon="settings" on-click="openSettings"></paper-icon-button>
 </div>
@@ -41,15 +46,23 @@
 
     properties: {
       page: String,
+      pageTitle: {
+        type: String,
+        computed: '_pageTitle(page)'
+      },
       arrowClass: {
         type: Boolean,
         computed: '_arrowClass(page)'
       },
-      settingsClass: {
+      castClass: {
+        type: Boolean,
+        computed: '_castClass(page)'
+      },
+      exitClass: {
         type: Boolean,
         computed: '_settingsClass(page)'
       },
-      exitClass: {
+      settingsClass: {
         type: Boolean,
         computed: '_settingsClass(page)'
       }
@@ -67,8 +80,18 @@
       }
     },
 
+    _pageTitle: function(page) {
+      if (page == 'timers') return 'Timers';
+      return ''
+    },
+
     _arrowClass: function (page) {
       var showPages = ['timer', 'configure', 'fourohfour'];
+      return !!~showPages.indexOf(page) ? 'show' : 'hidden';
+    },
+
+    _castClass: function (page) {
+      var showPages = ['timer'];
       return !!~showPages.indexOf(page) ? 'show' : 'hidden';
     },
 

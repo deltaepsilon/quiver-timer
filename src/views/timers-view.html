@@ -13,6 +13,7 @@
 
 <link rel="import" href="../gesture-service/gesture-service.html">
 <link rel="import" href="../digital-clock/digital-clock.html">
+<link rel="import" href="../timer-behavior/timer-defaults.html">
 <link rel="import" href="../shared-styles.html">
 
 <dom-module id="timers-view">
@@ -36,26 +37,33 @@
         background: white;
       }
 
+      .list {
+        margin-bottom: 6rem;
+      }
+
       #add {
-        position: absolute;
+        position: fixed;
         bottom: 2rem;
         right: 2rem;
+        z-index: 1;
+      }
+
+      paper-icon-button {
+        color: var(--dark-primary-color) ;
       }
     </style>
 
-<app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
+<app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}" on-data-changed="_data"></app-pouchdb-document>
 
 <a id="add" href="/configure/new">
   <paper-fab icon="add"></paper-fab>
 </a>
 
-
-
 <template is="dom-if" if="[[timers.length]]">
   <paper-material class="list" elevation="1">
     <template is="dom-repeat" items="[[timers]]" as="timer">
       <div>
-        <paper-icon-item two-line>
+        <paper-icon-item two-line style="padding: 0;">
           <a class="flex layout horizontal center-justified" href="/timer/[[index]]/stopped" item-icon>
             <paper-icon-button icon="av:play-circle-outline"></paper-icon-button>
           </a>
@@ -78,6 +86,9 @@
                     </a>
                   </paper-item>
                   <paper-item>
+                    <paper-icon-button icon="content-copy" on-click="duplicate" index="[[index]]"></paper-icon-button>
+                  </paper-item>
+                  <paper-item>
                     <paper-icon-button icon="delete" on-click="delete" index="[[index]]"></paper-icon-button>
                   </paper-item>
                 </paper-menu>
@@ -94,40 +105,61 @@
     Polymer({
       is: "timers-view",
 
+      behaviors: [TimerDefaults],
+
       properties: {
         timersData: Object,
         timers: {
           type: Array,
           computed: '_timers(timersData.value)'
+        },
+        ready: {
+          type: Boolean,
+          value: false
         }
-      },
-
-      attached: function () {
-        this.fire('timerFab', {
-          icon: 'add',
-          url: '/configure/new'
-        });
       },
 
       // Observers
-      _timers: function (timers) {
-        return timers || [];
-      },
+      observers: ['_restoreDefaults(timersData, ready)'],
 
-      //  Listeners
-      _dataChanged: function (e) {
-        this.splice.apply(this, ['timers', 0, this.timers.length].concat(e.detail.value));
-        var timers = e.detail.value;
-        if (!timers.length) {
-          // console.log('redirect temporarily disabled');
-          //  this.fire('redirect', '/configure/new);
+      _restoreDefaults: function(timers, ready) {
+        if (ready && timers._rev && !timers.value) {
+          this.restoreDefaults();
         }
       },
 
+      _timers: function (timers) {
+        return timers ? timers.slice(0) : [];
+      },
+
+      //  Listeners
+      _data: function(e) {
+        if (e.detail.value._id) {
+          this.ready = true;
+        };
+      },
+
       // Functions
+      save: function() {
+        return this.$.timersStorage.save();  
+      },
+
+      duplicate: function (e) {
+        this.timersData.value.push(this.timersData.value[+e.target.index]);
+        this.save();
+      },
+
       delete: function (e) {
         this.timersData.value.splice(+e.target.index, 1);
-        this.notifyPath('timersData.value');
+        this.save();
+      },
+
+      restoreDefaults: function() {
+        if (!this.timersData) {
+          this.timersData = {};
+        }
+        this.timersData.value = this.timerDefaults;
+        this.save();
       }
     });
   </script>
