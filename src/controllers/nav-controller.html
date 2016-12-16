@@ -1,11 +1,8 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
-<link rel="import" href="../../bower_components/iron-icons/hardware-icons.html">
 
 <link rel="import" href="../icons.html">
-
-<script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 
 <dom-module id="nav-controller">
   <template>
@@ -29,25 +26,13 @@
       #title {
         margin: 7px 0 0;
       }
-
-      #cast-button {
-        width: 24px;
-        background: none;
-        padding: 0;
-        margin-top: 8px;
-        height: 24px;
-        border: none;
-        margin-right: 10px;
-      }
     </style>
 <div class="layout horizontal justified" style="position: relative; z-index: 1;">
 <a href="/timers" class$="[[arrowClass]]">
   <paper-icon-button icon="arrow-back"></paper-icon-button>
 </a>
-<!--<paper-icon-button class$="[[castClass]]" icon="hardware:cast" on-click="cast"></paper-icon-button>-->
 <h3 id="title">[[pageTitle]]</h3>
 <div class="flex layout horizontal end-justified">
-  <button id="cast-button" class$="[[castClass]]" is="google-cast-button"></button>
   <paper-icon-button class$="[[exitClass]]" icon="extended:exit" on-click="logout"></paper-icon-button>
   <paper-icon-button class$="[[settingsClass]]" icon="settings" on-click="openSettings"></paper-icon-button>
 </div>
@@ -69,10 +54,6 @@
         type: Boolean,
         computed: '_arrowClass(page, tail)'
       },
-      castClass: {
-        type: Boolean,
-        computed: '_castClass(page, tail)'
-      },
       exitClass: {
         type: Boolean,
         computed: '_settingsClass(page)'
@@ -83,18 +64,7 @@
       }
     },
 
-    attached: function () {
-      window.__onGCastApiAvailable = function (isAvailable) {
-        if (isAvailable) {
-          cast.framework.CastContext.getInstance().setOptions({
-            receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-            autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-          });
-
-        }
-      }
-    },
-
+    // Observers
     _pageTitle: function (page) {
       if (page == 'timers') return 'Timers';
       return ''
@@ -104,12 +74,6 @@
       var showPages = ['timer', 'configure', 'fourohfour'];
       if (tail.path.match(/playing/)) return 'none';
       return !!~showPages.indexOf(page) ? 'show' : 'hidden';
-    },
-
-    _castClass: function (page, tail) {
-      var showPages = ['timer'];
-      if (tail.path.match(/stopped/)) return 'none';
-      return !!~showPages.indexOf(page) ? 'show' : 'none';
     },
 
     _settingsClass: function (page) {
@@ -123,14 +87,6 @@
 
     logout: function () {
       this.fire('logout');
-    },
-
-    cast: function () {
-      console.log('cast');
-    },
-
-    getCastSession: function () {
-      return cast.framework.CastContext.getInstance().getCurrentSession();
     }
   });
 </script>

@@ -10,43 +10,44 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>Quiver Timer</title>
-    <meta name="description" content="An interval timer app for tabata, HIIT, Crossfit, yoga, Pilates, etc.">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <link rel="icon" href="/images/favicon.ico">
+  <title>Quiver Timer</title>
+  <meta name="description" content="An interval timer app for tabata, HIIT, Crossfit, yoga, Pilates, etc.">
 
-    <!-- See https://goo.gl/OOhYW5 -->
-    <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/images/favicon.ico">
 
-    <!-- See https://goo.gl/qRE0vM -->
-    <meta name="theme-color" content="#512DA8">
+  <!-- See https://goo.gl/OOhYW5 -->
+  <link rel="manifest" href="/manifest.json">
 
-    <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Quiver Timer">
+  <!-- See https://goo.gl/qRE0vM -->
+  <meta name="theme-color" content="#512DA8">
 
-    <!-- Add to homescreen for Safari on iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Quiver Timer">
+  <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="Quiver Timer">
 
-    <!-- Homescreen icons -->
-    <link rel="apple-touch-icon" href="/images/manifest/icon-48x48.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="/images/manifest/icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="96x96" href="/images/manifest/icon-96x96.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/images/manifest/icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="/images/manifest/icon-192x192.png">
+  <!-- Add to homescreen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Quiver Timer">
 
-    <!-- Tile icon for Windows 8 (144x144 + tile color) -->
-    <meta name="msapplication-TileImage" content="/images/manifest/icon-144x144.png">
-    <meta name="msapplication-TileColor" content="#512DA8">
-    <meta name="msapplication-tap-highlight" content="no">
+  <!-- Homescreen icons -->
+  <link rel="apple-touch-icon" href="/images/manifest/icon-48x48.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/images/manifest/icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="96x96" href="/images/manifest/icon-96x96.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/images/manifest/icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/images/manifest/icon-192x192.png">
 
-    <script>
+  <!-- Tile icon for Windows 8 (144x144 + tile color) -->
+  <meta name="msapplication-TileImage" content="/images/manifest/icon-144x144.png">
+  <meta name="msapplication-TileColor" content="#512DA8">
+  <meta name="msapplication-tap-highlight" content="no">
+
+  <script>
       // Setup Polymer options
       window.Polymer = {
         dom: 'shadow',
@@ -54,15 +55,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       };
 
       // Load webcomponentsjs polyfill if browser does not support native Web Components
-      (function() {
+      (function () {
         'use strict';
 
-        var onload = function() {
+        var onload = function () {
           // For native Imports, manually fire WebComponentsReady so user code
           // can use the same code path for native and polyfill'd imports.
           if (!window.HTMLImports) {
             document.dispatchEvent(
-              new CustomEvent('WebComponentsReady', {bubbles: true})
+              new CustomEvent('WebComponentsReady', { bubbles: true })
             );
           }
         };
@@ -86,15 +87,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       // Load pre-caching Service Worker
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
           navigator.serviceWorker.register('/service-worker.js');
         });
       }
     </script>
 
-    <link rel="import" href="/src/quiver-timer.html">
+<link rel="import" href="/src/quiver-timer.html">
 
-    <style>
+<style>
       body {
         margin: 0;
         font-family: 'Roboto', 'Noto', sans-serif;
@@ -104,9 +105,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: #FFF;
       }
     </style>
-  </head>
-  <body>
-    <quiver-timer id="app"></quiver-timer>
-    <!-- Built with love using Polymer Starter Kit -->
-  </body>
+</head>
+
+<body>
+  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+  <script>
+      (function () {
+        window.addEventListener('showCast', function (e) {
+          document.body.querySelector('#cast-button').setAttribute('style', 'display: block;');
+        });
+        window.addEventListener('hideCast', function (e) {
+          document.body.querySelector('#cast-button').removeAttribute('style');
+        });
+      })();
+    </script>
+<style>
+      #cast-button {
+        position: absolute;
+        top: 1.5rem;
+        right: 107px;
+
+        display: none;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        background: none;
+        border: none;
+        z-index: 2;
+
+        --connected-color: #E01130;
+        --disconnected-color: #FFFFFF;
+      }
+
+      #cast-button:focus {
+        outline: none;
+      }
+    </style>
+<button id="cast-button" class$="[[castClass]]" is="google-cast-button"></button>
+<quiver-timer id="app"></quiver-timer>
+<!-- Built with love using Polymer Starter Kit -->
+</body>
+
 </html>
