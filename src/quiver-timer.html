@@ -39,7 +39,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <!-- Firestore -->
 <script src="https://www.gstatic.com/firebasejs/3.5.0/firebase.js"></script>
-<script src="https://storage.cloud.google.com/firebase-preview-drop/web/firestore/0.2.1/firestore.js"></script>
 
 
 <dom-module id="quiver-timer">
@@ -302,7 +301,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
       },
 
-      _flash: function () {
+      _flash: function (e) {
         if (this.settings.flash) {
           this.$.flashAlert.fireFlash();
         }

@@ -29,15 +29,25 @@
       #title {
         margin: 7px 0 0;
       }
+
+      #cast-button {
+        width: 24px;
+        background: none;
+        padding: 0;
+        margin-top: 8px;
+        height: 24px;
+        border: none;
+        margin-right: 10px;
+      }
     </style>
 <div class="layout horizontal justified" style="position: relative; z-index: 1;">
 <a href="/timers" class$="[[arrowClass]]">
   <paper-icon-button icon="arrow-back"></paper-icon-button>
 </a>
-<paper-icon-button class$="[[castClass]]" icon="hardware:cast" on-click="cast"></paper-icon-button>
+<!--<paper-icon-button class$="[[castClass]]" icon="hardware:cast" on-click="cast"></paper-icon-button>-->
 <h3 id="title">[[pageTitle]]</h3>
 <div class="flex layout horizontal end-justified">
-  <button is="google-cast-button"></button>
+  <button id="cast-button" class$="[[castClass]]" is="google-cast-button"></button>
   <paper-icon-button class$="[[exitClass]]" icon="extended:exit" on-click="logout"></paper-icon-button>
   <paper-icon-button class$="[[settingsClass]]" icon="settings" on-click="openSettings"></paper-icon-button>
 </div>
@@ -85,7 +95,7 @@
       }
     },
 
-    _pageTitle: function(page) {
+    _pageTitle: function (page) {
       if (page == 'timers') return 'Timers';
       return ''
     },
@@ -119,7 +129,7 @@
       console.log('cast');
     },
 
-    getCastSession: function() {
+    getCastSession: function () {
       return cast.framework.CastContext.getInstance().getCurrentSession();
     }
   });

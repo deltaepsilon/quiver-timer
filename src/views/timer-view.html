@@ -109,6 +109,7 @@
       ],
 
       _timerFab: function (state) {
+        console.log('state changed', state);
         switch (true) {
           case state == 'playing':
             this.page = 'playing';
@@ -188,25 +189,15 @@
 
       play: function () {
         this.state = 'playing';
-        this.fire('timerFab');
         this.fire('testSound');
       },
 
       pause: function () {
         this.state = 'paused';
-        this.fire('timerFab');
-        //  this.fire('timerFab', {
-        //    icon: 'av:play-arrow',
-        //    url: '/timer/' + this.timerKey + '/playing'
-        //  });
       },
 
       stop: function () {
         this.state = 'stopped';
-        this.fire('timerFab', {
-          icon: 'av:play-arrow',
-          url: '/timer/' + this.timerKey + '/playing'
-        });
         this.refresh();
       },
 

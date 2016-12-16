@@ -220,6 +220,7 @@
     },
 
     _flash: function(periodSeconds, periodTotalSeconds, periodType) {
+      if (this.state !== 'playing') return;
       var threshold = 3;
       if (periodType == 'stopwatch') {
         if (periodTotalSeconds - periodSeconds == threshold) {

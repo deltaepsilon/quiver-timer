@@ -253,7 +253,9 @@
         name: this.timerName,
         periods: this.periodsData.value.map(function (period) {
           return this._cleanPeriod(period);
-        }.bind(this)),
+        }.bind(this)).filter(function(period, i) {
+          return i == 0 || period.type !== 'prepare';
+        }),
         totalSeconds: this.totalSeconds,
         updated: Date.now()
       };
@@ -263,14 +265,16 @@
       } else {
         this.timersData.value.push(timer);
       }
-      this.notifyPath('timersData.value')
+      this.notifyPath('timersData.value');
       this.reset();
-      this.fire('back');
-      // this.fire('goTo', {
-      //   state: {},
-      //   title: 'Timers',
-      //   url: '/timers'
-      // });  
+      this.saveStorage();
+      this.fire('redirect', '/timers');  
+    },
+
+    saveStorage: function() {
+      this.$.periodsStorage.save();
+      this.$.timerNameStorage.save();
+      this.$.timersStorage.save();
     },
 
     editName: function () {
@@ -278,7 +282,7 @@
         id: 'itemNameDialog',
         name: this.timerName,
         callback: function (name) {
-          this.set('timerNameData.value', name || 'Fred Timer');
+          this.set('timerNameData.value', name || 'Mistake!!!');
         }.bind(this)
       });
     },
