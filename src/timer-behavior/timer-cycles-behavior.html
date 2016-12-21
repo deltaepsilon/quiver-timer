@@ -148,14 +148,30 @@
         nextMatch = i + matches.count * matches.multiplier;
 
         return cycles;
-      }, []).map(function(cycle) {
-        return cycle.seconds = this.getCycleSeconds(cycle), cycle;
+      }, []);
+
+      var periodIndex = 0;
+      var result = periodCycles.map(function(cycle) {
+        var cleanCycle = cycle.map(function(period) {
+          var cleanPeriod = _.clone(periods[periodIndex]);
+          cleanPeriod.index = periodIndex;
+          periodIndex++;
+          return cleanPeriod;
+        });
+        cleanCycle.seconds = this.getCycleSeconds(cycle);
+        return cleanCycle;
       }.bind(this));
 
+      // result.forEach(function(cycle) {
+      //   cycle.forEach(function(period) {
+      //     console.log(period);
+      //   });
+      // });
+
       if (this.splice) { // Null check for testing
-        this.splice.apply(this, ['periodCycles', 0, this.periodCycles.length].concat(periodCycles));
+        this.splice.apply(this, ['periodCycles', 0, this.periodCycles.length].concat(result));
       } else {
-        return periodCycles;
+        return result;
       }
     },
 
