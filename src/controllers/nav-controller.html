@@ -73,7 +73,7 @@
 
     _arrowClass: function (page, tail) {
       var showPages = ['timer', 'configure', 'fourohfour'];
-      if (tail.path.match(/playing/)) return 'none';
+      // if (tail.path.match(/playing/)) return 'none';
       return !!~showPages.indexOf(page) ? 'show' : 'hidden';
     },
 
