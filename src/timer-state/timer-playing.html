@@ -68,68 +68,78 @@
 
         @apply(--layout-horizontal);
       }
+      
+      .bottom-icons {
+        position: absolute;
+        right: 1rem;
+        bottom: 7rem;
+        left: 1rem;
+        font-size: 3vh;
+      }
     </style>
-    <div id="wrapper" class="pinned" type$="[[period.type]]" current-period$="[[currentPeriod]]" state$="[[state]]">
-      <div class$="layout [[position]]" style="height: calc(100% - 4rem)">
-        <digital-timer id="timer" class="timer flex" global-seconds="[[seconds]]" period-seconds="[[periodSeconds]]" global-cycle-seconds="[[seconds]]"
-          global-cycle="[[globalCycle]]" period-cycle-seconds="[[periodCycleSeconds]]" period-cycle="[[periodCycle]]" color-wheel="[[colorWheel]]"></digital-timer>
-      </div>
+<div id="wrapper" class="pinned" type$="[[period.type]]" current-period$="[[currentPeriod]]" state$="[[state]]">
+  <div class$="layout [[position]]" style="height: calc(100% - 4rem)">
+<digital-timer id="timer" class="timer flex" global-seconds="[[seconds]]" period-seconds="[[periodSeconds]]" global-cycle-seconds="[[seconds]]"
+  global-cycle="[[globalCycle]]" period-cycle-seconds="[[periodCycleSeconds]]" period-cycle="[[periodCycle]]" color-wheel="[[colorWheel]]"></digital-timer>
+</div>
 
-      <div class="total-seconds">
-        <digital-clock total-seconds="[[totalPeriodSeconds]]"></digital-clock>
-        <div class="flex"></div>
-        <digital-clock total-seconds="[[totalGlobalSeconds]]"></digital-clock>
-      </div>
+<div class="total-seconds">
+  <digital-clock total-seconds="[[totalPeriodSeconds]]"></digital-clock>
+  <div class="flex"></div>
+  <digital-clock total-seconds="[[totalGlobalSeconds]]"></digital-clock>
+</div>
 
-      <iron-icon id="icon" icon="[[period.icon]]" style="position: relative; bottom: 4rem;"></iron-icon>
+<div class="bottom-icons layout horizontal justified center">
+  <iron-icon id="icon" icon="[[period.icon]]"></iron-icon>  
+</div>
 
-      <div class="show-playing">
-        <div class="bottom-sheet layout horizontal justified center">
-          <paper-icon-button class="invisible-first-period" icon="av:skip-previous" on-click="previous"></paper-icon-button>
-          <a href$="/timer/[[timerKey]]/paused">
-            <paper-fab icon="av:pause"></paper-fab>
-          </a>
-          <paper-icon-button icon="av:skip-next" on-click="next"></paper-icon-button>
-        </div>
-      </div>
+<div class="show-playing">
+  <div class="bottom-sheet layout horizontal justified center">
+    <paper-icon-button class="invisible-first-period" icon="av:skip-previous" on-click="previous"></paper-icon-button>
+    <a href$="/timer/[[timerKey]]/paused">
+      <paper-fab icon="av:pause"></paper-fab>
+    </a>
+    <paper-icon-button icon="av:skip-next" on-click="next"></paper-icon-button>
+  </div>
+</div>
 
-      <div class="show-paused">
-        <div class="bottom-sheet layout horizontal justified center">
-          <paper-icon-button icon="av:replay" on-click="refresh"></paper-icon-button>
-          <a href$="/timer/[[timerKey]]/playing">
-            <paper-fab icon="av:play-arrow"></paper-fab>
-          </a>
-          <a href$="/timer/[[timerKey]]/stopped">
-            <paper-icon-button icon="av:stop"></paper-icon-button>
-          </a>
-        </div>
-      </div>
-    </div>
-  </template>
-  <script>
-    Polymer({
-       is: "timer-playing",
+<div class="show-paused">
+  <div class="bottom-sheet layout horizontal justified center">
+    <paper-icon-button icon="av:replay" on-click="refresh"></paper-icon-button>
+    <a href$="/timer/[[timerKey]]/playing">
+      <paper-fab icon="av:play-arrow"></paper-fab>
+    </a>
+    <a href$="/timer/[[timerKey]]/stopped">
+      <paper-icon-button icon="av:stop"></paper-icon-button>
+    </a>
+  </div>
+</div>
+</div>
+</template>
+<script>
+  Polymer({
+    is: "timer-playing",
 
-       behaviors: [TimerStateBehavior, TimerCyclesBehavior, QuiverColorWheel],
+    behaviors: [TimerStateBehavior, TimerCyclesBehavior, QuiverColorWheel],
 
-       properties: {
-         state: String
-       },
+    properties: {
+      state: String
+    },
 
-       observers: ['_state(state)'],
+    observers: ['_state(state)'],
 
-       _state: function(state) {
-         if (state == 'stopped') this.clear();
-       },
+    _state: function (state) {
+      if (state == 'stopped') this.clear();
+    },
 
-       // Functions
-       refresh: function() {
-         this.$.timer.refresh();
-       },
+    // Functions
+    refresh: function () {
+      this.$.timer.refresh();
+    },
 
-       clear: function() {
-         this.$.timer.emptyChart();
-       }
-    });
-  </script>
+    clear: function () {
+      this.$.timer.emptyChart();
+    }
+  });
+</script>
 </dom-module>

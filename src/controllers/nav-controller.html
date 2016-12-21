@@ -48,7 +48,7 @@
       tail: Object,
       pageTitle: {
         type: String,
-        computed: '_pageTitle(page)'
+        computed: '_pageTitle(page, tail)'
       },
       arrowClass: {
         type: Boolean,
@@ -65,8 +65,9 @@
     },
 
     // Observers
-    _pageTitle: function (page) {
+    _pageTitle: function (page, tail) {
       if (page == 'timers') return 'Timers';
+      if (page == 'timer' && tail.path.match(/playing/)) return location.hostname;
       return ''
     },
 
