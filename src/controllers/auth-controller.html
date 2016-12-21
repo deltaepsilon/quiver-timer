@@ -1,5 +1,8 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../firebase-behavior/firebase-behavior.html">
 <link rel="import" href="../shared-styles.html">
+
+<script src="../../bower_components/lodash/lodash.js"></script>
 
 <dom-module id="auth-controller">
   <template>
@@ -8,79 +11,130 @@
         display: block;
       }
     </style>
-  </template>
-  <script>
-    Polymer({
-       is: "auth-controller",
+</template>
+<script>
+  Polymer({
+    is: "auth-controller",
 
-       properties: {
-         firebase: Object,
-         loginEndpoint: String,
-         user: {
-           type: Object,
-           notify: true 
-         },
-         connected: {
-           type: Boolean,
-           value: false
-         },
-         page: String,
-         loginPages: {
-           type: Array,
-           value: ['timers', 'timer', 'configure']
-         }
-       },
+    behaviors: [FirebaseBehavior],
 
-       // Observers
-       observers: [
-         '_firebase(firebase, loginEndpoint)',
-         '_redirect(connected, user, page, loginPages)'
-      ],
-       
-       _firebase: function(firebase, loginEndpoint) {
-         firebase.auth().onAuthStateChanged(function(user) {
-           this.user = user;
-         }.bind(this));
-       },
+    properties: {
+      firebase: Object,
+      loginEndpoint: String,
+      accountEndpoint: String,
+      user: {
+        type: Object,
+        notify: true
+      },
+      account: {
+        type: Object,
+        notify: true
+      },
+      connected: {
+        type: Boolean,
+        value: false
+      },
+      page: String,
+      loginPages: {
+        type: Array,
+        value: ['timers', 'timer', 'configure']
+      }
+    },
 
-       _redirect: function(connected, user, page, loginPages) {
-         if (connected && !user && !!~loginPages.indexOf(page)) {
-           this.fire('redirect', '/login');
-         }
-       },
+    // Observers
+    observers: [
+      '_firebase(firebase, loginEndpoint)',
+      '_redirect(connected, user, page, loginPages)'
+    ],
 
-       // Functions
-       logout: function() {
-         this.firebase.auth().signOut();
-       },
+    _firebase: function (firebase, loginEndpoint) {
+      var handler;
+      var accountRef;
+      firebase.auth().onAuthStateChanged(function (user) {
+        this.user = user;
+        if (!user && handler && accountRef) {
+          accountRef.off('value', handler);
+        } if (user) {
+          var endpoint = this.replaceWildcard(this.loginEndpoint, 'uid', user.uid);
+          var loginRef = firebase.database().ref(endpoint);
+          var payload = _.pick(user, [
+            'uid',
+            'email',
+            'emailVerified',
+            'displayName',
+            'photoURL',
+            'refreshToken'
+          ]);
+          payload.timestamp = new Date().toString();
 
-       google: function() {
-         var provider = new this.firebase.auth.GoogleAuthProvider();
-         provider.addScope('profile');
-         provider.addScope('email');
-         this.signInWithPopupProvider(provider);
-       },
-
-       facebook: function() {
-         var provider = new this.firebase.auth.FacebookAuthProvider();
-         provider.addScope('public_profile');
-         provider.addScope('email');
-         this.signInWithPopupProvider(provider);
-       },
-
-       signInWithPopupProvider: function(provider) {
-         return this.firebase.auth().signInWithPopup(provider)
-          .catch(function(err) {
-            console.log('err', err);
-            if (err.code == 'auth/account-exists-with-different-credential') {
-              this.fire('error', 'Account already exists with this email. Try other login method.');
-            } else {
+          loginRef.remove()
+            .then(function() {
+              return new Promise(function(resolve, reject) {
+                setTimeout(resolve, 1000);
+              });
+            })
+            .then(function() {
+              return loginRef.set(payload);
+            })
+            .catch(function (err) {
               this.fire('error', err.toString());
-            }
+            }.bind(this));
+          
+          accountRef = firebase.database().ref(this.replaceWildcard(this.accountEndpoint, 'uid', user.uid));
+          handler = accountRef.on('value', function(snap) {
+            this.set('account', snap.val());
           }.bind(this));
-       }
+        }
+      }.bind(this));
+    },
 
+    _redirect: function (connected, user, page, loginPages) {
+      if (connected && !user && !!~loginPages.indexOf(page)) {
+        this.fire('redirect', '/login');
+      }
+    },
 
-    });
-  </script>
+    // Functions
+    logout: function () {
+      this.firebase.auth().signOut();
+    },
+
+    google: function () {
+      var provider = new this.firebase.auth.GoogleAuthProvider();
+      provider.addScope('profile');
+      provider.addScope('email');
+      this.signInWithPopupProvider(provider);
+    },
+
+    facebook: function () {
+      var provider = new this.firebase.auth.FacebookAuthProvider();
+      provider.addScope('public_profile');
+      provider.addScope('email');
+      this.signInWithPopupProvider(provider);
+    },
+
+    signInWithPopupProvider: function (provider) {
+      return this.firebase.auth().signInWithPopup(provider)
+        .catch(function (err) {
+          console.log('err', err);
+          if (err.code == 'auth/account-exists-with-different-credential') {
+            this.fire('error', 'Account already exists with this email. Try other login method.');
+          } else {
+            this.fire('error', err.toString());
+          }
+        }.bind(this));
+    },
+
+    verifyEmail: function() {
+      var user = this.firebase.auth().currentUser;
+      return user.sendEmailVerification()
+        .then(function() {
+          this.fire('alert', 'Email sent. Reload page after verification.');
+        }.bind(this))
+        .catch(function(err) {
+          this.fire('error', err.toString());
+        }.bind(this));
+    }
+  });
+</script>
 </dom-module>

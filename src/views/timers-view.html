@@ -6,6 +6,7 @@
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/iron-icons/av-icons.html">
 <link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
@@ -58,108 +59,121 @@
   <paper-fab icon="add"></paper-fab>
 </a>
 
+
+<template is="dom-if" if="[[!account.emailVerified]]">
+  <div class="layout horizontal center-justified">
+    <paper-button class="primary" on-click="verifyEmail">Verify Email</paper-button>
+  </div>
+</template>
+
+
 <template is="dom-if" if="[[timers.length]]">
   <paper-material class="list" elevation="1">
     <template is="dom-repeat" items="[[timers]]" as="timer">
       <div>
         <paper-icon-item two-line style="padding: 0;">
-          <a class="flex layout horizontal center-justified" href="/timer/[[index]]/stopped" item-icon>
-            <paper-icon-button icon="av:play-circle-outline"></paper-icon-button>
-          </a>
-          <paper-item-body>
-            <div class="layout horizontal justified center">
-              <div class="flex">
-                <div>
-                  <strong>[[timer.name]]</strong>
-                </div>
-                <div secondary>
-                  <digital-clock total-seconds="[[timer.totalSeconds]]"></digital-clock>
-                </div>
-              </div>
-              <paper-menu-button>
-                <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
-                <paper-menu class="dropdown-content">
-                  <paper-item>
-                    <a href="/configure/[[index]]">
-                      <paper-icon-button icon="editor:mode-edit"></paper-icon-button>
-                    </a>
-                  </paper-item>
-                  <paper-item>
-                    <paper-icon-button icon="content-copy" on-click="duplicate" index="[[index]]"></paper-icon-button>
-                  </paper-item>
-                  <paper-item>
-                    <paper-icon-button icon="delete" on-click="delete" index="[[index]]"></paper-icon-button>
-                  </paper-item>
-                </paper-menu>
-              </paper-menu-button>
-            </div>
-          </paper-item-body>
-        </paper-icon-item>
+<a class="flex layout horizontal center-justified" href="/timer/[[index]]/stopped" item-icon>
+  <paper-icon-button icon="av:play-circle-outline"></paper-icon-button>
+</a>
+<paper-item-body>
+  <div class="layout horizontal justified center">
+    <div class="flex">
+      <div>
+        <strong>[[timer.name]]</strong>
       </div>
-    </template>
-  </paper-material>
+      <div secondary>
+        <digital-clock total-seconds="[[timer.totalSeconds]]"></digital-clock>
+      </div>
+    </div>
+    <paper-menu-button>
+      <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
+      <paper-menu class="dropdown-content">
+        <paper-item>
+          <a href="/configure/[[index]]">
+            <paper-icon-button icon="editor:mode-edit"></paper-icon-button>
+          </a>
+        </paper-item>
+        <paper-item>
+          <paper-icon-button icon="content-copy" on-click="duplicate" index="[[index]]"></paper-icon-button>
+        </paper-item>
+        <paper-item>
+          <paper-icon-button icon="delete" on-click="delete" index="[[index]]"></paper-icon-button>
+        </paper-item>
+      </paper-menu>
+    </paper-menu-button>
+  </div>
+</paper-item-body>
+</paper-icon-item>
+</div>
+</template>
+</paper-material>
 </template>
 </template>
 <script>
-    Polymer({
-      is: "timers-view",
+  Polymer({
+    is: "timers-view",
 
-      behaviors: [TimerDefaults],
+    behaviors: [TimerDefaults],
 
-      properties: {
-        timersData: Object,
-        timers: {
-          type: Array,
-          computed: '_timers(timersData.value)'
-        },
-        ready: {
-          type: Boolean,
-          value: false
-        }
+    properties: {
+      account: Object,
+      timersData: Object,
+      timers: {
+        type: Array,
+        computed: '_timers(timersData.value)'
       },
-
-      // Observers
-      observers: ['_restoreDefaults(timersData, ready)'],
-
-      _restoreDefaults: function(timers, ready) {
-        if (ready && timers._rev && !timers.value) {
-          this.restoreDefaults();
-        }
-      },
-
-      _timers: function (timers) {
-        return timers ? timers.slice(0) : [];
-      },
-
-      //  Listeners
-      _data: function(e) {
-        if (e.detail.value._id) {
-          this.ready = true;
-        };
-      },
-
-      // Functions
-      save: function() {
-        return this.$.timersStorage.save();  
-      },
-
-      duplicate: function (e) {
-        this.timersData.value.push(this.timersData.value[+e.target.index]);
-        this.save();
-      },
-
-      delete: function (e) {
-        this.timersData.value.splice(+e.target.index, 1);
-        this.save();
-      },
-
-      restoreDefaults: function() {
-        if (!this.timersData) {
-          this.timersData = {};
-        }
-        this.timersData.value = this.timerDefaults;
-        this.save();
+      ready: {
+        type: Boolean,
+        value: false
       }
-    });
-  </script>
+    },
+
+    // Observers
+    observers: ['_restoreDefaults(timersData, ready)'],
+
+    _restoreDefaults: function (timers, ready) {
+      if (ready && timers._rev && !timers.value) {
+        this.restoreDefaults();
+      }
+    },
+
+    _timers: function (timers) {
+      return timers ? timers.slice(0) : [];
+    },
+
+    //  Listeners
+    _data: function (e) {
+      if (e.detail.value._id) {
+        this.ready = true;
+      };
+    },
+
+    // Functions
+    save: function () {
+      return this.$.timersStorage.save();
+    },
+
+    duplicate: function (e) {
+      this.timersData.value.push(this.timersData.value[+e.target.index]);
+      this.save();
+    },
+
+    delete: function (e) {
+      this.timersData.value.splice(+e.target.index, 1);
+      this.save();
+    },
+
+    restoreDefaults: function () {
+      if (!this.timersData) {
+        this.timersData = {};
+      }
+      this.timersData.value = this.timerDefaults;
+      this.save();
+    },
+
+    verifyEmail: function () {
+      this.fire('verifyEmail');
+    }
+  });
+</script>
 </dom-module>

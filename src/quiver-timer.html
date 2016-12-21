@@ -133,8 +133,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <app-route id="appRoute" route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
 <app-scrollpos-control selected="{{page}}"></app-scrollpos-control>
 <flash-alert id="flashAlert" flash="[[settings.flash]]" sound="[[settings.sound]]" sound-file="[[settings.soundFile]]"></flash-alert>
-<auth-controller id="authController" firebase="[[firebase]]" login-endpoint="[[model.user.write.login]]" connected="[[connected]]"
-  page="[[page]]" user="{{user}}"></auth-controller>
+<auth-controller id="authController" firebase="[[firebase]]" login-endpoint="[[model.user.write.login]]" account-endpoint="[[model.user.read.account]]" connected="[[connected]]"
+  page="[[page]]" user="{{user}}" account="{{account}}"></auth-controller>
 <cast-controller route="[[route]]"></cast-controller>
 <paper-toast id="toast"></paper-toast>
 
@@ -145,7 +145,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="fourohfour" role="main">
     <landing-view id="landingView" name="landing"></landing-view>
     <login-view id="loginView" name="login" user="[[user]]"></login-view>
-    <timers-view id="timersView" name="timers" session="[[session]]"></timers-view>
+    <timers-view id="timersView" name="timers" account="[[account]]"></timers-view>
     <timer-view id="timerView" name="timer" local-route="[[subroute]]" session="[[session]]"></timer-view>
     <configure-view id="configureView" local-route="[[subroute]]" session="[[session]]" name="configure" title="{{configureTitle}}"
       on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
@@ -274,8 +274,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         login: '_login',
         logout: '_logout',
         openSettings: 'openSettings',
+        alert: '_alert',
         error: '_error',
-        restoreDefaults: 'restoreDefaults'
+        restoreDefaults: 'restoreDefaults',
+        verifyEmail: 'verifyEmail'
       },
 
       _redirect: function (e) {
@@ -341,6 +343,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.authController.logout();
       },
 
+      _alert: function (e) {
+        this.alert(e.detail.toString());
+      },
+
       _error: function (e) {
         this.alert(e.detail.toString(), 5000);
       },
@@ -373,6 +379,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       restoreDefaults: function() {
         this.$.timersView.restoreDefaults();
+      },
+
+      verifyEmail: function() {
+        this.$.authController.verifyEmail();
       }
     });
   </script>
