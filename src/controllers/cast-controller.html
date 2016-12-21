@@ -14,31 +14,93 @@
     is: "cast-controller",
 
     properties: {
-      route: Object
-    },
-
-    attached: function () {
-      window.__onGCastApiAvailable = function (isAvailable) {
-        if (isAvailable) {
-          cast.framework.CastContext.getInstance().setOptions({
-            receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-            autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-          });
+      route: Object,
+      sessionState: String,
+      isAvailable: {
+        type: Boolean,
+        value: false
+      },
+      href: {
+        type: String,
+        value: function() {
+          return location.href;
         }
+      },
+      instance: {
+        type: Object,
+        computed: '_instance(isAvailable)'
+      },
+      castSession: {
+        type: Object,
+        computed: '_castSession(instance, sessionState)'
+      },
+      request: {
+        type: Object,
+        computed: '_request(isAvailable, href)'
       }
     },
 
+    attached: function () {
+      window.__onGCastApiAvailable = this.initializeCast.bind(this);
+    },
+
     // Observers
-    observers: ['_route(route.path)'],
+    observers: [
+      '_route(route.path)',
+      '_loadMedia(request, castSession)'
+    ],
 
     _route: function (path) {
-      return path.match(/playing/) ? this.fire('showCast') : this.fire('hideCast');
+      return path.match(/(playing|paused)/) ? this.fire('showCast') : this.fire('hideCast');
+    },
+
+    _loadMedia: function(request, castSession) {
+      if (!request || !castSession) return console.log('media not loaded');
+      return castSession.loadMedia(request)
+        .then(function() {
+          console.log('load media success', arguments);
+        })
+        .catch(function(err) {
+          var error = err.toString();
+          this.fire('error', `Chromecast error: ${error}`);
+        }.bind(this));
+    },
+
+    _instance: function(isAvailable) {
+      if (!isAvailable) return;
+      var instance = cast.framework.CastContext.getInstance();
+      instance.setOptions({
+        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        // autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+      });
+      instance.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, function(e) {
+        this.set('sessionState', e.sessionState);
+      }.bind(this));
+      return instance;
+    },
+
+    _castSession: function(instance, sessionState) {
+      console.log(sessionState);
+      return instance.getCurrentSession();
+    },
+
+    _request: function(isAvailable, href) {
+      if (!isAvailable) return;
+
+      var mediaInfo = new chrome.cast.media.MediaInfo(href, 'text/html');
+      return new chrome.cast.media.LoadRequest(mediaInfo);
     },
 
     // Functions
-    getCastSession: function () {
-      return cast.framework.CastContext.getInstance().getCurrentSession();
-    }
+    initializeCast: function (isAvailable) {
+      this.isAvailable = isAvailable;
+    },
+
+    getPlayerController: function() {
+      var player = new cast.framework.RemotePlayer();
+      return new cast.framework.RemotePlayerController(player);
+    },
+
   });
 </script>
 </dom-module>

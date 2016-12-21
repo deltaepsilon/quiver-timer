@@ -67,7 +67,7 @@
     // Observers
     _pageTitle: function (page, tail) {
       if (page == 'timers') return 'Timers';
-      if (page == 'timer' && tail.path.match(/playing/)) return location.hostname;
+      if (page == 'timer' && !tail.path.match(/stopped/)) return location.hostname;
       return ''
     },
 
