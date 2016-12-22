@@ -15,7 +15,7 @@
 
     properties: {
       route: Object,
-      castEndpoint: String,
+      castUrl: String,
       sessionState: String,
       isAvailable: {
         type: Boolean,
@@ -31,7 +31,11 @@
       },
       request: {
         type: Object,
-        computed: '_request(isAvailable, castEndpoint)'
+        computed: '_request(isAvailable, castUrl)'
+      },
+      playerController: {
+        type: Object,
+        computed: '_playerController(isAvailable)'
       }
     },
 
@@ -42,58 +46,68 @@
     // Observers
     observers: [
       '_route(route.path)',
-      '_loadMedia(request, castSession)'
+      '_loadMedia(request, castSession)',
+      '_playerEvents(playerController)'
     ],
 
     _route: function (path) {
       return path.match(/(playing|paused)/) ? this.fire('showCast') : this.fire('hideCast');
     },
 
-    _loadMedia: function(request, castSession) {
-      if (!request || !castSession) return console.log('media not loaded');
+    _loadMedia: function (request, castSession) {
+      if (!request || !castSession) return;
       return castSession.loadMedia(request)
-        .then(function() {
+        .then(function () {
           console.log('load media success', arguments);
         })
-        .catch(function(err) {
+        .catch(function (err) {
           var error = err.toString();
           this.fire('error', 'Chromecast error: ' + error);
         }.bind(this));
     },
 
-    _instance: function(isAvailable) {
+    _playerEvents: function(playerController) {
+      playerController.addEventListener(cast.framework.RemotePlayerEventType.IS_CONNECTED_CHANGED, function (e) {
+        console.log('ctrl connected changed', e);
+      });
+      playerController.addEventListener(cast.framework.RemotePlayerEventType.SESSION_STATE_CHANGED, function (e) {
+        console.log('ctrl session state changed', e);
+      });
+    },
+
+    _instance: function (isAvailable) {
       if (!isAvailable) return;
       var instance = cast.framework.CastContext.getInstance();
       instance.setOptions({
         receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-        // autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
       });
-      instance.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, function(e) {
+      instance.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, function (e) {
         this.set('sessionState', e.sessionState);
       }.bind(this));
       return instance;
     },
 
-    _castSession: function(instance, sessionState) {
-      console.log(sessionState);
+    _castSession: function (instance, sessionState) {
       return instance.getCurrentSession();
     },
 
-    _request: function(isAvailable, castEndpoint) {
+    _request: function (isAvailable, castUrl) {
       if (!isAvailable) return;
 
       var mediaInfo = new chrome.cast.media.MediaInfo(castEndpoint, 'text/html');
       return new chrome.cast.media.LoadRequest(mediaInfo);
     },
 
+    _playerController: function (isAvailable) {
+      if (!isAvailable) return;
+      var player = new cast.framework.RemotePlayer();
+      return new cast.framework.RemotePlayerController(player);
+    },
+
     // Functions
     initializeCast: function (isAvailable) {
       this.isAvailable = isAvailable;
-    },
-
-    getPlayerController: function() {
-      var player = new cast.framework.RemotePlayer();
-      return new cast.framework.RemotePlayerController(player);
     },
 
   });

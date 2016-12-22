@@ -136,7 +136,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <flash-alert id="flashAlert" flash="[[settings.flash]]" sound="[[settings.sound]]" sound-file="[[settings.soundFile]]"></flash-alert>
 <auth-controller id="authController" firebase="[[firebase]]" login-endpoint="[[model.user.write.login]]" account-endpoint="[[model.user.read.account]]"
   connected="[[connected]]" page="[[page]]" user="{{user}}" account="{{account}}"></auth-controller>
-<cast-controller route="[[route]]" cast-endpoint="[[castEndpoint]]"></cast-controller>
+<cast-controller id="castController" route="[[route]]" cast-endpoint="[[castUrl]]"></cast-controller>
 <paper-toast id="toast"></paper-toast>
 
 
@@ -150,7 +150,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <timer-view id="timerView" name="timer" local-route="[[subroute]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]"></timer-view>
     <configure-view id="configureView" name="configure" local-route="[[subroute]]" title="{{configureTitle}}"
       on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
-    <cast-view id="castView" name="cast" firebase="[[firebase]]" cast-endpoint="[[castEndpoint]]"></cast-view>
+    <cast-view id="castView" name="cast" firebase="[[firebase]]" cast-url="[[castUrl]]"></cast-view>
     <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
     
   </iron-pages>
@@ -212,6 +212,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       castEndpoint: {
         type: String,
         computed: '_castEndpoint(model.public.timer, subroute.path)'
+      },
+      castUrl: {
+        type: String,
+        computed: '_castUrl(user.uid)'
       }
     },
 
@@ -256,6 +260,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     _castEndpoint: function(path, subroutePath) {
       return this.replaceWildcard(path, 'uid', subroutePath.substring(1));
+    },
+
+    _castUrl: function(uid) {
+      return location.origin + '/cast/' + uid;
     },
 
     // Observers
