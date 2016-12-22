@@ -1,0 +1,97 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../timer-behavior/timer-cycles-behavior.html">
+<link rel="import" href="../color-wheel.html">
+<link rel="import" href="../shared-styles.html">
+<link rel="import" href="../digital-timer/digital-timer.html">
+<link rel="import" href="../digital-clock/digital-clock.html">
+
+<dom-module id="timer-cast">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      #wrapper {
+        padding: 1rem;
+      }
+      
+      [current-period="0"] .invisible-first-period {
+        visibility: none;
+      }
+      
+      .timer {
+        margin: 0;
+      }
+      
+      .show-playing {
+        display: none;
+      }
+      
+      .show-paused {
+        display: none;
+      }
+      
+      [state="playing"] .show-playing {
+        display: inherit;
+      }
+      
+      [state="paused"] .show-paused {
+        display: inherit;
+      }
+/*
+      .show-stopwatch {
+        display: none;
+      }
+
+      [type="stopwatch"] .show-stopwatch {
+        display: inherit;
+      }*/
+      .total-seconds {
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+        left: 1rem;
+        font-size: 3vh;
+
+        @apply(--layout-horizontal);
+      }
+      
+      .bottom-icons {
+        position: absolute;
+        right: 1rem;
+        bottom: 7rem;
+        left: 1rem;
+        font-size: 3vh;
+      }
+
+      #timer {
+        height: 100%;
+      }
+
+    </style>
+<div id="wrapper" class="pinned" type$="[[period.type]]" current-period$="[[currentPeriod]]" state$="[[state]]">
+  <div class$="layout [[position]]" style="height: calc(100% + 0rem)">
+<digital-timer id="timer" class="timer flex" global-seconds="[[seconds]]" period-seconds="[[periodSeconds]]" global-cycle-seconds="[[seconds]]"
+  global-cycle="[[globalCycle]]" period-cycle-seconds="[[periodCycleSeconds]]" period-cycle="[[periodCycle]]" color-wheel="[[colorWheel]]"></digital-timer>
+</div>
+
+<div class="total-seconds">
+  <digital-clock total-seconds="[[totalPeriodSeconds]]"></digital-clock>
+  <div class="flex"></div>
+  <digital-clock total-seconds="[[totalGlobalSeconds]]"></digital-clock>
+</div>
+
+<div class="bottom-icons layout horizontal justified center">
+  <iron-icon id="icon" icon="[[period.icon]]"></iron-icon>
+</div>
+
+</template>
+<script>
+    Polymer({
+      is: "timer-cast",
+
+      behaviors: [TimerCyclesBehavior, QuiverColorWheel]
+    });
+  </script>
+</dom-module>

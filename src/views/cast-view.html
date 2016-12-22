@@ -1,0 +1,57 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../timer-state/timer-cast.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="cast-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+<timer-cast id="timerCast" state="[[state]]" seconds="[[seconds]]" periods="[[periods]]"></timer-cast>
+</template>
+<script>
+    Polymer({
+      is: "cast-view",
+
+      properties: {
+        firebase: Object,
+        castEndpoint: String,
+        ref: {
+          type: String,
+          computed: '_ref(firebase, castEndpoint)'
+        },
+        seconds: Number,
+        state: String,
+        periods: {
+          type: Array,
+          value: []
+        }
+      },
+
+      // Observers
+      observers: ['on(ref)'],
+
+      _ref: function(firebase, castEndpoint) {
+        return firebase.database().ref(castEndpoint);
+      },
+
+      // Functions
+      on: function(ref) {
+        this.handler = ref.on('value', function(snap) {
+          var payload = snap.val();
+          this.seconds = payload.seconds;
+          this.state = payload.state;
+          this.splice.apply(this, ['periods', 0, this.periods.length].concat(payload.periods));
+        }.bind(this));
+      },
+
+      off: function() {
+        ref.off('value', this.handler);
+      }
+
+    });
+  </script>
+</dom-module>

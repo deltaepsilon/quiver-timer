@@ -203,7 +203,7 @@
          this.emptyChart();
          
          
-         var minDimension = Math.max(0, Math.min(width, height)); // Prevent clipping in vert layouts 
+         var minDimension = Math.max(0, Math.min(width, height - 16)); // Prevent clipping in vert layouts 
          var w = minDimension;
          var h = minDimension;
          var arcWidth = minDimension * .06;

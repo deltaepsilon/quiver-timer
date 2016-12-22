@@ -1,6 +1,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-icons/social-icons.html">
 
 <link rel="import" href="../icons.html">
 
@@ -33,6 +34,11 @@
 </a>
 <h3 id="title">[[pageTitle]]</h3>
 <div class="flex layout horizontal end-justified">
+  <template is="dom-if" if="[[uid]]">
+    <a href$="/cast/[[uid]]" target="_blank" style="margin-right: 3rem;">
+      <paper-icon-button class$="[[exitClass]]" icon="social:share"></paper-icon-button>
+    </a>
+  </template>
   <paper-icon-button class$="[[exitClass]]" icon="extended:exit" on-click="logout"></paper-icon-button>
   <paper-icon-button class$="[[settingsClass]]" icon="settings" on-click="openSettings"></paper-icon-button>
 </div>
@@ -46,6 +52,7 @@
     properties: {
       page: String,
       tail: Object,
+      uid: String,
       pageTitle: {
         type: String,
         computed: '_pageTitle(page, tail)'

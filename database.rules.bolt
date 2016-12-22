@@ -6,6 +6,10 @@ path /timer/{environment}/public {
   write() {isAdmin(environment)}
 }
 
+path /timer/{environment}/public/{objectType}/{uid} {
+  write() {isUser(uid) || isAdmin(environment)}
+}
+
 path /timer/{environment}/user/owned/{object}/{uid} {
   read() {isUser(uid) || isAdmin(environment)}
   write() {isUser(uid) || isAdmin(environment)}
