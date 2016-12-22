@@ -209,6 +209,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     },
 
+    attached: function() {
+      document.body.addEventListener('keyup', function(e) {
+        if (e.code == 'Space') this.fire('Space');
+        if (e.code == 'ArrowRight') this.fire('ArrowRight');
+        if (e.code == 'ArrowLeft') this.fire('ArrowLeft');
+      }.bind(this));
+    },
+
     // Computed
     _firebase: function (firebaseConfig) {
       firebase.initializeApp(firebaseConfig);
@@ -288,9 +296,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       alert: '_alert',
       error: '_error',
       restoreDefaults: 'restoreDefaults',
-      verifyEmail: 'verifyEmail'
+      verifyEmail: 'verifyEmail',
+      Space: '_space',
+      ArrowLeft: '_arrowLeft',
+      ArrowRight: '_arrowRight',
     },
-
     _redirect: function (e) {
       this.set('route.path', e.detail);
     },
@@ -360,6 +370,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     _error: function (e) {
       this.alert(e.detail.toString(), 5000);
+    },
+
+    _space: function(e) {
+      var regex = /(paused|playing)/;
+      var match = this.route.path.match(regex);
+      if (match) {
+        var other = match[0] == 'paused' ? 'playing' : 'paused';
+        this.set('route.path', this.route.path.replace(regex, other));
+      }
+    },
+
+    _arrowRight: function() {
+      if(this.route.path.match(/playing/)) {
+        this.$.timerView.next();
+      }
+    },
+
+    _arrowLeft: function() {
+      if(this.route.path.match(/playing/)) {
+        this.$.timerView.previous();
+      }
     },
 
     // Functions

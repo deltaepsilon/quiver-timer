@@ -68,6 +68,10 @@
       localRoute: Object,
       firebase: Object,
       timerEndpoint: String,
+      ref: {
+        type: Object,
+        computed: '_ref(firebase, timerEndpoint)'
+      },
       timerKey: {
         type: Number,
         computed: '_timerKey(routeData.timerKey)'
@@ -115,7 +119,7 @@
       '_clock(state, timer.periods, clock)',
       '_workingPeriods(workingPeriods, timer.periods)',
       '_end(seconds, laggedSeconds, state)',
-      '_firebase(firebase, timerEndpoint, state, seconds, workingPeriods, workingPeriods.splices)'
+      '_firebase(ref, state, seconds, workingPeriods, workingPeriods.splices)'
     ],
 
     _timerFab: function (state) {
@@ -147,6 +151,10 @@
           clock.start(this.getTotalSeconds(periods) + 1);
         }
       }
+    },
+
+    _ref: function(firebase, timerEndpoint) {
+      return firebase.database().ref(timerEndpoint);
     },
 
     _timerKey: function (timerKey) {
@@ -193,8 +201,12 @@
       }
     },
 
-    _firebase: function (firebase, timerEndpoint, state, seconds, workingPeriods) {
-      // console.log('_firebase', firebase, timerEndpoint, state, seconds, workingPeriods);
+    _firebase: function (ref, state, seconds, workingPeriods) {
+      ref.update({
+        state: state,
+        seconds: seconds,
+        workingPeriods: workingPeriods
+      });
     },
 
     //Listeners
