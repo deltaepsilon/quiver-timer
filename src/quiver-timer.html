@@ -35,6 +35,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="dialogs/settings-dialog.html">
 <link rel="import" href="dialogs/sound-dialog.html">
 <link rel="import" href="flash-alert/flash-alert.html">
+<link rel="import" href="firebase-behavior/firebase-behavior.html">
 
 <script src="../bower_components/lodash/lodash.js"></script>
 
@@ -133,8 +134,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <app-route id="appRoute" route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
 <app-scrollpos-control selected="{{page}}"></app-scrollpos-control>
 <flash-alert id="flashAlert" flash="[[settings.flash]]" sound="[[settings.sound]]" sound-file="[[settings.soundFile]]"></flash-alert>
-<auth-controller id="authController" firebase="[[firebase]]" login-endpoint="[[model.user.write.login]]" account-endpoint="[[model.user.read.account]]" connected="[[connected]]"
-  page="[[page]]" user="{{user}}" account="{{account}}"></auth-controller>
+<auth-controller id="authController" firebase="[[firebase]]" login-endpoint="[[model.user.write.login]]" account-endpoint="[[model.user.read.account]]"
+  connected="[[connected]]" page="[[page]]" user="{{user}}" account="{{account}}"></auth-controller>
 <cast-controller route="[[route]]"></cast-controller>
 <paper-toast id="toast"></paper-toast>
 
@@ -146,7 +147,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <landing-view id="landingView" name="landing"></landing-view>
     <login-view id="loginView" name="login" user="[[user]]"></login-view>
     <timers-view id="timersView" name="timers" account="[[account]]"></timers-view>
-    <timer-view id="timerView" name="timer" local-route="[[subroute]]" session="[[session]]"></timer-view>
+    <timer-view id="timerView" name="timer" local-route="[[subroute]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]"></timer-view>
     <configure-view id="configureView" local-route="[[subroute]]" session="[[session]]" name="configure" title="{{configureTitle}}"
       on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
     <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
@@ -163,227 +164,237 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </template>
 
 <script>
-    Polymer({
-      is: 'quiver-timer',
+  Polymer({
+    is: 'quiver-timer',
 
-      properties: {
-        firebase: {
-          type: Object,
-          computed: '_firebase(env.firebaseConfig)'
-        },
-        env: {
-          type: Object,
-          computed: '_env(rawEnv)'
-        },
-        model: {
-          type: Object,
-          computed: '_model(rawEnv, env.firebaseConfig, env.environment)'
-        },
-        connected: {
-          type: Boolean,
-          value: false
-        },
-        page: {
-          type: String,
-          reflectToAttribute: true,
-          observer: '_pageChanged'
-        },
-        session: {
-          type: String,
-          value: '123456'
-        },
-        settings: {
-          type: Object,
-          value: {
-            flash: true,
-            sound: true,
-            soundFile: 'chime'
-          }
+    behaviors: [FirebaseBehavior],
+
+    properties: {
+      firebase: {
+        type: Object,
+        computed: '_firebase(env.firebaseConfig)'
+      },
+      env: {
+        type: Object,
+        computed: '_env(rawEnv)'
+      },
+      model: {
+        type: Object,
+        computed: '_model(rawEnv, env.firebaseConfig, env.environment)'
+      },
+      connected: {
+        type: Boolean,
+        value: false
+      },
+      page: {
+        type: String,
+        reflectToAttribute: true,
+        observer: '_pageChanged'
+      },
+      session: {
+        type: String,
+        value: '123456'
+      },
+      settings: {
+        type: Object,
+        value: {
+          flash: true,
+          sound: true,
+          soundFile: 'chime'
         }
       },
-
-      // Computed
-      _firebase: function (firebaseConfig) {
-        firebase.initializeApp(firebaseConfig);
-        return firebase;
-      },
-
-      _env: function (env) {
-        return _.merge(env.defaults, env[location.hostname.split('.').join(':')]);
-      },
-
-      _model: function (env, firebaseEnv, environment) {
-        function normalizeModel(model) {
-          var keys = Object.keys(model);
-          var i = keys.length;
-          var result = {};
-          var key;
-          var item;
-          while (i--) {
-            key = keys[i];
-            item = model[key];
-            result[key] = typeof item == 'string' ? firebaseEnv.root + '/' + environment + item : normalizeModel(item);
-          }
-          return result;
-        };
-        return normalizeModel(env.model);
-      },
-
-      // Observers
-      observers: [
-        '_connected(firebase)',
-        '_routePageChanged(routeData.page)'
-      ],
-
-      _connected: function (firebase) {
-        firebase.database().ref().child('.info/connected').on('value', function (snap) {
-          this.connected = snap.val();
-        }.bind(this));
-      },
-
-      _routePageChanged: function (page) {
-        this.page = page || 'landing';
-        this.showPeriodSelectSheet = page == 'configure';
-        if (page == 'timers' && this.$.timersView.attached) this.$.timersView.attached();
-        if (page == 'timer' && this.$.timerView.attached) this.$.timerView.attached();
-        if (page == 'configure' && this.$.configureView.attached) this.$.configureView.attached();
-      },
-
-      _pageChanged: function (page) {
-        // Load page import on demand. Show 404 page if fails
-        var resolvedPageUrl = this.resolveUrl('views/' + page + '-view.html');
-        this.importHref(resolvedPageUrl, null, this._showPage404, true);
-      },
-
-      _showPage404: function () {
-        this.page = 'fourohfour';
-      },
-
-      // Listeners
-      listeners: {
-        redirect: '_redirect',
-        back: '_back',
-        scrollIntoView: '_scrollIntoView',
-        openDialog: '_openDialog',
-        timerFab: '_timerFab',
-        flash: '_flash',
-        sound: '_sound',
-        testSound: '_testSound',
-        enableSound: '_enableSound',
-        disableSound: '_disableSound',
-        login: '_login',
-        logout: '_logout',
-        openSettings: 'openSettings',
-        alert: '_alert',
-        error: '_error',
-        restoreDefaults: 'restoreDefaults',
-        verifyEmail: 'verifyEmail'
-      },
-
-      _redirect: function (e) {
-        this.set('route.path', e.detail);
-      },
-
-      _back: function () {
-        window.history.go(-1);
-      },
-
-      _scrollIntoView: function (e) {
-        e.detail.scrollIntoView({ behavior: 'smooth' });
-      },
-
-      _openDialog: function (e) {
-        this.$[e.detail.id].open(e);
-      },
-
-      _timerFab: function (e) {
-        var payload = e.detail;
-        this.timerFabPayload = {
-          icon: payload.icon || false,
-          url: payload.url || false,
-          callback: payload.callback || false
-        };
-      },
-
-      _flash: function (e) {
-        if (this.settings.flash) {
-          this.$.flashAlert.fireFlash();
-        }
-        if (this.settings.sound) {
-          this.$.flashAlert.fireSound();
-        }
-      },
-
-      _sound: function () {
-        this.$.flashAlert.fireSound();
-      },
-
-      _testSound: function () {
-        this.$.flashAlert.testSound();
-      },
-
-      _enableSound: function () {
-        this.$.soundDialog.open();
-      },
-
-      _disableSound: function () {
-        this.$.settingsDialog.disableSound();
-      },
-
-      _login: function (e) {
-        var provider = e.detail;
-        if (provider == 'google') {
-          this.$.authController.google();
-        } else if (provider == 'facebook') {
-          this.$.authController.facebook();
-        }
-      },
-
-      _logout: function () {
-        this.$.authController.logout();
-      },
-
-      _alert: function (e) {
-        this.alert(e.detail.toString());
-      },
-
-      _error: function (e) {
-        this.alert(e.detail.toString(), 5000);
-      },
-
-      // Functions
-      clearLocalStorage: function () {
-        localStorage.clear();
-        location = location.pathname + '?now=' + Date.now();
-      },
-
-      toggleConfigureSheet: function (e) {
-        this.showBulkEdits = e.detail.value;
-      },
-
-      openSettings: function () {
-        this.$.settingsDialog.open();
-      },
-
-      alert: function (message, duration) {
-        var tempDuration = this.$.toast.duration;
-        if (duration) {
-          this.$.toast.duration = duration;
-        }
-        this.$.toast.text = message;
-        this.$.toast.show();
-        setTimeout(function () {
-          this.$.toast.duration = tempDuration;
-        }.bind(this), tempDuration);
-      },
-
-      restoreDefaults: function() {
-        this.$.timersView.restoreDefaults();
-      },
-
-      verifyEmail: function() {
-        this.$.authController.verifyEmail();
+      timerEndpoint: {
+        type: String,
+        computed: '_replaceUid(model.public.timer, user.uid)'
       }
-    });
-  </script>
+    },
+
+    // Computed
+    _firebase: function (firebaseConfig) {
+      firebase.initializeApp(firebaseConfig);
+      return firebase;
+    },
+
+    _env: function (env) {
+      return _.merge(env.defaults, env[location.hostname.split('.').join(':')]);
+    },
+
+    _model: function (env, firebaseEnv, environment) {
+      function normalizeModel(model) {
+        var keys = Object.keys(model);
+        var i = keys.length;
+        var result = {};
+        var key;
+        var item;
+        while (i--) {
+          key = keys[i];
+          item = model[key];
+          result[key] = typeof item == 'string' ? firebaseEnv.root + '/' + environment + item : normalizeModel(item);
+        }
+        return result;
+      };
+      return normalizeModel(env.model);
+    },
+
+    _replaceUid: function (path, uid) {
+      return this.replaceWildcard(path, 'uid', uid);
+    },
+
+    // Observers
+    observers: [
+      '_connected(firebase)',
+      '_routePageChanged(routeData.page)'
+    ],
+
+    _connected: function (firebase) {
+      firebase.database().ref().child('.info/connected').on('value', function (snap) {
+        this.connected = snap.val();
+      }.bind(this));
+    },
+
+    _routePageChanged: function (page) {
+      this.page = page || 'landing';
+      this.showPeriodSelectSheet = page == 'configure';
+      if (page == 'timers' && this.$.timersView.attached) this.$.timersView.attached();
+      if (page == 'timer' && this.$.timerView.attached) this.$.timerView.attached();
+      if (page == 'configure' && this.$.configureView.attached) this.$.configureView.attached();
+    },
+
+    _pageChanged: function (page) {
+      // Load page import on demand. Show 404 page if fails
+      var resolvedPageUrl = this.resolveUrl('views/' + page + '-view.html');
+      this.importHref(resolvedPageUrl, null, this._showPage404, true);
+    },
+
+    _showPage404: function () {
+      this.page = 'fourohfour';
+    },
+
+    // Listeners
+    listeners: {
+      redirect: '_redirect',
+      back: '_back',
+      scrollIntoView: '_scrollIntoView',
+      openDialog: '_openDialog',
+      timerFab: '_timerFab',
+      flash: '_flash',
+      sound: '_sound',
+      testSound: '_testSound',
+      enableSound: '_enableSound',
+      disableSound: '_disableSound',
+      login: '_login',
+      logout: '_logout',
+      openSettings: 'openSettings',
+      alert: '_alert',
+      error: '_error',
+      restoreDefaults: 'restoreDefaults',
+      verifyEmail: 'verifyEmail'
+    },
+
+    _redirect: function (e) {
+      this.set('route.path', e.detail);
+    },
+
+    _back: function () {
+      window.history.go(-1);
+    },
+
+    _scrollIntoView: function (e) {
+      e.detail.scrollIntoView({ behavior: 'smooth' });
+    },
+
+    _openDialog: function (e) {
+      this.$[e.detail.id].open(e);
+    },
+
+    _timerFab: function (e) {
+      var payload = e.detail;
+      this.timerFabPayload = {
+        icon: payload.icon || false,
+        url: payload.url || false,
+        callback: payload.callback || false
+      };
+    },
+
+    _flash: function (e) {
+      if (this.settings.flash) {
+        this.$.flashAlert.fireFlash();
+      }
+      if (this.settings.sound) {
+        this.$.flashAlert.fireSound();
+      }
+    },
+
+    _sound: function () {
+      this.$.flashAlert.fireSound();
+    },
+
+    _testSound: function () {
+      this.$.flashAlert.testSound();
+    },
+
+    _enableSound: function () {
+      this.$.soundDialog.open();
+    },
+
+    _disableSound: function () {
+      this.$.settingsDialog.disableSound();
+    },
+
+    _login: function (e) {
+      var provider = e.detail;
+      if (provider == 'google') {
+        this.$.authController.google();
+      } else if (provider == 'facebook') {
+        this.$.authController.facebook();
+      }
+    },
+
+    _logout: function () {
+      this.$.authController.logout();
+    },
+
+    _alert: function (e) {
+      this.alert(e.detail.toString());
+    },
+
+    _error: function (e) {
+      this.alert(e.detail.toString(), 5000);
+    },
+
+    // Functions
+    clearLocalStorage: function () {
+      localStorage.clear();
+      location = location.pathname + '?now=' + Date.now();
+    },
+
+    toggleConfigureSheet: function (e) {
+      this.showBulkEdits = e.detail.value;
+    },
+
+    openSettings: function () {
+      this.$.settingsDialog.open();
+    },
+
+    alert: function (message, duration) {
+      var tempDuration = this.$.toast.duration;
+      if (duration) {
+        this.$.toast.duration = duration;
+      }
+      this.$.toast.text = message;
+      this.$.toast.show();
+      setTimeout(function () {
+        this.$.toast.duration = tempDuration;
+      }.bind(this), tempDuration);
+    },
+
+    restoreDefaults: function () {
+      this.$.timersView.restoreDefaults();
+    },
+
+    verifyEmail: function () {
+      this.$.authController.verifyEmail();
+    }
+  });
+</script>
 </dom-module>

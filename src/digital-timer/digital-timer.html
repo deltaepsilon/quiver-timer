@@ -173,7 +173,7 @@
 
        // Observers
        observers: [
-         '_title(period.name)',
+         '_title(period.name, globalSeconds)',
          '_chart(width, height, globalCycle, periodCycle, globalCycle.splices, periodCycle.splices)',
          '_chartUpdate(globalPercentage, globalCycle, globalOuterCircle, globalCycle.splices)',
          '_chartUpdate(periodPercentage, periodCycle, periodOuterCircle, periodCycle.splices)'
@@ -194,8 +194,8 @@
          return this.round(1 - cycleSeconds/totalSeconds);
        },
 
-       _title: function(name) {
-         return this.title = name;
+       _title: function(name, globalSeconds) {
+         return this.title = !globalSeconds ? 'Press Play' : name;
        },
 
        _chart: function(width, height, globalCycle, periodCycle) {

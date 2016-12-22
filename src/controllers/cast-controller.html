@@ -62,7 +62,7 @@
         })
         .catch(function(err) {
           var error = err.toString();
-          this.fire('error', `Chromecast error: ${error}`);
+          this.fire('error', 'Chromecast error: ' + error);
         }.bind(this));
     },
 

@@ -219,6 +219,7 @@
     },
 
     _periodCycle: function(seconds, periodCycles) {
+      if (!periodCycles.length) return this.periodCycle.seconds = 0;
       var i = periodCycles.length;
       var periodSeconds;
       while (i--) {
@@ -230,8 +231,8 @@
         break;
       }
       if (!_.isEqual(this.periodCycle, periodCycles[i])) {
+        this.periodCycle.seconds = periodCycles[i].seconds // Set this first to avoid sync problems with chart, which updates on periodCycle.splices change, ignoring periodCycle.seconds
         this.splice.apply(this, ['periodCycle', 0, this.periodCycle.length].concat(periodCycles[i]));
-        this.periodCycle.seconds = periodCycles[i].seconds;
       }
     },
 

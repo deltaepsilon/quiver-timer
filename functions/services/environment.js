@@ -17,7 +17,6 @@ try {
   functions.env.model = normalizeModel(functions.env.model, functions.env);
   module.exports = functions.env;
 } catch (e) {
-  // console.log('error', e);
   let env = JSON.parse(require('fs').readFileSync('../env.server.json', 'utf8'));
   let model = JSON.parse(require('fs').readFileSync('../env.client.json', 'utf8')).model;
   env.model = normalizeModel(model, env);

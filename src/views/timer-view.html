@@ -59,221 +59,243 @@
 </iron-pages>
 </template>
 <script>
-    Polymer({
-      is: "timer-view",
+  Polymer({
+    is: "timer-view",
 
-      behaviors: [QuiverColorWheel],
+    behaviors: [QuiverColorWheel],
 
-      properties: {
-        localRoute: Object,
-        timerKey: {
-          type: Number,
-          computed: '_timerKey(routeData.timerKey)'
-        },
-        timersData: Object,
-        timer: {
-          type: Object,
-          computed: '_timer(timerKey, timersData.value)'
-        },
-        state: {
-          type: String,
-          computed: '_state(localRoute, subrouteData)'
-        },
-        clock: {
-          type: Object,
-          value: function () {
-            return new Timer({
-              tick: 1,
-              ontick: this.tickHandler.bind(this),
-              //  onstop: function() {
-              //    console.log('timer stopped');
-              //  },
-              //  onstart: function() {
-              //    console.log('timer started');
-              //  }
-            });
-          }
-        },
-        seconds: Number,
-        workingPeriods: {
-          type: Array,
-          value: []
-        }
+    properties: {
+      localRoute: Object,
+      firebase: Object,
+      timerEndpoint: String,
+      timerKey: {
+        type: Number,
+        computed: '_timerKey(routeData.timerKey)'
       },
-
-      //  Observers
-      observers: [
-        '_timerFab(state)',
-        '_clock(state, timer.periods, clock)',
-        '_workingPeriods(workingPeriods, timer.periods)'
-      ],
-
-      _timerFab: function (state) {
-        switch (true) {
-          case state == 'playing':
-            this.page = 'playing';
-            this.play();
-            break;
-          case state == 'paused':
-            this.page = 'playing';
-            this.pause();
-            break;
-          case state == 'stopped':
-            this.page = 'stopped';
-            this.stop();
-            break;
-        }
+      timersData: Object,
+      timer: {
+        type: Object,
+        computed: '_timer(timerKey, timersData.value)'
       },
-
-      _clock: function (state, periods, clock) {
-        if (state == 'paused') {
-          clock.pause();
-        } else if (state == 'stopped') {
-          clock.stop();
-        } else if (state == 'playing') {
-          if (clock.getDuration()) {
-            clock.start();
-          } else {
-            clock.start(this.getTotalSeconds(periods) + 1);
-          }
-        }
+      state: {
+        type: String,
+        computed: '_state(localRoute, subrouteData)'
       },
-
-      _timerKey: function (timerKey) {
-        return +timerKey;
-      },
-
-      _state: function (localRoute, subrouteData) {
-        if (localRoute.prefix !== '/timer') return 'stopped';
-        return subrouteData.state || 'stopped';
-      },
-
-      _timer: function (timerKey, timers) {
-        var timer = timers[timerKey];
-        var prepareColor = this.prepareColor;
-        var colors = {
-          work: this.workColors.slice(0),
-          rest: this.restColors.slice(0),
-          stopwatch: this.stopwatchColors.slice(0)
-        };
-        if (timer && timer.periods) {
-          timer.periods = timer.periods.map(function (period, i) {
-            if (period.type == 'prepare') {
-              period.color = prepareColor
-            } else {
-              var list = colors[period.type];
-              period.color = list.shift();
-              list.push(period.color);
-            }
-            return period;
+      clock: {
+        type: Object,
+        value: function () {
+          return new Timer({
+            tick: 1,
+            ontick: this.tickHandler.bind(this),
+            //  onstop: function() {
+            //    console.log('timer stopped');
+            //  },
+            //  onstart: function() {
+            //    console.log('timer started');
+            //  }
           });
         }
-        return timer;
       },
-
-      _workingPeriods: function (workingPeriods, periods) {
-        if (periods) {
-          this.splice.apply(this, ['workingPeriods', 0, this.workingPeriods.length].concat(_.cloneDeep(periods)));
-        }
+      seconds: {
+        type: Number,
+        value: 0
       },
-
-      //Listeners
-      listeners: {
-        play: 'play',
-        pause: 'pause',
-        stop: 'stop',
-        previous: 'previous',
-        next: 'next',
-        refresh: 'refresh'
+      laggedSeconds: {
+        type: Number
       },
-
-      play: function () {
-        this.state = 'playing';
-        this.fire('testSound');
-      },
-
-      pause: function () {
-        this.state = 'paused';
-      },
-
-      stop: function () {
-        this.state = 'stopped';
-        this.refresh();
-      },
-
-      previous: function () {
-        var i = this.getPeriodIndex();
-        var remaining = this.getTotalSeconds(this.getRemainingPeriods(i));
-        var current = this.getPeriod(i).totalSeconds;
-        var s = remaining + current;
-        var diff = s - this.seconds;
-        var currentPeriodIndex = i;
-
-        if (diff < 5 && i) {
-          currentPeriodIndex = i - 1;
-
-          // Reset stopwatches
-          if (i > 0 && this.workingPeriods[currentPeriodIndex].type == 'stopwatch') {
-            this.workingPeriods[currentPeriodIndex].totalSeconds = this.timer.periods[currentPeriodIndex].totalSeconds;
-          }
-
-          s = Math.min(this.workingPeriods.seconds, s + this.workingPeriods[i - 1].totalSeconds);
-        }
-        s = Math.min(s, this.workingPeriods.seconds);
-        this.seconds = s;
-        this.clock.stop();
-        this.clock.start(this.seconds);
-      },
-
-      next: function () {
-        var periodIndex = this.getPeriodIndex();
-        var period = this.getPeriod(periodIndex);
-        var remainingSeconds = this.getTotalSeconds(this.getRemainingPeriods());
-
-
-        if (period.type == 'stopwatch') {
-          this.workingPeriods[periodIndex].totalSeconds = period.totalSeconds - (this.seconds - remainingSeconds);
-        }
-
-        this.seconds = remainingSeconds;
-        this.clock.stop();
-        this.clock.start(this.seconds);
-      },
-
-      refresh: function () {
-        var s = this.getTotalSeconds();
-        this.clock.stop();
-        if (s) this.seconds = s;
-      },
-
-      tickHandler: function (ms) {
-        this.seconds = Math.round(ms / 1000) - 1;
-      },
-
-      // Functions
-      getTotalSeconds: function (periods) {
-        return (periods || this.workingPeriods).reduce(function (s, p) {
-          return s + p.totalSeconds;
-        }, 0);
-      },
-
-      getPeriodIndex: function () {
-        var seconds = this.seconds;
-        var i = this.workingPeriods.length;
-        while (i--) {
-          seconds -= this.workingPeriods[i].totalSeconds;
-          if (seconds <= 0) break;
-        }
-        return i;
-      },
-
-      getPeriod: function (i) {
-        return this.workingPeriods[typeof i == 'undefined' ? this.getPeriodIndex() : i];
-      },
-
-      getRemainingPeriods: function (i) {
-        return this.workingPeriods.slice((typeof i == 'undefined' ? this.getPeriodIndex() : i) + 1);
+      workingPeriods: {
+        type: Array,
+        value: []
       }
-    });
-  </script>
+    },
+
+    //  Observers
+    observers: [
+      '_timerFab(state)',
+      '_clock(state, timer.periods, clock)',
+      '_workingPeriods(workingPeriods, timer.periods)',
+      '_end(seconds, laggedSeconds, state)',
+      '_firebase(firebase, timerEndpoint, state, seconds, workingPeriods, workingPeriods.splices)'
+    ],
+
+    _timerFab: function (state) {
+      switch (true) {
+        case state == 'playing':
+          this.page = 'playing';
+          this.play();
+          break;
+        case state == 'paused':
+          this.page = 'playing';
+          this.pause();
+          break;
+        case state == 'stopped':
+          this.page = 'stopped';
+          this.stop();
+          break;
+      }
+    },
+
+    _clock: function (state, periods, clock) {
+      if (state == 'paused') {
+        clock.pause();
+      } else if (state == 'stopped') {
+        clock.stop();
+      } else if (state == 'playing') {
+        if (clock.getDuration()) {
+          clock.start();
+        } else {
+          clock.start(this.getTotalSeconds(periods) + 1);
+        }
+      }
+    },
+
+    _timerKey: function (timerKey) {
+      return +timerKey;
+    },
+
+    _state: function (localRoute, subrouteData) {
+      if (localRoute.prefix !== '/timer') return 'stopped';
+      return subrouteData.state || 'stopped';
+    },
+
+    _timer: function (timerKey, timers) {
+      var timer = timers[timerKey];
+      var prepareColor = this.prepareColor;
+      var colors = {
+        work: this.workColors.slice(0),
+        rest: this.restColors.slice(0),
+        stopwatch: this.stopwatchColors.slice(0)
+      };
+      if (timer && timer.periods) {
+        timer.periods = timer.periods.map(function (period, i) {
+          if (period.type == 'prepare') {
+            period.color = prepareColor
+          } else {
+            var list = colors[period.type];
+            period.color = list.shift();
+            list.push(period.color);
+          }
+          return period;
+        });
+      }
+      return timer;
+    },
+
+    _workingPeriods: function (workingPeriods, periods) {
+      if (periods) {
+        this.splice.apply(this, ['workingPeriods', 0, this.workingPeriods.length].concat(_.cloneDeep(periods)));
+      }
+    },
+
+    _end: function(seconds, laggedSeconds, state) {
+      if (seconds == 0 && laggedSeconds && state == 'playing') {
+        this.pause();
+      }
+    },
+
+    _firebase: function (firebase, timerEndpoint, state, seconds, workingPeriods) {
+      // console.log('_firebase', firebase, timerEndpoint, state, seconds, workingPeriods);
+    },
+
+    //Listeners
+    listeners: {
+      play: 'play',
+      pause: 'pause',
+      stop: 'stop',
+      previous: 'previous',
+      next: 'next',
+      refresh: 'refresh'
+    },
+
+    play: function () {
+      this.state = 'playing';
+      this.fire('testSound');
+    },
+
+    pause: function () {
+      this.state = 'paused'; // Set to avoid sync issues from upstream
+      this.fire('redirect', '/timer/' + this.timerKey + '/paused');
+    },
+
+    stop: function () {
+      this.state = 'stopped';
+      this.refresh();
+    },
+
+    previous: function () {
+      var i = this.getPeriodIndex();
+      var remaining = this.getTotalSeconds(this.getRemainingPeriods(i));
+      var current = this.getPeriod(i).totalSeconds;
+      var s = remaining + current;
+      var diff = s - this.seconds;
+      var currentPeriodIndex = i;
+
+      if (diff < 5 && i) {
+        currentPeriodIndex = i - 1;
+
+        // Reset stopwatches
+        if (i > 0 && this.workingPeriods[currentPeriodIndex].type == 'stopwatch') {
+          this.workingPeriods[currentPeriodIndex].totalSeconds = this.timer.periods[currentPeriodIndex].totalSeconds;
+        }
+
+        s = Math.min(this.workingPeriods.seconds, s + this.workingPeriods[i - 1].totalSeconds);
+      }
+      s = Math.min(s, this.workingPeriods.seconds);
+      this.seconds = s;
+      this.clock.stop();
+      this.clock.start(this.seconds);
+    },
+
+    next: function () {
+      var periodIndex = this.getPeriodIndex();
+      var period = this.getPeriod(periodIndex);
+      var remainingSeconds = this.getTotalSeconds(this.getRemainingPeriods());
+
+
+      if (period.type == 'stopwatch') {
+        this.workingPeriods[periodIndex].totalSeconds = period.totalSeconds - (this.seconds - remainingSeconds);
+      }
+
+      this.seconds = remainingSeconds;
+      this.clock.stop();
+      this.clock.start(this.seconds);
+    },
+
+    refresh: function () {
+      var s = this.getTotalSeconds();
+      this.clock.stop();
+      if (s) this.seconds = s;
+    },
+
+    tickHandler: function (ms) {
+      this.laggedSeconds = this.seconds;
+      this.seconds = Math.round(ms / 1000) - 1;
+    },
+
+    // Functions
+    getTotalSeconds: function (periods) {
+      return (periods || this.workingPeriods).reduce(function (s, p) {
+        return s + p.totalSeconds;
+      }, 0);
+    },
+
+    getPeriodIndex: function () {
+      var seconds = this.seconds;
+      var i = this.workingPeriods.length;
+      while (i--) {
+        seconds -= this.workingPeriods[i].totalSeconds;
+        if (seconds <= 0) break;
+      }
+      return i;
+    },
+
+    getPeriod: function (i) {
+      return this.workingPeriods[typeof i == 'undefined' ? this.getPeriodIndex() : i];
+    },
+
+    getRemainingPeriods: function (i) {
+      return this.workingPeriods.slice((typeof i == 'undefined' ? this.getPeriodIndex() : i) + 1);
+    }
+  });
+</script>
 </dom-module>
