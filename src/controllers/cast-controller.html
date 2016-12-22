@@ -15,16 +15,11 @@
 
     properties: {
       route: Object,
+      castEndpoint: String,
       sessionState: String,
       isAvailable: {
         type: Boolean,
         value: false
-      },
-      href: {
-        type: String,
-        value: function() {
-          return location.href;
-        }
       },
       instance: {
         type: Object,
@@ -36,7 +31,7 @@
       },
       request: {
         type: Object,
-        computed: '_request(isAvailable, href)'
+        computed: '_request(isAvailable, castEndpoint)'
       }
     },
 
@@ -84,10 +79,10 @@
       return instance.getCurrentSession();
     },
 
-    _request: function(isAvailable, href) {
+    _request: function(isAvailable, castEndpoint) {
       if (!isAvailable) return;
 
-      var mediaInfo = new chrome.cast.media.MediaInfo(href, 'text/html');
+      var mediaInfo = new chrome.cast.media.MediaInfo(castEndpoint, 'text/html');
       return new chrome.cast.media.LoadRequest(mediaInfo);
     },
 
