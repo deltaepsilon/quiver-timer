@@ -33,9 +33,13 @@
         type: Object,
         computed: '_request(isAvailable, castUrl)'
       },
+      player: {
+        type: Object,
+        computed: '_player(isAvailable)'
+      },
       playerController: {
         type: Object,
-        computed: '_playerController(isAvailable)'
+        computed: '_playerController(player)'
       }
     },
 
@@ -47,7 +51,7 @@
     observers: [
       '_route(route.path)',
       '_loadMedia(request, castSession)',
-      '_playerEvents(playerController)'
+      '_playerEvents(player, playerController)'
     ],
 
     _route: function (path) {
@@ -66,12 +70,16 @@
         }.bind(this));
     },
 
-    _playerEvents: function(playerController) {
+    _playerEvents: function(player, playerController) {
       playerController.addEventListener(cast.framework.RemotePlayerEventType.IS_CONNECTED_CHANGED, function (e) {
         console.log('ctrl connected changed', e);
       });
       playerController.addEventListener(cast.framework.RemotePlayerEventType.SESSION_STATE_CHANGED, function (e) {
         console.log('ctrl session state changed', e);
+      });
+      playerController.addEventListener(cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED, function (e) {
+        console.log('ctrl media info changed', e);
+        console.log(player.mediaInfo);
       });
     },
 
@@ -95,13 +103,16 @@
     _request: function (isAvailable, castUrl) {
       if (!isAvailable) return;
 
-      var mediaInfo = new chrome.cast.media.MediaInfo(castEndpoint, 'text/html');
+      var mediaInfo = new chrome.cast.media.MediaInfo(castUrl, 'text/html');
       return new chrome.cast.media.LoadRequest(mediaInfo);
     },
 
-    _playerController: function (isAvailable) {
+    _player: function (isAvailable) {
       if (!isAvailable) return;
-      var player = new cast.framework.RemotePlayer();
+      return new cast.framework.RemotePlayer();
+    },
+
+    _playerController: function (player) {
       return new cast.framework.RemotePlayerController(player);
     },
 
