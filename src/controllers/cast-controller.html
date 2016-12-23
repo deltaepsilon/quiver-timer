@@ -118,7 +118,7 @@
 
     // Functions
     initializeCast: function (isAvailable) {
-      this.isAvailable = isAvailable;
+      this.isAvailable = this.route.path.match(/cast/) ? false : isAvailable;
     },
 
   });
