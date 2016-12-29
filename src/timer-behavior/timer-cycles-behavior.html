@@ -230,7 +230,9 @@
         } 
         break;
       }
-      if (!_.isEqual(this.periodCycle, periodCycles[i])) {
+      // i is -1 when the seconds updates before periodCycles, and periodCycles seconds is less than seconds.
+      // The issue corrects itself once periodCycles updates
+      if (i !== -1 && !_.isEqual(this.periodCycle, periodCycles[i])) {
         this.periodCycle.seconds = periodCycles[i].seconds // Set this first to avoid sync problems with chart, which updates on periodCycle.splices change, ignoring periodCycle.seconds
         this.splice.apply(this, ['periodCycle', 0, this.periodCycle.length].concat(periodCycles[i]));
       }
