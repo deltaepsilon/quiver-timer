@@ -2,6 +2,10 @@
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../../bower_components/iron-icons/av-icons.html">
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../color-wheel.html">
 
 <dom-module id="timer-stopped">
@@ -45,29 +49,51 @@
         top: -3px;
         left: 4px;
       }
+
+      [is-cast] {
+        padding: 1rem 2rem;
+      }
+      
+      [is-cast] .hide-cast {
+        display: none;
+      }
+
+      [is-cast] #top-title {
+        top: 0;
+        left: 1rem;
+        width: calc(100vw - 8rem);
+        font-size: 2em;
+      }
+
+      [is-cast] .list {
+        padding: 1rem;
+      }
     </style>
 
-<div id="top-title" class="layout vertical">
-  <h3 id="title" class="layout horizontal">
-    [[timer.name]]
-    <a href$="/configure/[[timerKey]]/">
-      <iron-icon icon="editor:mode-edit"></iron-icon>
-    </a>
-  </h3>
-  <digital-clock total-seconds="[[timer.totalSeconds]]"></digital-clock>
-</div>
+<div is-cast$="[[isCast]]">
 
-<paper-material class="list" elevation="1">
-  <a id="top-fab" style="left: 13px;" href$="/timer/[[timerKey]]/playing">
-    <paper-fab icon="av:play-arrow"></paper-fab>
-  </a>
-  <template is="dom-repeat" items="[[timer.periods]]" as="period">
-    <paper-icon-item type$="[[period.type]]">
-      <iron-icon class="type-color" icon="[[period.icon]]" item-icon></iron-icon>
-      <paper-item-body>
-        <div class="layout horizontal justified center">
-          <div class="flex">
-            <strong style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
+
+  <div id="top-title" class="layout vertical">
+    <h3 id="title" class="layout horizontal">
+      [[timer.name]]
+      <a class="hide-cast" href$="/configure/[[timerKey]]/">
+        <iron-icon icon="editor:mode-edit"></iron-icon>
+      </a>
+    </h3>
+    <digital-clock total-seconds="[[timer.totalSeconds]]"></digital-clock>
+  </div>
+
+  <paper-material class="list" elevation="1">
+    <a id="top-fab" class="hide-cast" style="left: 13px;" href$="/timer/[[timerKey]]/playing">
+<paper-fab icon="av:play-arrow"></paper-fab>
+</a>
+<template is="dom-repeat" items="[[timer.periods]]" as="period">
+  <paper-icon-item type$="[[period.type]]">
+    <iron-icon class="type-color" icon="[[period.icon]]" item-icon></iron-icon>
+    <paper-item-body>
+      <div class="layout horizontal justified center">
+        <div class="flex">
+          <strong style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
 <div class="layout horizontal center" secondary>
   <aside class="show-stopwatch" style="font-size: .75rem; margin-right: 1rem;">Time Cap</aside>
 <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
@@ -79,6 +105,8 @@
 </paper-icon-item>
 </template>
 </paper-material>
+
+</div>
 </template>
 <script>
   Polymer({
@@ -87,7 +115,8 @@
     properties: {
       state: String,
       timerKey: String,
-      timer: Object
+      timer: Object,
+      isCast: Boolean
     }
   });
 </script>

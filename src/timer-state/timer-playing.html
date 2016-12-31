@@ -27,6 +27,10 @@
         padding: 1rem;
         top: 4rem;
       }
+
+      #timer-wrapper {
+        height: calc(100% - 5rem);
+      }
       
       [current-period="0"] .invisible-first-period {
         visibility: none;
@@ -76,10 +80,43 @@
         left: 1rem;
         font-size: 3vh;
       }
+
+      [is-cast] .hide-cast {
+        display: none;
+      }
+
+      #wrapper[is-cast] {
+        padding: 0;
+        top: 0;
+      }
+
+      [is-cast] #timer-wrapper {
+        padding: 3rem;
+      }
+
+      [is-cast] .total-seconds {
+        right: 5rem;
+        top: 5rem;
+        left: 5rem;
+        font-size: 6vh;
+      }
+
+      [is-cast] .bottom-icons {
+        bottom: 3rem;
+        right: 4rem;
+        left: 4rem;
+      }
+
+      [is-cast] #icon {
+        width: 96px;
+        height: 96px;
+        margin-left: 3rem;
+      }
+
     </style>
-<div id="wrapper" class="pinned" type$="[[period.type]]" current-period$="[[currentPeriod]]" state$="[[state]]">
-  <div class$="layout [[position]]" style="height: calc(100% - 5rem)">
-<digital-timer id="timer" class="timer flex" global-seconds="[[seconds]]" period-seconds="[[periodSeconds]]" global-cycle-seconds="[[seconds]]"
+<div id="wrapper" class="pinned" type$="[[period.type]]" current-period$="[[currentPeriod]]" state$="[[state]]" is-cast$="[[isCast]]">
+  <div id="timer-wrapper" class$="layout [[position]]">
+<digital-timer id="timer" class="timer flex" is-cast="[[isCast]]" global-seconds="[[seconds]]" period-seconds="[[periodSeconds]]" global-cycle-seconds="[[seconds]]"
   global-cycle="[[globalCycle]]" period-cycle-seconds="[[periodCycleSeconds]]" period-cycle="[[periodCycle]]" color-wheel="[[colorWheel]]"></digital-timer>
 </div>
 
@@ -90,28 +127,30 @@
 </div>
 
 <div class="bottom-icons layout horizontal justified center">
-  <iron-icon id="icon" icon="[[period.icon]]"></iron-icon>  
+  <iron-icon id="icon" icon="[[period.icon]]"></iron-icon>
 </div>
 
-<div class="show-playing">
-  <div class="bottom-sheet layout horizontal justified center">
-    <paper-icon-button class="invisible-first-period" icon="av:skip-previous" on-click="previous"></paper-icon-button>
-    <a href$="/timer/[[timerKey]]/paused">
-      <paper-fab icon="av:pause"></paper-fab>
-    </a>
-    <paper-icon-button icon="av:skip-next" on-click="next"></paper-icon-button>
+<div class="hide-cast">
+  <div class="show-playing">
+    <div class="bottom-sheet layout horizontal justified center">
+      <paper-icon-button class="invisible-first-period" icon="av:skip-previous" on-click="previous"></paper-icon-button>
+      <a href$="/timer/[[timerKey]]/paused">
+        <paper-fab icon="av:pause"></paper-fab>
+      </a>
+      <paper-icon-button icon="av:skip-next" on-click="next"></paper-icon-button>
+    </div>
   </div>
-</div>
 
-<div class="show-paused">
-  <div class="bottom-sheet layout horizontal justified center">
-    <a href$="/timer/[[timerKey]]/stopped">
-      <paper-icon-button icon="av:stop"></paper-icon-button>
-    </a>
-    <a href$="/timer/[[timerKey]]/playing">
-      <paper-fab icon="av:play-arrow"></paper-fab>
-    </a>
-    <paper-icon-button icon="av:replay" on-click="refresh"></paper-icon-button>
+  <div class="show-paused">
+    <div class="bottom-sheet layout horizontal justified center">
+      <a href$="/timer/[[timerKey]]/stopped">
+        <paper-icon-button icon="av:stop"></paper-icon-button>
+      </a>
+      <a href$="/timer/[[timerKey]]/playing">
+        <paper-fab icon="av:play-arrow"></paper-fab>
+      </a>
+      <paper-icon-button icon="av:replay" on-click="refresh"></paper-icon-button>
+    </div>
   </div>
 </div>
 </div>
@@ -123,7 +162,8 @@
     behaviors: [TimerStateBehavior, TimerCyclesBehavior, QuiverColorWheel],
 
     properties: {
-      state: String
+      state: String,
+      isCast: Boolean
     },
 
     observers: ['_state(state)'],

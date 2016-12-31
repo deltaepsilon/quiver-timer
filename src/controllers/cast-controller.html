@@ -15,7 +15,6 @@
 
     properties: {
       route: Object,
-      castUrl: String,
       env: Object,
       sessionState: String,
       isAvailable: {
@@ -32,7 +31,7 @@
       },
       request: {
         type: Object,
-        computed: '_request(isAvailable, castUrl)'
+        computed: '_request(isAvailable, env.chromecast.receiverUrl)'
       },
       player: {
         type: Object,
@@ -94,6 +93,7 @@
       });
       instance.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, function (e) {
         this.set('sessionState', e.sessionState);
+        console.log('sessionState', e);
       }.bind(this));
       return instance;
     },
@@ -102,10 +102,10 @@
       return instance.getCurrentSession();
     },
 
-    _request: function (isAvailable, castUrl) {
+    _request: function (isAvailable, receiverUrl) {
       if (!isAvailable) return;
 
-      var mediaInfo = new chrome.cast.media.MediaInfo(castUrl, 'text/html');
+      var mediaInfo = new chrome.cast.media.MediaInfo(receiverUrl, 'audio/mp3');
       return new chrome.cast.media.LoadRequest(mediaInfo);
     },
 
@@ -124,7 +124,10 @@
     },
 
     message: function(payload) {
-      console.log(this.env.chromecast.namespace, payload);
+      if (this.castSession && this.env.chromecast.namespace) {
+        console.log('sendMessage', this.env.chromecast.namespace, payload);
+        this.castSession.sendMessage(this.env.chromecast.namespace, payload);
+      }
     }
 
   });

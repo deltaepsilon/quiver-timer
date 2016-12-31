@@ -1,0 +1,57 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+
+<link rel="import" href="../shared-styles.html">
+<link rel="import" href="../timer-state/timer-stopped.html">
+<link rel="import" href="../timer-state/timer-playing.html">
+
+<dom-module id="receiver-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+<iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="stopped" role="main">
+  <timer-stopped id="timerStopped" name="stopped" is-cast="true" timer="[[timer]]"></timer-stopped>
+  <timer-playing id="timerPlaying" name="playing" is-cast="true" state="[[state]]" seconds="[[seconds]]" periods="[[periods]]"></timer-playing>
+</iron-pages>
+</template>
+<script>
+  Polymer({
+    is: "receiver-view",
+
+    properties: {
+      env: Object,
+      settings: {
+        type: Object,
+        value: {
+          flash: true,
+          sound: true,
+          soundFile: 'chime'
+        }
+      },
+      timer: Object,
+      state: {
+        type: String,
+        value: 'stopped'
+      },
+      seconds: Number,
+      periods: {
+        type: Array,
+        value: []
+      },
+      page: {
+        type: String,
+        computed: '_page(state)'
+      }
+    },
+
+    _page: function (state) {
+      if (state == 'stopped') return 'stopped';
+      return 'playing';
+    }
+  });
+</script>
+</dom-module>

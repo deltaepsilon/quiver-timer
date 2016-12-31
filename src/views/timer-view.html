@@ -10,7 +10,6 @@
 
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../color-wheel.html">
-<link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../timer-state/timer-stopped.html">
 <link rel="import" href="../timer-state/timer-playing.html">
 
@@ -122,7 +121,7 @@
       '_clock(state, timer.periods, clock)',
       '_workingPeriods(workingPeriods, timer.periods)',
       '_end(seconds, laggedSeconds, state)',
-      '_firebase(ref, state, seconds, workingPeriods, workingPeriods.splices)'
+      '_firebase(ref, state, seconds, workingPeriods, timer, workingPeriods.splices)'
     ],
 
     _timerFab: function (state) {
@@ -189,6 +188,9 @@
           return period;
         });
       }
+      this.fire('cast', {
+        timer: timer
+      });
       return timer;
     },
 
@@ -204,13 +206,13 @@
       }
     },
 
-    _firebase: function (ref, state, seconds, workingPeriods) {
-      var payload = {
+    _firebase: function (ref, state, seconds, workingPeriods, timer) {
+      this.fire('cast', {
         state: state,
         seconds: seconds,
-        periods: workingPeriods
-      };
-      this.fire('cast', payload);
+        periods: workingPeriods,
+        timer: timer
+      });
 
       if (this.casting) {
         ref.update({

@@ -1,0 +1,240 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-layout/app-grid/app-grid-style.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+
+<link rel="import" href="icons.html">
+
+<link rel="import" href="shared-styles.html">
+
+<link rel="import" href="flash-alert/flash-alert.html">
+<link rel="import" href="views/receiver-view.html">
+
+<script src="../bower_components/lodash/lodash.js"></script>
+
+
+<dom-module id="quiver-timer-cast">
+  <template>
+    <style include="app-grid-style shared-styles">
+      :host {
+        --color-rich-black: #080705;
+        --color-maastricht-blue: #011627;
+        --color-metallic-seaweed: #1C898E;
+        --color-gainsboro: #DDD1D9;
+        --color-medium-candy-apple-red: #E01130;
+        --color-white: #FFFFFF;
+        
+        --app-primary-color: var(--color-metallic-seaweed);
+        --app-secondary-color: var(--color-gainsboro);
+        
+        --primary-color: var(--color-metallic-seaweed);
+        --primary-text-color: var(--color-white);
+        --primary-background-color: var(--color-white);
+        --dark-primary-color: var(--color-maastricht-blue);
+        --light-primary-color: var(--color-gainsboro);
+        --default-primary-color: var(--color-metallic-seaweed);
+        
+        --secondary-color: var(--color-gainsboro);
+        --secondary-text-color: var(--color-white);
+        
+        --accent-color: var(--color-medium-candy-apple-red);
+
+        --disabled-text-color: var(--color-gainsboro);
+        --divider-color: var(--color-maastricht-blue);
+        /* Components */
+        /* paper-drawer-panel */
+        --drawer-menu-color: var(--color-gainsboro);
+        --drawer-border-color: 1px solid var(--color-maastricht-blue);
+        --drawer-toolbar-border-color: 1px solid var(--color-maastricht-blue);
+        /* paper-menu */
+        --paper-menu-background-color: var(--color-white);
+        /* paper-input */
+        /*--paper-input-container-color: rgba(255, 255, 255, 0.64);
+        --paper-input-container-focus-color: rgba(255, 255, 255, 1);
+        --paper-input-container-input-color: #fff;*/
+        --paper-input-container-color: var(--color-white);
+        --paper-input-container-focus-color: var(--color-metallic-seaweed);
+        --paper-input-container-input-color: var(--color-white);
+        /* paper-dialog */
+        --paper-dialog-background-color: var(--color-rich-black);
+        --paper-dialog-color: var(--color-white);
+        /* paper-button */
+        --paper-button-primary: var(--color-medium-candy-apple-red);
+        --paper-button-secondary: var(--color-metallic-seaweed);
+        --paper-button-tertiary: var(--color-maastricht-blue);
+        --paper-button-google: var(--color-medium-candy-apple-red);
+        --paper-button-facebook: var(--color-metallic-seaweed);
+        /*paper-checkbox*/
+        --paper-checkbox-checked-color: var(--color-maastricht-blue);
+        /*paper-toggle*/
+        /*app-grid*/
+        --app-grid-columns: 1;
+        /*--app-grid-item-height: 33%;*/
+        display: block;
+
+        --paper-icon-item: {
+          color: var(--dark-primary-color);  
+        }
+
+        /*--paper-checkbox-checked-background-color: var(--color-gainsboro);*/
+        --paper-checkbox-unchecked-color: var(--color-white);
+        --paper-checkbox-checked-color: var(--color-white);
+        --paper-checkbox-checkmark-color: var(--dark-primary-color);
+        
+
+        --paper-item-body-secondary: {
+          color: var(--dark-primary-color);
+        }
+      }
+      
+      #main {
+        padding: 1rem;
+      }
+
+      landing-view {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
+    </style>
+
+<iron-ajax auto url="/env.client.json" handle-as="json" last-response="{{rawEnv}}"></iron-ajax>
+
+<flash-alert id="flashAlert" flash="[[settings.flash]]" sound="[[settings.sound]]" sound-file="[[settings.soundFile]]"></flash-alert>
+<paper-toast id="toast"></paper-toast>
+
+
+<!-- Main content -->
+<div id="main" class="app-grid">
+  <receiver-view id="receiverView" env="[[env]]" settings="[[settings]]" state="[[state]]" seconds="[[seconds]]" periods="[[periods]]" timer="[[timer]]"></receiver-view>
+</div>
+
+</template>
+
+<script>
+  Polymer({
+    is: 'quiver-timer-cast',
+
+    properties: {
+      env: {
+        type: Object,
+        computed: '_env(rawEnv)'
+      },
+      settings: {
+        type: Object,
+        value: {
+          flash: true,
+          sound: true,
+          soundFile: 'chime'
+        }
+      },
+      state: {
+        type: String,
+        value: 'stopped'  
+      },
+      seconds: {
+        type: Number,
+        value: 0
+      },
+      periods: {
+        type: Array,
+        value: []
+      },
+      timer: Object
+    },
+
+    // Computed
+    _env: function (env) {
+      return _.merge(env.defaults, env[location.hostname.split('.').join(':')]);
+    },
+
+    // Observers
+    observers: ['_init(env)'],
+
+    _init: function(env) {
+      var appConfig = new cast.receiver.CastReceiverManager.Config();
+      var castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
+      var messageBus = castReceiverManager.getCastMessageBus(env.chromecast.namespace);
+
+      appConfig.statusText = "Get to work!";
+      appConfig.maxInactivity = 6000;
+
+      console.log('appconfig', appConfig, castReceiverManager);
+      castReceiverManager.start(appConfig);
+
+      castReceiverManager.onSenderDisconnected = function(e) {
+        console.log('disconnected', castReceiverManager.getSenders(), e);
+      };
+
+      messageBus.onMessage = function(e) {
+        if (e.data) {
+          var payload = JSON.parse(e.data);
+          this.state = payload.state;
+          this.seconds = payload.seconds;
+          this.splice.apply(this, ['periods', 0, this.periods.length].concat(payload.periods || []));
+          this.timer = payload.timer;
+          this.settings = payload.settings;
+        }
+      }.bind(this);
+    },
+
+    // Listeners
+    listeners: {
+      flash: '_flash',
+      sound: '_sound',
+      testSound: '_testSound',
+      alert: '_alert',
+      error: '_error'
+    },
+
+    _flash: function (e) {
+      if (this.settings.flash) {
+        this.$.flashAlert.fireFlash();
+      }
+      if (this.settings.sound) {
+        this.$.flashAlert.fireSound();
+      }
+    },
+
+    _sound: function () {
+      this.$.flashAlert.fireSound();
+    },
+
+    _testSound: function () {
+      this.$.flashAlert.testSound();
+    },
+
+    _alert: function (e) {
+      this.alert(e.detail.toString());
+    },
+
+    _error: function (e) {
+      this.alert(e.detail.toString(), 5000);
+    },
+
+    // Functions
+    alert: function (message, duration) {
+      var tempDuration = this.$.toast.duration;
+      if (duration) {
+        this.$.toast.duration = duration;
+      }
+      this.$.toast.text = message;
+      this.$.toast.show();
+      setTimeout(function () {
+        this.$.toast.duration = tempDuration;
+      }.bind(this), tempDuration);
+    }
+  });
+</script>
+</dom-module>
