@@ -82,12 +82,28 @@
         margin: 0;
         padding: 0;
       }
+
+      #fontFill {
+        width: 6em; 
+        height: 2em; 
+        text-align: center;
+      }
+
+      [is-cast] #fontFill {
+        width: 7em; 
+        height: 3em; 
+        text-align: center;
+      }
+
+      [is-cast] digital-clock {
+        font-size: 1.4em;
+      }
     </style>
 
-    <div id="chartWrapper" class="flex layout vertical center-justified center" type$="[[period.type]]">
+    <div id="chartWrapper" class="flex layout vertical center-justified center" type$="[[period.type]]" is-cast$="[[isCast]]">
       <div id="textWrapper" class="pinned layout vertical center-justified center" style$="font-size: [[fontSize]]px;">
         <digital-clock class="hide-prepare" total-seconds="[[globalSeconds]]"></digital-clock>
-        <font-fill id="fontFill" text="[[title]]" style="width: 6em; height: 2em; text-align: center;"></font-fill>
+        <font-fill id="fontFill" text="[[title]]"></font-fill>
         <digital-clock total-seconds="[[periodSeconds]]"></digital-clock>
       </div>
       <div id="chart"></div>

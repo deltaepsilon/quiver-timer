@@ -40,7 +40,8 @@
       playerController: {
         type: Object,
         computed: '_playerController(player)'
-      }
+      },
+      payload: Object
     },
 
     attached: function () {
@@ -55,7 +56,7 @@
     ],
 
     _route: function (path) {
-      return path.match(/(playing|paused)/) ? this.fire('showCast') : this.fire('hideCast');
+      return path.match(/(playing|paused|stopped)/) ? this.fire('showCast') : this.fire('hideCast');
     },
 
     _loadMedia: function (request, castSession) {
@@ -73,13 +74,17 @@
     _playerEvents: function(player, playerController) {
       playerController.addEventListener(cast.framework.RemotePlayerEventType.IS_CONNECTED_CHANGED, function (e) {
         console.log('ctrl connected changed', e);
-      });
+        if (e.value) {
+          console.log('messaging');
+          this.message();
+        }
+      }.bind(this));
       playerController.addEventListener(cast.framework.RemotePlayerEventType.SESSION_STATE_CHANGED, function (e) {
-        console.log('ctrl session state changed', e);
+        // console.log('ctrl session state changed', e);
       });
       playerController.addEventListener(cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED, function (e) {
-        console.log('ctrl media info changed', e);
-        console.log(player.mediaInfo);
+        // console.log('ctrl media info changed', e);
+        // console.log(player.mediaInfo);
       });
     },
 
@@ -93,7 +98,6 @@
       });
       instance.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, function (e) {
         this.set('sessionState', e.sessionState);
-        console.log('sessionState', e);
       }.bind(this));
       return instance;
     },
@@ -124,9 +128,12 @@
     },
 
     message: function(payload) {
+      if (payload) {
+        this.payload = payload;
+      }
+
       if (this.castSession && this.env.chromecast.namespace) {
-        console.log('sendMessage', this.env.chromecast.namespace, payload);
-        this.castSession.sendMessage(this.env.chromecast.namespace, payload);
+        this.castSession.sendMessage(this.env.chromecast.namespace, this.payload);
       }
     }
 
