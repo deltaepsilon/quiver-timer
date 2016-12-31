@@ -230,11 +230,22 @@
       stop: 'stop',
       previous: 'previous',
       next: 'next',
-      refresh: 'refresh'
+      refresh: 'refresh',
+      forward: 'forward',
+      replay: 'replay'
     },
 
     play: function () {
+      if (!this.state == 'playing') return;
+
+      if (!this.seconds) {
+        this.seconds = this.getTotalSeconds(this.workingPeriods);
+      }
+
       this.state = 'playing';
+      if (!this.localRoute.path.match(/playing/)) {
+        this.fire('redirect', '/timer/' + this.timerKey + '/playing');
+      }
       this.fire('testSound');
     },
 
@@ -291,6 +302,21 @@
       var s = this.getTotalSeconds();
       this.clock.stop();
       if (s) this.seconds = s;
+    },
+
+    forward: function() {
+      this.addSeconds(-10);
+    },
+
+    replay: function() {
+      this.addSeconds(10);
+    },
+
+    addSeconds: function(s) {
+      var maxSeconds = this.getTotalSeconds(this.workingPeriods);
+      this.seconds = Math.max(0, Math.min(maxSeconds, s + this.seconds));
+      this.clock.stop();
+      this.clock.start(this.seconds);
     },
 
     tickHandler: function (ms) {

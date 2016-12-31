@@ -134,9 +134,11 @@
   <div class="show-playing">
     <div class="bottom-sheet layout horizontal justified center">
       <paper-icon-button class="invisible-first-period" icon="av:skip-previous" on-click="previous"></paper-icon-button>
+      <paper-icon-button icon="av:replay-10" on-click="replay"></paper-icon-button>
       <a href$="/timer/[[timerKey]]/paused">
         <paper-fab icon="av:pause"></paper-fab>
       </a>
+      <paper-icon-button icon="av:forward-10" on-click="forward"></paper-icon-button>
       <paper-icon-button icon="av:skip-next" on-click="next"></paper-icon-button>
     </div>
   </div>
@@ -180,6 +182,7 @@
     clear: function () {
       this.$.timer.emptyChart();
     }
+    
   });
 </script>
 </dom-module>

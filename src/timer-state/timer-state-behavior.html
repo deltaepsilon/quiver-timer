@@ -31,6 +31,14 @@
       this.fire('next');
     },
 
+    forward: function() {
+      this.fire('forward');
+    },
+
+    replay: function() {
+      this.fire('replay');
+    },
+
     resize: function() {
       if (document.body.offsetWidth > document.body.offsetHeight) {
         this.position = 'horizontal';
