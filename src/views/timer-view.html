@@ -67,6 +67,10 @@
       localRoute: Object,
       firebase: Object,
       timerEndpoint: String,
+      casting: {
+        type: Boolean,
+        value: false
+      },
       ref: {
         type: Object,
         computed: '_ref(firebase, timerEndpoint)'
@@ -152,7 +156,7 @@
       }
     },
 
-    _ref: function(firebase, timerEndpoint) {
+    _ref: function (firebase, timerEndpoint) {
       return firebase.database().ref(timerEndpoint);
     },
 
@@ -194,18 +198,27 @@
       }
     },
 
-    _end: function(seconds, laggedSeconds, state) {
+    _end: function (seconds, laggedSeconds, state) {
       if (seconds == 0 && laggedSeconds && state == 'playing') {
         this.pause();
       }
     },
 
     _firebase: function (ref, state, seconds, workingPeriods) {
-      ref.update({
+      var payload = {
         state: state,
         seconds: seconds,
         periods: workingPeriods
-      });
+      };
+      this.fire('cast', payload);
+
+      if (this.casting) {
+        ref.update({
+          state: state,
+          seconds: seconds,
+          periods: workingPeriods
+        });
+      }
     },
 
     //Listeners

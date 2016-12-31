@@ -27,6 +27,10 @@
       #title {
         margin: 7px 0 0;
       }
+
+      paper-icon-button[casting] {
+        color: var(--app-primary-color);
+      }
     </style>
 <div class="layout horizontal justified" style="position: relative; z-index: 1;">
 <a href="/timers" class$="[[arrowClass]]">
@@ -35,9 +39,7 @@
 <h3 id="title">[[pageTitle]]</h3>
 <div class="flex layout horizontal end-justified">
   <template is="dom-if" if="[[uid]]">
-    <a href$="/cast/[[uid]]" target="_blank" style="margin-right: 3rem;">
-      <paper-icon-button class$="[[exitClass]]" icon="social:share"></paper-icon-button>
-    </a>
+    <paper-icon-button class$="[[exitClass]]" casting$="[[casting]]" icon="social:share" on-click="openCast"></paper-icon-button>
   </template>
   <paper-icon-button class$="[[exitClass]]" icon="extended:exit" on-click="logout"></paper-icon-button>
   <paper-icon-button class$="[[settingsClass]]" icon="settings" on-click="openSettings"></paper-icon-button>
@@ -53,6 +55,10 @@
       page: String,
       tail: Object,
       uid: String,
+      casting: {
+        type: Boolean,
+        value: false
+      },
       pageTitle: {
         type: String,
         computed: '_pageTitle(page, tail)'
@@ -91,6 +97,10 @@
 
     openSettings: function () {
       this.fire('openSettings');
+    },
+
+    openCast: function() {
+      this.fire('openDialog', {id: 'castDialog'})
     },
 
     logout: function () {

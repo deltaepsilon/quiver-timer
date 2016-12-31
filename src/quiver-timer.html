@@ -34,6 +34,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="dialogs/period-select-sheet.html">
 <link rel="import" href="dialogs/settings-dialog.html">
 <link rel="import" href="dialogs/sound-dialog.html">
+<link rel="import" href="dialogs/cast-dialog.html">
 <link rel="import" href="flash-alert/flash-alert.html">
 <link rel="import" href="firebase-behavior/firebase-behavior.html">
 
@@ -137,18 +138,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <auth-controller id="authController" firebase="[[firebase]]" login-endpoint="[[model.user.write.login]]" account-endpoint="[[model.user.read.account]]"
   connected="[[connected]]" page="[[page]]" user="{{user}}" account="{{account}}"></auth-controller>
 
-<cast-controller id="castController" route="[[route]]" cast-url="[[castUrl]]"></cast-controller>
+<cast-controller id="castController" route="[[route]]" cast-url="[[castUrl]]" env="[[env]]"></cast-controller>
 <paper-toast id="toast"></paper-toast>
 
 
 <!-- Main content -->
 <div id="main" class="app-grid">
-  <nav-controller page="[[page]]" tail="{{subroute}}" uid="[[user.uid]]"></nav-controller>
+  <nav-controller page="[[page]]" tail="{{subroute}}" uid="[[user.uid]]" casting="[[casting]]"></nav-controller>
   <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="fourohfour" role="main">
     <landing-view id="landingView" name="landing"></landing-view>
     <login-view id="loginView" name="login" user="[[user]]"></login-view>
     <timers-view id="timersView" name="timers" account="[[account]]"></timers-view>
-    <timer-view id="timerView" name="timer" local-route="[[subroute]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]"></timer-view>
+    <timer-view id="timerView" name="timer" local-route="[[subroute]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]" casting="[[casting]]"></timer-view>
     <configure-view id="configureView" name="configure" local-route="[[subroute]]" title="{{configureTitle}}"
       on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
     <cast-view id="castView" name="cast" firebase="[[firebase]]" cast-endpoint="[[castEndpoint]]"></cast-view>
@@ -161,6 +162,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <item-name-dialog id="itemNameDialog"></item-name-dialog>
 <settings-dialog id="settingsDialog" settings="{{settings}}"></settings-dialog>
 <sound-dialog id="soundDialog"></sound-dialog>
+<cast-dialog id="castDialog" uid="[[user.uid]]" casting="{{casting}}"></cast-dialog>
 
 <!-- Bottom sheet -->
 <period-select-sheet id="periodSelectSheet" show="[[showPeriodSelectSheet]]" show-bulk-edits="[[showBulkEdits]]" payload="[[periodSelectSheetPayload]]"></period-select-sheet>

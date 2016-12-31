@@ -16,6 +16,7 @@
     properties: {
       route: Object,
       castUrl: String,
+      env: Object,
       sessionState: String,
       isAvailable: {
         type: Boolean,
@@ -85,9 +86,10 @@
 
     _instance: function (isAvailable) {
       if (!isAvailable) return;
+      var receiverApplicationId = this.env.chromecast.receiverApplicationId || chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID;
       var instance = cast.framework.CastContext.getInstance();
       instance.setOptions({
-        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        receiverApplicationId: receiverApplicationId,
         autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
       });
       instance.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, function (e) {

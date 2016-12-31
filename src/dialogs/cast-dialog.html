@@ -1,0 +1,53 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/iron-icons/social-icons.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="cast-dialog">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+<paper-dialog id="dialog" with-backdrop always-on-top="false">
+  <paper-item>
+    <paper-toggle-button checked="{{casting}}">Enable Cast</paper-toggle-button>
+  </paper-item>
+
+  <a href$="/cast/[[uid]]" target="_blank">
+    <paper-icon-button icon="social:share"></paper-icon-button> Open Public Timer
+  </a>
+
+  <div class="buttons">
+    <paper-button tabindex="1" on-click="close">close</paper-button>
+  </div>
+</paper-dialog>
+
+</template>
+<script>
+    Polymer({
+      is: "cast-dialog",
+
+      properties: {
+        uid: String,
+        casting: {
+          type: Boolean,
+          value: false,
+          notify: true
+        }
+      },
+
+      open: function () {
+        this.$.dialog.open();
+      },
+
+      close: function () {
+        this.$.dialog.close();
+      }
+    });
+  </script>
+</dom-module>

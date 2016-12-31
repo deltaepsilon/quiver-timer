@@ -26,7 +26,7 @@ module.exports = function (e) {
       return axios.get(links.lists.href, headers);
     })
     .then(function (res) {
-      var list = res.data.lists.find(list => list.name.match(/Timer/));
+      var list = res.data.lists.find(list => list.name.match(/hiit/i));
       return flattenLinks(list._links);
     })
     .then(function (links) {
