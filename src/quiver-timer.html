@@ -321,6 +321,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Space: '_space',
       ArrowLeft: '_arrowLeft',
       ArrowRight: '_arrowRight',
+      cast: '_cast'
     },
     _redirect: function (e) {
       this.set('route.path', e.detail);
@@ -412,6 +413,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       if(this.route.path.match(/playing/)) {
         this.$.timerView.previous();
       }
+    },
+
+    _cast: function(e) {
+      this.$.castController.message(e.detail);
     },
 
     // Functions

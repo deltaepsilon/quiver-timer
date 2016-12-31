@@ -123,6 +123,10 @@
       this.isAvailable = this.route.path.match(/cast/) ? false : isAvailable;
     },
 
+    message: function(payload) {
+      console.log(this.env.chromecast.namespace, payload);
+    }
+
   });
 </script>
 </dom-module>
