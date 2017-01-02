@@ -9,18 +9,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/app-layout/app-grid/app-grid-style.html">
 <link rel="import" href="../bower_components/app-layout/app-box/app-box.html">
 
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
-<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/app-layout/app-scrollpos-control/app-scrollpos-control.html">
 <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 
 <link rel="import" href="icons.html">
@@ -29,7 +24,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="controllers/nav-controller.html">
 <link rel="import" href="controllers/auth-controller.html">
 <link rel="import" href="controllers/cast-controller.html">
-<link rel="import" href="timer-fab/timer-fab.html">
 <link rel="import" href="dialogs/item-name-dialog.html">
 <link rel="import" href="dialogs/item-description-dialog.html">
 <link rel="import" href="dialogs/period-select-sheet.html">
@@ -39,7 +33,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="flash-alert/flash-alert.html">
 <link rel="import" href="firebase-behavior/firebase-behavior.html">
 
-<script src="../bower_components/lodash/lodash.js"></script>
+<script src="third-party/lodash.custom.min.js"></script>
 
 <!-- Firestore -->
 <script src="https://www.gstatic.com/firebasejs/3.5.0/firebase.js"></script>
@@ -47,7 +41,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="quiver-timer">
   <template>
-    <style include="app-grid-style shared-styles">
+    <style include="shared-styles">
       :host {
         --color-rich-black: #080705;
         --color-maastricht-blue: #011627;
@@ -99,9 +93,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         /*paper-checkbox*/
         --paper-checkbox-checked-color: var(--color-maastricht-blue);
         /*paper-toggle*/
-        /*app-grid*/
-        --app-grid-columns: 1;
-        /*--app-grid-item-height: 33%;*/
         display: block;
 
         --paper-icon-item: {
@@ -144,7 +135,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 
 <!-- Main content -->
-<div id="main" class="app-grid">
+<div id="main">
   <nav-controller page="[[page]]" tail="{{subroute}}" uid="[[user.uid]]" casting="[[casting]]"></nav-controller>
   <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="fourohfour" role="main">
     <landing-view id="landingView" name="landing"></landing-view>
@@ -221,6 +212,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     attached: function() {
+      var loading = document.body.querySelector('#loading');
+      if (loading) {
+        loading.remove();
+      }
       document.body.addEventListener('keyup', function(e) {
         if (e.code == 'Space') this.fire('Space');
         if (e.code == 'ArrowRight') this.fire('ArrowRight');

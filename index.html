@@ -48,52 +48,50 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <meta name="msapplication-tap-highlight" content="no">
 
   <script>
-      // Setup Polymer options
-      window.Polymer = {
-        dom: 'shadow',
-        lazyRegister: true
+    // Setup Polymer options
+    window.Polymer = {
+      dom: 'shadow',
+      lazyRegister: true
+    };
+
+    // Load webcomponentsjs polyfill if browser does not support native Web Components
+    (function () {
+      'use strict';
+
+      var onload = function () {
+        // For native Imports, manually fire WebComponentsReady so user code
+        // can use the same code path for native and polyfill'd imports.
+        if (!window.HTMLImports) {
+          document.dispatchEvent(
+            new CustomEvent('WebComponentsReady', { bubbles: true })
+          );
+        }
       };
 
-      // Load webcomponentsjs polyfill if browser does not support native Web Components
-      (function () {
-        'use strict';
+      var webComponentsSupported = (
+        'registerElement' in document
+        && 'import' in document.createElement('link')
+        && 'content' in document.createElement('template')
+      );
 
-        var onload = function () {
-          // For native Imports, manually fire WebComponentsReady so user code
-          // can use the same code path for native and polyfill'd imports.
-          if (!window.HTMLImports) {
-            document.dispatchEvent(
-              new CustomEvent('WebComponentsReady', { bubbles: true })
-            );
-          }
-        };
-
-        var webComponentsSupported = (
-          'registerElement' in document
-          && 'import' in document.createElement('link')
-          && 'content' in document.createElement('template')
-        );
-
-        if (!webComponentsSupported) {
-          var script = document.createElement('script');
-          script.async = true;
-          script.src = '/bower_components/webcomponentsjs/webcomponents-lite.min.js';
-          script.onload = onload;
-          document.head.appendChild(script);
-        } else {
-          onload();
-        }
-      })();
-
-      // Load pre-caching Service Worker
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function () {
-          navigator.serviceWorker.register('/service-worker.js');
-        });
+      if (!webComponentsSupported) {
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = '/bower_components/webcomponentsjs/webcomponents-lite.min.js';
+        script.onload = onload;
+        document.head.appendChild(script);
+      } else {
+        onload();
       }
-    </script>
+    })();
 
-<link rel="import" href="/src/quiver-timer.html">
+    // Load pre-caching Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/service-worker.js');
+      });
+    }
+  </script>
 
 <style>
       body {
@@ -108,6 +106,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </head>
 
 <body>
+  <quiver-timer id="app"></quiver-timer>
+  <link rel="import" href="/src/quiver-timer.html">
+  <!-- Built with love using Polymer Starter Kit -->
   <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
   <script>
       (function () {
@@ -118,7 +119,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           document.body.querySelector('#cast-button').removeAttribute('style');
         });
       })();
-    </script>
+  </script>
 <style>
       #cast-button {
         position: absolute;
@@ -133,7 +134,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         border: none;
         z-index: 2;
 
-        --connected-color: #E01130;
+        --connected-color: #1C898E;
         --disconnected-color: #FFFFFF;
       }
 
@@ -142,8 +143,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 <button id="cast-button" is="google-cast-button"></button>
-<quiver-timer id="app"></quiver-timer>
-<!-- Built with love using Polymer Starter Kit -->
 </body>
 
 </html>
