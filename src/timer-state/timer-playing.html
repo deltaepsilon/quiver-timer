@@ -65,9 +65,9 @@
       }*/
       .total-seconds {
         position: absolute;
-        right: 1rem;
         top: 1rem;
-        left: 1rem;
+        right: 26px;
+        left: 26px;
         font-size: 3vh;
 
         @apply(--layout-horizontal);
@@ -75,9 +75,9 @@
       
       .bottom-icons {
         position: absolute;
-        right: 1rem;
+        right: 26px;
         bottom: 7rem;
-        left: 1rem;
+        left: 24px;
         font-size: 3vh;
       }
 
@@ -99,7 +99,7 @@
         top: 2rem;
         right: 4rem;
         left: 4rem;
-        font-size: 12vh;
+        font-size: 86px;
       }
 
       [is-cast] .bottom-icons {
@@ -126,7 +126,7 @@
   <digital-clock total-seconds="[[totalGlobalSeconds]]"></digital-clock>
 </div>
 
-<div class="bottom-icons layout horizontal justified center">
+<div class="bottom-icons hide-cast layout horizontal justified center">
   <iron-icon id="icon" icon="[[period.icon]]"></iron-icon>
 </div>
 

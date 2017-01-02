@@ -89,7 +89,17 @@
         text-align: center;
       }
 
-      [is-cast] #fontFill {
+      #castTextWrapper {
+        padding: 1rem 2rem;
+      }
+
+      #cast-seconds {
+        width: 100%;
+        font-size: 61px;
+        margin-bottom: -18px;
+      }
+
+      #castTextWrapper #fontFill {
         width: 7em; 
         height: 3em; 
         text-align: center;
@@ -100,308 +110,346 @@
       }
     </style>
 
-    <div id="chartWrapper" class="flex layout vertical center-justified center" type$="[[period.type]]" is-cast$="[[isCast]]">
-      <div id="textWrapper" class="pinned layout vertical center-justified center" style$="font-size: [[fontSize]]px;">
-        <digital-clock class="hide-prepare" total-seconds="[[globalSeconds]]"></digital-clock>
-        <font-fill id="fontFill" text="[[title]]"></font-fill>
-        <digital-clock total-seconds="[[periodSeconds]]"></digital-clock>
-      </div>
-      <div id="chart"></div>
+<div id="chartWrapper" class="flex layout vertical center-justified center" type$="[[period.type]]" is-cast$="[[isCast]]">
+
+  <template is="dom-if" if="[[!isCast]]">
+    <div id="textWrapper" class="pinned layout vertical center-justified center" style$="font-size: [[fontSize]]px;">
+      <digital-clock class="hide-prepare" total-seconds="[[globalSeconds]]"></digital-clock>
+      <font-fill id="fontFill" text="[[title]]"></font-fill>
+      <digital-clock total-seconds="[[periodSeconds]]"></digital-clock>
     </div>
-
   </template>
-  <script>
-    Polymer({
-       is: "digital-timer",
 
-       behaviors: [Polymer.IronResizableBehavior],
+  <template is="dom-if" if="[[isCast]]">
 
-       properties: {
-         isCast: {
-           type: Boolean,
-           value: false
-         },
-         globalSeconds: Number,
-         globalCycleSeconds: Number,
-         globalCycle: Array,
-         globalPercentage: {
-           type: Number,
-           computed: '_percentage(globalCycleSeconds, globalCycle, globalCycle.splices)'
-         },
-         periodCycle: Array,
-         periodCycleSeconds: Number,
-         periodSeconds: Number,
-         periodPercentage: {
-           type: Number,
-           computed: '_percentage(periodCycleSeconds, periodCycle, periodCycle.splices)'
-         },
-         pie: {
-           type: Object,
-           value: function() {
-             return d3.pie()
-              .value(function(period) {
-                return period.percentage;
-              })
-              .sort(null);
-           }
-         },
-         accumulatedPie: {
-           type: Object,
-           value: function() {
-             return d3.pie()
-              .value(function(period) {
-                return period.accumulatedPercentage;
-              })
-              .sort(null);
-           }
-         },
-         height: Number,
-         width: Number,
-         fontSize: {
-           type: Number,
-           computed: '_fontSize(height, width)'
-         },
-         period: {
-           type: Object,
-           computed: '_period(globalSeconds, globalCycle, globalCycle.splices)'
-         },
-         title: {
-           type: String,
-           value: 'Press Play'
-         },
-         globalInnerCircle: Object,
-         globalOuterCircle: Object,
-         periodInnerCircle: Object,
-         periodOuterCircle: Object,
-         colorWheel: {
-           type: Array,
-           value: []
-         }
-       },
-      
-      // Listeners
-      listeners: {
-        'iron-resize': 'resize'
+    <!--<div style="
+    position: fixed;
+    width: 1px;
+    background: gold;
+    top: 0;
+    bottom: 0;
+    right: 391px;
+"></div>
+<div style="
+    border: 1px solid gold;
+    position: fixed;
+    top: 61px;
+    right: 67px;
+    bottom: 61px;
+    left: 67px;
+"></div>-->
+
+
+<div id="castTextWrapper" class="pinned layout vertical center-justified center" style$="font-size: [[fontSize]]px;">
+  <div style="height: 7rem;"></div>
+<div class="flex layout vertical center-justified">
+  <font-fill id="fontFill" text="[[title]]"></font-fill>
+</div>
+<div id="cast-seconds" class="layout horizontal justified">
+  <digital-clock class="hide-prepare" total-seconds="[[globalSeconds]]"></digital-clock>
+  <digital-clock total-seconds="[[periodSeconds]]"></digital-clock>
+</div>
+</div>
+</template>
+
+<div id="chart"></div>
+</div>
+
+</template>
+<script>
+  Polymer({
+    is: "digital-timer",
+
+    behaviors: [Polymer.IronResizableBehavior],
+
+    properties: {
+      isCast: {
+        type: Boolean,
+        value: false
       },
-
-      resize: function() {
-        if (!this.debouncedResize) { // Debounced functions must be local, not shared
-          this.debouncedResize = _.debounce(this.setDimensions.bind(this), 50);
+      globalSeconds: Number,
+      globalCycleSeconds: Number,
+      globalCycle: Array,
+      globalPercentage: {
+        type: Number,
+        computed: '_percentage(globalCycleSeconds, globalCycle, globalCycle.splices)'
+      },
+      periodCycle: Array,
+      periodCycleSeconds: Number,
+      periodSeconds: Number,
+      periodPercentage: {
+        type: Number,
+        computed: '_percentage(periodCycleSeconds, periodCycle, periodCycle.splices)'
+      },
+      pie: {
+        type: Object,
+        value: function () {
+          return d3.pie()
+            .value(function (period) {
+              return period.percentage;
+            })
+            .sort(null);
         }
-        this.debouncedResize();
       },
+      accumulatedPie: {
+        type: Object,
+        value: function () {
+          return d3.pie()
+            .value(function (period) {
+              return period.accumulatedPercentage;
+            })
+            .sort(null);
+        }
+      },
+      height: Number,
+      width: Number,
+      fontSize: {
+        type: Number,
+        computed: '_fontSize(height, width)'
+      },
+      period: {
+        type: Object,
+        computed: '_period(globalSeconds, globalCycle, globalCycle.splices)'
+      },
+      title: {
+        type: String,
+        value: 'Press Play'
+      },
+      globalInnerCircle: Object,
+      globalOuterCircle: Object,
+      periodInnerCircle: Object,
+      periodOuterCircle: Object,
+      colorWheel: {
+        type: Array,
+        value: []
+      }
+    },
+
+    // Listeners
+    listeners: {
+      'iron-resize': 'resize'
+    },
+
+    resize: function () {
+      if (!this.debouncedResize) { // Debounced functions must be local, not shared
+        this.debouncedResize = _.debounce(this.setDimensions.bind(this), 50);
+      }
+      this.debouncedResize();
+    },
 
 
-       // Observers
-       observers: [
-         '_title(period.name, globalSeconds)',
-         '_chart(width, height, globalCycle, periodCycle, globalCycle.splices, periodCycle.splices)',
-         '_chartUpdate(globalPercentage, globalCycle, globalOuterCircle, globalCycle.splices)',
-         '_chartUpdate(periodPercentage, periodCycle, periodOuterCircle, periodCycle.splices)'
-       ],
+    // Observers
+    observers: [
+      '_title(period.name, globalSeconds)',
+      '_chart(width, height, globalCycle, periodCycle, globalCycle.splices, periodCycle.splices)',
+      '_chartUpdate(globalPercentage, globalCycle, globalOuterCircle, globalCycle.splices)',
+      '_chartUpdate(periodPercentage, periodCycle, periodOuterCircle, periodCycle.splices)'
+    ],
 
-       _fontSize: function(h, w) {
-         var min = Math.min(h, w);
-         return min * .08;
-       },
+    _fontSize: function (h, w) {
+      var min = Math.min(h, w);
+      return min * .08;
+    },
 
-       _period: function(globalSeconds, globalCycle) {
-         var i = this.getPeriodIndex(globalSeconds, globalCycle);
-         return globalCycle[i];
-       },
+    _period: function (globalSeconds, globalCycle) {
+      var i = this.getPeriodIndex(globalSeconds, globalCycle);
+      return globalCycle[i];
+    },
 
-       _percentage: function(cycleSeconds, cycle) {
-         var totalSeconds = cycle.seconds || this.getCycleSeconds(cycle);
-         return this.round(1 - cycleSeconds/totalSeconds);
-       },
+    _percentage: function (cycleSeconds, cycle) {
+      var totalSeconds = cycle.seconds || this.getCycleSeconds(cycle);
+      return this.round(1 - cycleSeconds / totalSeconds);
+    },
 
-       _title: function(name, globalSeconds) {
-         return this.title = !globalSeconds ? 'Press Play' : name;
-       },
+    _title: function (name, globalSeconds) {
+      return this.title = !globalSeconds ? 'Press Play' : name;
+    },
 
-       _chart: function(width, height, globalCycle, periodCycle) {
-         if (!width || !height) return;
-         this.emptyChart();
-         
-         var minDimension = Math.max(0, Math.min(width, height - 16)); // Prevent clipping in vert layouts 
-         var w = minDimension;
-         var h = minDimension;
-         var arcWidth = minDimension * .06;
-         var outerRadiusArc = w/2;
-         var innerRadiusArc = outerRadiusArc - arcWidth;
-         var shadowWidth = minDimension * .02;
-         var outerRadiusArcShadow = innerRadiusArc + 1;
-         var innerRadiusArcShadow = innerRadiusArc - shadowWidth;
-         var color = d3.scaleOrdinal().range(this.colorWheel);
-         var colorWheel = this.colorWheel;
+    _chart: function (width, height, globalCycle, periodCycle) {
+      if (!width || !height) return;
+      this.emptyChart();
 
-         var svg = d3.select(this.$.chart)
-          .append('svg')
-          .attr('width', w)
-          .attr('height', h)
-          .attr('class', 'shadow')
-          .append('g')
-          .attr('transform', 'translate('+w/2+','+h/2+')');
-         
-         function outerCircleFill(d, i) {
-           // Only filler arcs should be transparent
-           if (!d.data.totalSeconds) return 'transparent';
-           if (!d.data.color) return 'gray';
-           return d3.color(d.data.color);
-          //  return color(d.data.color);
-         };
+      var minDimension = Math.max(0, Math.min(width, height - 16)); // Prevent clipping in vert layouts 
+      var w = minDimension;
+      var h = minDimension;
+      var arcWidth = minDimension * .06;
+      var outerRadiusArc = w / 2;
+      var innerRadiusArc = outerRadiusArc - arcWidth;
+      var shadowWidth = minDimension * .02;
+      var outerRadiusArcShadow = innerRadiusArc + 1;
+      var innerRadiusArcShadow = innerRadiusArc - shadowWidth;
+      var color = d3.scaleOrdinal().range(this.colorWheel);
+      var colorWheel = this.colorWheel;
 
-         function innerCircleFill(d, i) {
-          //  var c = d3.hsl(color(d.data.color));
-          var c = d3.hsl(d3.color(d.data.color));
-          return d3.hsl((c.h + 5), (c.s + .07), (c.l - .15));
-         };
-         
-         
-         var globalPeriods = this.getPeriods(this.globalPercentage, globalCycle);
+      var svg = d3.select(this.$.chart)
+        .append('svg')
+        .attr('width', w)
+        .attr('height', h)
+        .attr('class', 'shadow')
+        .append('g')
+        .attr('transform', 'translate(' + w / 2 + ',' + h / 2 + ')');
 
-         this.globalOuterCircle = this.createChart(globalPeriods, this.accumulatedPie, svg, outerRadiusArc, innerRadiusArc, outerCircleFill, 'globalOuterCircle'); 
-         
-         this.globalInnerCircle = this.createChart(globalPeriods, this.pie, svg, outerRadiusArcShadow, innerRadiusArcShadow, innerCircleFill, 'globalInnerCircle');
+      function outerCircleFill(d, i) {
+        // Only filler arcs should be transparent
+        if (!d.data.totalSeconds) return 'transparent';
+        if (!d.data.color) return 'gray';
+        return d3.color(d.data.color);
+        //  return color(d.data.color);
+      };
 
-         var periodPeriods = this.getPeriods(this.periodPercentage, periodCycle);
-         var periodInset = minDimension * .08;
+      function innerCircleFill(d, i) {
+        //  var c = d3.hsl(color(d.data.color));
+        var c = d3.hsl(d3.color(d.data.color));
+        return d3.hsl((c.h + 5), (c.s + .07), (c.l - .15));
+      };
 
-         this.periodOuterCircle = this.createChart(periodPeriods, this.accumulatedPie, svg, outerRadiusArc - periodInset, innerRadiusArc - periodInset, outerCircleFill, 'periodOuterCircle'); 
-         
-         this.periodInnerCircle = this.createChart(periodPeriods, this.pie, svg, outerRadiusArcShadow - periodInset, innerRadiusArcShadow - periodInset, innerCircleFill, 'periodInnerCircle');
-        
-       },
 
-       _chartUpdate: function(percentage, cycle, circle) {
-         circle.update(this.getPeriods(percentage, cycle));
-       },
+      var globalPeriods = this.getPeriods(this.globalPercentage, globalCycle);
 
-       // Functions
-       getPeriodIndex: function(seconds, periods) {
-         var i = periods.length;
-         while (i--) {
-           seconds -= periods[i].totalSeconds
-           if (seconds <= 0) break;
-         }
-         return i;
-       },
+      this.globalOuterCircle = this.createChart(globalPeriods, this.accumulatedPie, svg, outerRadiusArc, innerRadiusArc, outerCircleFill, 'globalOuterCircle');
 
-       getPeriods: function(maxPercentage, cycle) {
-         maxPercentage = maxPercentage || 0;
+      this.globalInnerCircle = this.createChart(globalPeriods, this.pie, svg, outerRadiusArcShadow, innerRadiusArcShadow, innerCircleFill, 'globalInnerCircle');
 
-         var totalSeconds = cycle.seconds || this.getCycleSeconds(cycle);
-         var accumulatedPercentage = 0;
-         var periods = cycle.map(function(period) {
-           if (!period) return;
-           period.percentage = this.round(period.totalSeconds/totalSeconds);
+      var periodPeriods = this.getPeriods(this.periodPercentage, periodCycle);
+      var periodInset = minDimension * .08;
 
-           if (accumulatedPercentage + period.percentage <= maxPercentage) {
-             period.accumulatedPercentage = period.percentage;
-           } else {
-             period.accumulatedPercentage = Math.max(0, this.round(maxPercentage - accumulatedPercentage));
-           }
+      this.periodOuterCircle = this.createChart(periodPeriods, this.accumulatedPie, svg, outerRadiusArc - periodInset, innerRadiusArc - periodInset, outerCircleFill, 'periodOuterCircle');
 
-           accumulatedPercentage = accumulatedPercentage + period.percentage;
-           
-           return period;
-         }.bind(this));
+      this.periodInnerCircle = this.createChart(periodPeriods, this.pie, svg, outerRadiusArcShadow - periodInset, innerRadiusArcShadow - periodInset, innerCircleFill, 'periodInnerCircle');
 
-         var roundingError = this.round(1 - periods.reduce(function(i, p) {
-           return i + p.percentage;
-         }, 0));
+    },
 
-         periods.push({
-           name: 'Done',
-           accumulatedPercentage: this.round(1 - periods.reduce(function(i, p) {
-             return i + p.accumulatedPercentage;
-           }, 0)) - roundingError
-         });
+    _chartUpdate: function (percentage, cycle, circle) {
+      circle.update(this.getPeriods(percentage, cycle));
+    },
 
-         return periods;
-       },
+    // Functions
+    getPeriodIndex: function (seconds, periods) {
+      var i = periods.length;
+      while (i--) {
+        seconds -= periods[i].totalSeconds
+        if (seconds <= 0) break;
+      }
+      return i;
+    },
 
-       getCycleSeconds: function(cycle) {
-         return cycle.reduce(function(s, period) {
-           return s + period.totalSeconds;
-         }, 0);
-       },
+    getPeriods: function (maxPercentage, cycle) {
+      maxPercentage = maxPercentage || 0;
 
-       createChart: function(periods, pie, svg, outerRadius, innerRadius, fillFunction, className) {
-         var tau = 2 * Math.PI;
-         var paths = getPaths();
-         var arc = d3.arc()
-            .innerRadius(innerRadius)
-            .outerRadius(outerRadius);
-         
-         
-         paths.transition()
-          .duration(1000)
-          .attrTween('d', function(d) {
-            var interpolate = d3.interpolate({startAngle: 0, endAngle: 0}, d);
-            return function(t) {
-              return arc(interpolate(t));
-            };
+      var totalSeconds = cycle.seconds || this.getCycleSeconds(cycle);
+      var accumulatedPercentage = 0;
+      var periods = cycle.map(function (period) {
+        if (!period) return;
+        period.percentage = this.round(period.totalSeconds / totalSeconds);
+
+        if (accumulatedPercentage + period.percentage <= maxPercentage) {
+          period.accumulatedPercentage = period.percentage;
+        } else {
+          period.accumulatedPercentage = Math.max(0, this.round(maxPercentage - accumulatedPercentage));
+        }
+
+        accumulatedPercentage = accumulatedPercentage + period.percentage;
+
+        return period;
+      }.bind(this));
+
+      var roundingError = this.round(1 - periods.reduce(function (i, p) {
+        return i + p.percentage;
+      }, 0));
+
+      periods.push({
+        name: 'Done',
+        accumulatedPercentage: this.round(1 - periods.reduce(function (i, p) {
+          return i + p.accumulatedPercentage;
+        }, 0)) - roundingError
+      });
+
+      return periods;
+    },
+
+    getCycleSeconds: function (cycle) {
+      return cycle.reduce(function (s, period) {
+        return s + period.totalSeconds;
+      }, 0);
+    },
+
+    createChart: function (periods, pie, svg, outerRadius, innerRadius, fillFunction, className) {
+      var tau = 2 * Math.PI;
+      var paths = getPaths();
+      var arc = d3.arc()
+        .innerRadius(innerRadius)
+        .outerRadius(outerRadius);
+
+
+      paths.transition()
+        .duration(1000)
+        .attrTween('d', function (d) {
+          var interpolate = d3.interpolate({ startAngle: 0, endAngle: 0 }, d);
+          return function (t) {
+            return arc(interpolate(t));
+          };
+        });
+      paths.data(pie(periods))
+        .enter()
+        .append('path')
+        .attr('class', className)
+        .attr('d', arc)
+        .attr('fill', fillFunction);
+
+
+      function getPaths() {
+        return svg.selectAll('.' + className);
+      };
+      function update(periods) {
+        if (periods.length > 2 && className != 'periodOuterCircle') {
+          periods = periods.filter(function (p) {
+            return p.type !== 'prepare';
           });
-          paths.data(pie(periods))
-              .enter()
-              .append('path')
-              .attr('class', className)
-              .attr('d', arc)
-              .attr('fill', fillFunction);
+        }
+
+        getPaths()
+          .data(pie(periods))
+          .attr('d', arc)
+          .attr('fill', fillFunction);
 
 
-         function getPaths() {
-           return svg.selectAll('.' + className);
-         };
-         function update(periods) {
-           if (periods.length > 2 && className != 'periodOuterCircle') {
-             periods = periods.filter(function(p) {
-               return p.type !== 'prepare';
-             });
-           }
-           
-           getPaths()
-            .data(pie(periods))
-            .attr('d', arc)
-            .attr('fill', fillFunction);
-              
+        return {
+          paths: paths,
+          arc: arc,
+          update: update
+        };
+      };
+      return update(periods);
+    },
 
-            return {
-              paths: paths,
-              arc: arc,
-              update: update
-            };
-         };
-         return update(periods);
-       },
+    emptyChart: function () {
+      var chart = this.$.chart;
+      var children = chart.children;
+      var i = children.length;
+      while (i--) {
+        chart.removeChild(children[i]);
+      }
+    },
 
-       emptyChart: function() {
-         var chart = this.$.chart;
-         var children = chart.children;
-         var i = children.length;
-         while (i--) {
-           chart.removeChild(children[i]);
-         }
-       },
+    setDimensions: function () {
+      this.width = this.offsetWidth;
+      this.height = this.offsetHeight;
+    },
 
-       setDimensions: function() {
-         this.width = this.offsetWidth;
-         this.height = this.offsetHeight;
-       },
+    round: function (p) {
+      return Math.round(p * 10000) / 10000;
+    },
 
-       round: function(p) {
-         return Math.round(p * 10000) / 10000;
-       },
+    refresh: function () {
+      setTimeout(function () {
+        var fontFill = this.$.chartWrapper.querySelector('#fontFill');
 
-       refresh: function() {
-        setTimeout(function() {
-          this.fire('iron-resize');
-          this.$.fontFill.fire('iron-resize');
-          this.fire('refresh'); 
-        }.bind(this), 100);  
-       }
+        if (fontFill) fontFill.fire('iron-resize');
+        this.fire('iron-resize');
+        this.fire('refresh');
+      }.bind(this), 100);
+    }
 
-    });
-  </script>
+  });
+</script>
 </dom-module>

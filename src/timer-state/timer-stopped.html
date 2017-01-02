@@ -47,7 +47,7 @@
       #title a {
         position: relative;
         top: -3px;
-        left: 4px;
+        left: .5rem;
       }
 
       [is-cast] {
@@ -84,7 +84,7 @@
   </div>
 
   <paper-material class="list" elevation="1">
-    <a id="top-fab" class="hide-cast" style="left: 13px;" href$="/timer/[[timerKey]]/playing">
+    <a id="top-fab" class="hide-cast layout horizontal end-justified" style="left: 13px;" href$="/timer/[[timerKey]]/playing">
 <paper-fab icon="av:play-arrow"></paper-fab>
 </a>
 <template is="dom-repeat" items="[[timer.periods]]" as="period">

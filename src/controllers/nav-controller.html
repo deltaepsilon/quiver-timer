@@ -13,7 +13,7 @@
       }
 
       .hidden {
-        visibility: hidden;
+        display: none;
       }
 
       .none {
@@ -25,7 +25,14 @@
       }
 
       #title {
-        margin: 7px 0 0;
+        margin: 0;
+        padding: 6px 10px 0;
+      }
+
+      #title.bottom-right {
+        position: fixed;
+        bottom: 110px;
+        right: 26px;
       }
 
       paper-icon-button[casting] {
@@ -33,10 +40,10 @@
       }
     </style>
 <div class="layout horizontal justified" style="position: relative; z-index: 1;">
-<a href="/timers" class$="[[arrowClass]]">
+<a href="/timers" class$="[[arrowClass]]" style="margin-left: -2px;">
   <paper-icon-button icon="arrow-back"></paper-icon-button>
 </a>
-<h3 id="title">[[pageTitle]]</h3>
+<h3 id="title" class$="[[titleClass]]">[[pageTitle]]</h3>
 <div class="flex layout horizontal end-justified">
   <template is="dom-if" if="[[uid]]">
     <paper-icon-button class$="[[exitClass]]" casting$="[[casting]]" icon="social:share" on-click="openCast"></paper-icon-button>
@@ -63,16 +70,20 @@
         type: String,
         computed: '_pageTitle(page, tail)'
       },
+      titleClass: {
+        type: String,
+        computed: '_titleClass(page, tail)'
+      },
       arrowClass: {
-        type: Boolean,
+        type: String,
         computed: '_arrowClass(page, tail)'
       },
       exitClass: {
-        type: Boolean,
+        type: String,
         computed: '_settingsClass(page)'
       },
       settingsClass: {
-        type: Boolean,
+        type: String,
         computed: '_settingsClass(page)'
       }
     },
@@ -82,6 +93,10 @@
       if (page == 'timers') return 'Timers';
       if (page == 'timer' && !tail.path.match(/stopped/)) return location.hostname;
       return ''
+    },
+
+    _titleClass: function(page, tail) {
+      if (page == 'timer' && !tail.path.match(/stopped/)) return 'bottom-right';
     },
 
     _arrowClass: function (page, tail) {
