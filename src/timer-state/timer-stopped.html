@@ -6,13 +6,16 @@
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/marked-element/marked-element.html">
+<link rel="import" href="../../bower_components/app-layout/app-grid/app-grid-style.html">
 <link rel="import" href="../color-wheel.html">
 
 <dom-module id="timer-stopped">
   <template>
-    <style include="shared-styles color-wheel">
+    <style include="shared-styles color-wheel app-grid-style">
       :host {
         display: block;
+        --app-grid-columns: 3;
       }
 
       .show-stopwatch {
@@ -50,41 +53,45 @@
         left: .5rem;
       }
 
-      [is-cast] {
-        padding: 1rem 2rem;
-      }
-      
-      [is-cast] .hide-cast {
-        display: none;
+      #cast-wrapper #title {
+        font-size: 5rem;
+        margin: 0;  
       }
 
-      [is-cast] #top-title {
-        top: 0;
-        left: 1rem;
-        width: calc(100vw - 8rem);
-        font-size: 2em;
+      #cast-wrapper #title-clock {
+        font-size: 5rem;
       }
 
-      [is-cast] .list {
-        margin: 1rem;
+      #cast-description-wrapper {
+        padding: 0 2rem;
+      }
+
+      #cast-description-wrapper marked-element{
+        font-size: 2rem;
+      }
+
+      #cast-description-wrapper .app-grid {
+        
       }
     </style>
 
-<div is-cast$="[[isCast]]">
 
-
+<template is="dom-if" if="[[!isCast]]">
   <div id="top-title" class="layout vertical">
     <h3 id="title" class="layout horizontal">
       [[timer.name]]
-      <a class="hide-cast" href$="/configure/[[timerKey]]/">
+      <a href$="/configure/[[timerKey]]/">
         <iron-icon icon="editor:mode-edit"></iron-icon>
       </a>
     </h3>
     <digital-clock total-seconds="[[timer.totalSeconds]]"></digital-clock>
+    <div>
+      <marked-element markdown="[[timer.description]]"></marked-element>
+    </div>
   </div>
 
   <paper-material class="list" elevation="1">
-    <a id="top-fab" class="hide-cast layout horizontal end-justified" style="left: 13px;" href$="/timer/[[timerKey]]/playing">
+    <a id="top-fab" class="layout horizontal end-justified" style="left: 13px;" href$="/timer/[[timerKey]]/playing">
 <paper-fab icon="av:play-arrow"></paper-fab>
 </a>
 <template is="dom-repeat" items="[[timer.periods]]" as="period">
@@ -95,8 +102,8 @@
         <div class="flex">
           <strong style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
 <div class="layout horizontal center" secondary>
-  <aside class="show-stopwatch" style="font-size: .75rem; margin-right: 1rem;">Time Cap</aside>
 <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
+<span class="show-stopwatch" style="margin-left: .5rem;">Time Cap</span>
 </div>
 </div>
 <div class$="color-block md-[[period.color]]"></div>
@@ -106,7 +113,48 @@
 </template>
 </paper-material>
 
+</template>
+
+
+<template is="dom-if" if="[[isCast]]">
+  <div id="cast-wrapper">
+    <div class="layout horizontal center" style="padding: 1rem 2rem;">
+<h3 id="title" class="layout horizontal center flex">
+  [[timer.name]]
+</h3>
+<digital-clock id="title-clock" total-seconds="[[timer.totalSeconds]]"></digital-clock>
 </div>
+<div id="cast-description-wrapper" class="layout horizontal justified">
+  <div style="min-width: 33%;">
+    <marked-element markdown="[[timer.description]]"></marked-element>
+  </div>
+  <div class="flex">
+    <paper-material class="app-grid" elevation="1">
+      <template is="dom-repeat" items="[[timer.periods]]" as="period">
+        <paper-icon-item type$="[[period.type]]">
+          <iron-icon class="type-color" icon="[[period.icon]]" item-icon></iron-icon>
+          <paper-item-body>
+            <div class="layout horizontal justified center">
+              <div class="flex">
+                <strong style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
+<div class="layout horizontal center" secondary>
+  
+<digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
+<span class="show-stopwatch" style="margin-left: .25rem;">Time Cap</span>
+</div>
+</div>
+<div class$="color-block md-[[period.color]]"></div>
+</div>
+</paper-item-body>
+</paper-icon-item>
+</template>
+</paper-material>
+</div>
+</div>
+</div>
+
+</template>
+
 </template>
 <script>
   Polymer({
@@ -116,7 +164,10 @@
       state: String,
       timerKey: String,
       timer: Object,
-      isCast: Boolean
+      isCast: {
+        type: Boolean,
+        value: false
+      }
     }
   });
 </script>

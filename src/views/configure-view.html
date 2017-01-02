@@ -6,6 +6,7 @@
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../../bower_components/marked-element/marked-element.html">
 
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../color-wheel.html">
@@ -28,18 +29,25 @@
         @apply(--shadow-elevation-2dp);
       }
 
-      
+      #timer-description {
+        margin-left: 10px;
+      }
     </style>
 
 <app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
 
 <app-pouchdb-document id="periodsStorage" db-name="quiver-timer" doc-id="periods" data="{{periodsData}}"></app-pouchdb-document>
 <app-pouchdb-document id="timerNameStorage" db-name="quiver-timer" doc-id="timer-name" data="{{timerNameData}}"></app-pouchdb-document>
+<app-pouchdb-document id="timerDescriptionStorage" db-name="quiver-timer" doc-id="timer-description" data="{{timerDescriptionData}}"></app-pouchdb-document>
 <app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
 
 <div id="top-title" class="layout vertical">
   <h3 id="title" on-click="editName">[[timerName]]</h3>
   <digital-clock id="totalSeconds" total-seconds="[[totalSeconds]]"></digital-clock>
+</div>
+
+<div style="margin-left: 10px;">
+  <marked-element markdown="[[timerDescription]]" on-click="editDescription"></marked-element>  
 </div>
 
 <div style="padding: 0rem 1rem 6rem;">
@@ -57,6 +65,7 @@
 </template>
 <script>
   var newTimerName = 'New Timer';
+  var newTimerDescription = 'Add description';
   Polymer({
     is: "configure-view",
 
@@ -83,6 +92,11 @@
       timerName: {
         type: String,
         computed: '_timerName(timerNameData.value)'
+      },
+      timerDescriptionData: Object,
+      timerDescription: {
+        type: String,
+        computed: '_timerDescription(timerDescriptionData.value)'
       },
       periodsData: Object,
       periods: {
@@ -130,6 +144,7 @@
     _setEditing: function (timerKey, timersData) {
       if (timersData.value && timersData.value[timerKey]) {
         this.set('timerNameData.value', timersData.value[timerKey].name);
+        this.set('timerDescriptionData.value', timersData.value[timerKey].description);
         this.set('periodsData.value', timersData.value[timerKey].periods);
 
       }
@@ -145,6 +160,10 @@
 
     _timerName: function (value) {
       return value || newTimerName;
+    },
+
+    _timerDescription: function (value) {
+      return value || newTimerDescription;
     },
 
     _periods: function (periodsData) {
@@ -240,6 +259,7 @@
 
     reset: function () {
       this.timerNameData.value = newTimerName;
+      this.timerDescriptionData.value = newTimerDescription;
       this.notifyPath('timerNameData.value');
       if (this.periodsData && this.periodsData.value) {
         this.periodsData.value.splice(0, this.periodsData.value.length);
@@ -251,6 +271,7 @@
     save: function () {
       var timer = {
         name: this.timerName,
+        description: this.timerDescription,
         periods: this.periodsData.value.map(function (period) {
           return this._cleanPeriod(period);
         }.bind(this)).filter(function(period, i) {
@@ -274,6 +295,7 @@
     saveStorage: function() {
       this.$.periodsStorage.save();
       this.$.timerNameStorage.save();
+      this.$.timerDescriptionStorage.save();
       this.$.timersStorage.save();
     },
 
@@ -287,11 +309,21 @@
       });
     },
 
+    editDescription: function () {
+      this.fire('openDialog', {
+        id: 'itemDescriptionDialog',
+        description: this.timerDescription == newTimerDescription ? '' : this.timerDescription,
+        callback: function (description) {
+          this.set('timerDescriptionData.value', description);
+        }.bind(this)
+      });
+    },
+
     addWork: function () {
       this.addPeriod('work');
     },
 
-    addRest: function () {
+    addRest: function () {  
       this.addPeriod('rest');
     },
 

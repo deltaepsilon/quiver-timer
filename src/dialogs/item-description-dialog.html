@@ -1,0 +1,46 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="item-description-dialog">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+
+    </style>
+<paper-dialog id="dialog" with-backdrop always-on-top="false">
+  <form id="form" is="iron-form">
+    <paper-textarea id="name" label="Description" max-rows="15" value="{{value}}" type="text" autofocus tabindex="0" auto-validate on-value-changed="validate" autofocus></paper-textarea>
+    <div class="buttons">
+      <paper-button dialog-dismiss tabindex="2">cancel</paper-button>
+      <paper-button tabindex="1" on-click="edit" item-value="[[value]]" disabled$="[[invalid]]">save</paper-button>
+    </div>
+  </form>
+</paper-dialog>
+</template>
+<script>
+    Polymer({
+      is: "item-description-dialog",
+
+      validate: function () {
+        this.$.dialog.fire('iron-resize');
+        this.invalid = !this.$.form.validate();
+      },
+
+      open: function (e) {
+        var dialog = this.$.dialog;
+        var callback = e.detail.callback;
+        this.value = e.detail.description || '';
+        this.edit = function (e) {
+          callback(e.target.itemValue);
+          dialog.close();
+        };
+        dialog.open();
+      }
+    });
+  </script>
+</dom-module>

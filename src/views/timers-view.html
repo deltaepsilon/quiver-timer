@@ -51,6 +51,19 @@
       paper-icon-button {
         color: var(--dark-primary-color) ;
       }
+
+      paper-menu-button {
+        position: absolute;
+        right: 0;
+        background: var(--color-white);
+        padding-bottom: 0;
+      }
+
+      .timer-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: calc(100% - 3.2rem);
+      }
     </style>
 
 <app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}" on-data-changed="_data"></app-pouchdb-document>
@@ -78,7 +91,7 @@
 <paper-item-body>
   <div class="layout horizontal justified center">
     <div class="flex">
-      <div>
+      <div class="timer-name">
         <strong>[[timer.name]]</strong>
       </div>
       <div secondary>
