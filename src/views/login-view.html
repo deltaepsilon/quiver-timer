@@ -35,7 +35,8 @@
       </div>
       <div class="third layout vertical start-justified">
         <paper-button class="google" on-click="google" style="margin-bottom: 2rem;">Login with Google</paper-button>
-        <paper-button class="facebook" on-click="facebook">Login with Facebook</paper-button>
+        <paper-button class="facebook" on-click="facebook" style="margin-bottom: 2rem;">Login with Facebook</paper-button>
+        <paper-button class="tertiary" on-click="anonymous">Guest Mode</paper-button>
       </div>
       <div class="third">
         <p>
@@ -77,6 +78,10 @@
 
        facebook: function() {
          this.fire('login', 'facebook');
+       },
+
+       anonymous: function() {
+         this.fire('login', 'anonymous');
        },
     });
   </script>

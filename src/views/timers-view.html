@@ -11,6 +11,7 @@
 <link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
 
 <link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../timer-behavior/timer-defaults.html">
@@ -59,6 +60,10 @@
         padding-bottom: 0;
       }
 
+      paper-toolbar {
+        margin: 1rem;
+      }
+
       .timer-name {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -73,7 +78,13 @@
 </a>
 
 
-<template is="dom-if" if="[[!account.emailVerified]]">
+<paper-toolbar class="layout horizontal center-justified">
+  <paper-button on-click="guestModeDialog">Guest Mode</paper-button>
+</paper-toolbar>
+
+
+
+<template is="dom-if" if="[[showVerifyEmail]]">
   <div class="layout horizontal center-justified">
     <paper-button class="primary" on-click="verifyEmail">Verify Email</paper-button>
   </div>
@@ -138,6 +149,10 @@
       ready: {
         type: Boolean,
         value: false
+      },
+      showVerifyEmail: {
+        type: Boolean,
+        computed: '_showVerifyEmail(user.isAnonymous, user.emailVerified)'
       }
     },
 
@@ -152,6 +167,10 @@
 
     _timers: function (timers) {
       return timers ? timers.slice(0) : [];
+    },
+
+    _showVerifyEmail: function(isAnonymous, emailVerified) {
+      return !isAnonymous && !emailVerified;
     },
 
     //  Listeners
@@ -186,6 +205,10 @@
 
     verifyEmail: function () {
       this.fire('verifyEmail');
+    },
+
+    guestModeDialog: function() {
+     this.fire('openDialog', {id: 'guestModeDialog'}) 
     }
   });
 </script>

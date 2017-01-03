@@ -10,6 +10,8 @@ module.exports = function (e) {
 
   if (!user) return Promise.resolve();
 
+  if (user.isAnonymous) return e.data.ref.remove();
+
   function isTimeToVerify(verification) {
     if (!verification) return true;
     return (new Date().getTime() - new Date(verification).getTime()) / 86400000 > env.admin.emailVerificationFrequencyInDays;

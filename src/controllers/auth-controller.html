@@ -11,6 +11,12 @@
         display: block;
       }
     </style>
+    
+    <template is="dom-if" if=""></template>
+    
+    <div class="guest-mode">
+      
+    </div>
 </template>
 <script>
   Polymer({
@@ -54,7 +60,7 @@
         this.user = user;
         if (!user && handler && accountRef) {
           accountRef.off('value', handler);
-        } if (user) {
+        } if (user && !user.isAnonymous) {
           var endpoint = this.replaceWildcard(this.loginEndpoint, 'uid', user.uid);
           var loginRef = firebase.database().ref(endpoint);
           var payload = _.pick(user, [
@@ -63,7 +69,8 @@
             'emailVerified',
             'displayName',
             'photoURL',
-            'refreshToken'
+            'refreshToken',
+            'isAnonymous'
           ]);
           payload.timestamp = new Date().toString();
 
@@ -111,6 +118,10 @@
       provider.addScope('public_profile');
       provider.addScope('email');
       this.signInWithPopupProvider(provider);
+    },
+
+    anonymous: function () {
+      this.firebase.auth().signInAnonymously();
     },
 
     signInWithPopupProvider: function (provider) {

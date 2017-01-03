@@ -9,8 +9,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/app-layout/app-box/app-box.html">
-
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
@@ -30,6 +28,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="dialogs/settings-dialog.html">
 <link rel="import" href="dialogs/sound-dialog.html">
 <link rel="import" href="dialogs/cast-dialog.html">
+<link rel="import" href="dialogs/guest-mode-dialog.html">
 <link rel="import" href="flash-alert/flash-alert.html">
 <link rel="import" href="firebase-behavior/firebase-behavior.html">
 
@@ -61,7 +60,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --default-primary-color: var(--color-metallic-seaweed);
         
         --secondary-color: var(--color-gainsboro);
-        --secondary-text-color: var(--color-white);
+        --secondary-text-color: var(--color-rich-black);
         
         --accent-color: var(--color-medium-candy-apple-red);
 
@@ -87,7 +86,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         /* paper-button */
         --paper-button-primary: var(--color-medium-candy-apple-red);
         --paper-button-secondary: var(--color-metallic-seaweed);
-        --paper-button-tertiary: var(--color-maastricht-blue);
+        --paper-button-tertiary: var(--color-gainsboro);
         --paper-button-google: var(--color-medium-candy-apple-red);
         --paper-button-facebook: var(--color-metallic-seaweed);
         /*paper-checkbox*/
@@ -156,6 +155,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <settings-dialog id="settingsDialog" settings="{{settings}}"></settings-dialog>
 <sound-dialog id="soundDialog"></sound-dialog>
 <cast-dialog id="castDialog" uid="[[user.uid]]" casting="{{casting}}"></cast-dialog>
+<guest-mode-dialog id="guestModeDialog"></guest-mode-dialog>
 
 <!-- Bottom sheet -->
 <period-select-sheet id="periodSelectSheet" show="[[showPeriodSelectSheet]]" show-bulk-edits="[[showBulkEdits]]" payload="[[periodSelectSheetPayload]]"></period-select-sheet>
@@ -368,6 +368,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.authController.google();
       } else if (provider == 'facebook') {
         this.$.authController.facebook();
+      } else if (provider == 'anonymous') {
+        this.$.authController.anonymous();
       }
     },
 
