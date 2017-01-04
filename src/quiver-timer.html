@@ -30,10 +30,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="dialogs/cast-dialog.html">
 <link rel="import" href="dialogs/guest-mode-dialog.html">
 <link rel="import" href="flash-alert/flash-alert.html">
+<link rel="import" href="datastores/quiver-store-behavior.html">
 <!--<link rel="import" href="firebase-sync/firebase-sync.html">-->
 <link rel="import" href="firebase-behavior/firebase-behavior.html">
 
-<script src="../bower_components/redux/index.js"></script>
 <script src="third-party/lodash.custom.min.js"></script>
 
 <!-- Firestore -->
@@ -144,7 +144,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <login-view id="loginView" name="login" user="[[user]]"></login-view>
     <timers-view id="timersView" name="timers" account="[[account]]"></timers-view>
     <timer-view id="timerView" name="timer" local-route="[[subroute]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]" casting="[[casting]]"></timer-view>
-    <configure-view id="configureView" name="configure" timers-store="[[timersStore]]" local-route="[[subroute]]" on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
+    <configure-view id="configureView" name="configure" local-route="[[subroute]]" on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
     <cast-view id="castView" name="cast" firebase="[[firebase]]" cast-endpoint="[[castEndpoint]]"></cast-view>
     <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
     
@@ -154,7 +154,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- Dialogs -->
 <item-name-dialog id="itemNameDialog"></item-name-dialog>
 <item-description-dialog id="itemDescriptionDialog"></item-description-dialog>
-<settings-dialog id="settingsDialog" settings="{{settings}}"></settings-dialog>
+<settings-dialog id="settingsDialog"></settings-dialog>
 <sound-dialog id="soundDialog"></sound-dialog>
 <cast-dialog id="castDialog" uid="[[user.uid]]" casting="{{casting}}"></cast-dialog>
 <guest-mode-dialog id="guestModeDialog"></guest-mode-dialog>
@@ -167,7 +167,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   Polymer({
     is: 'quiver-timer',
 
-    behaviors: [FirebaseBehavior],
+    behaviors: [FirebaseBehavior, QuiverStoreBehavior],
 
     properties: {
       firebase: {
@@ -182,26 +182,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         type: Object,
         computed: '_model(rawEnv, env.firebaseConfig, env.environment)'
       },
-      timersStore: {
-        type: Object,
-        value: function() {
-          return Redux.createStore(function(state, action) {
-            console.log('timersStore', state, action);
-            switch (action.type) {
-              case 'clearTimers': 
-                console.log('clear timers');
-              case 'addTimer':
-                console.log('add timer', action.value);
-              case 'changeTimer':
-                console.log('change timer', action.index, action.value);
-              case 'removeTimer':
-                console.log('removeTimer', action.index);
-              default:
-                return state;
-            }
-          });
-        }
-      },
       connected: {
         type: Boolean,
         value: false
@@ -210,14 +190,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         type: String,
         reflectToAttribute: true,
         observer: '_pageChanged'
-      },
-      settings: {
-        type: Object,
-        value: {
-          flash: true,
-          sound: true,
-          soundFile: 'chime'
-        }
       },
       timerEndpoint: {
         type: String,

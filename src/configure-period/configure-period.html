@@ -211,11 +211,6 @@
         },
         index: Number,
         periodsCount: Number,
-        selected: {
-          type: Boolean,
-          reflectToAttribute: true,
-          notify: true
-        },
         isFirst: {
           type: Boolean,
           computed: '_isFirst(index)'
@@ -244,16 +239,6 @@
       },
 
       //  Observers
-       observers: [
-        //  '_firstLast(index, periodsCount)',
-        '_period(period, period.*)'
-      ],
-
-      _period: function(period) {
-        if (!period.select) period.select = this.select.bind(this);
-        if (!period.deselect) period.deselect = this.deselect.bind(this);
-      },
-
       _isFirst: function(index) {
         return index < 2;
       },
@@ -405,14 +390,6 @@
             this.updatePeriod();
           }.bind(this)
         });
-      },
-
-      select: function() {
-        this.set('selected', true);
-      },
-
-      deselect: function() {
-        this.set('selected', false);
       }
     });
   </script>

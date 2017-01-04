@@ -1,5 +1,4 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/app-pouchdb/app-pouchdb-document.html">
 <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
@@ -15,6 +14,7 @@
 
 <link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../timer-behavior/timer-defaults.html">
+<link rel="import" href="../datastores/quiver-store-behavior.html">
 <link rel="import" href="../shared-styles.html">
 
 <script src="../third-party/lodash.custom.min.js"></script>
@@ -72,8 +72,6 @@
         width: calc(100% - 3.2rem);
       }
     </style>
-
-<app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}" on-data-changed="_data"></app-pouchdb-document>
 
 <a id="add" href="/configure/new">
   <paper-fab icon="add"></paper-fab>
@@ -139,14 +137,13 @@
   Polymer({
     is: "timers-view",
 
-    behaviors: [TimerDefaults],
+    behaviors: [TimerDefaults, QuiverStoreBehavior],
 
     properties: {
       account: Object,
-      timersData: Object,
       timers: {
         type: Array,
-        computed: '_timers(timersData.value)'
+        statePath: 'timers'
       },
       ready: {
         type: Boolean,
@@ -183,27 +180,24 @@
     },
 
     // Functions
-    save: function () {
-      return this.$.timersStorage.save();
-    },
-
     duplicate: function (e) {
-      this.timersData.value.push(this.timersData.value[+e.target.index]);
-      this.save();
+      this.dispatch({
+        type: 'duplicateTimer',
+        index: +e.target.index
+      });
     },
 
     delete: function (e) {
-      this.fire('deleteTimer', +e.target.index);
+      this.dispatch({
+        type: 'deleteTimer',
+        index: +e.target.index
+      });
     },
 
     restoreDefaults: function () {
-      if (!this.timersData) {
-        this.timersData = {};
-      }
-
-      this.timersData.value = _.clone(this.timerDefaults);
-      this.save();
-      this.fire('forceSync');
+      this.dispatch({
+        type: 'restoreDefaults'
+      });
     },
 
     verifyEmail: function () {

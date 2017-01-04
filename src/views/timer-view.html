@@ -1,6 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/app-route/app-route.html">
-<link rel="import" href="../../bower_components/app-pouchdb/app-pouchdb-document.html">
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
@@ -12,6 +11,7 @@
 <link rel="import" href="../color-wheel.html">
 <link rel="import" href="../timer-state/timer-stopped.html">
 <link rel="import" href="../timer-state/timer-playing.html">
+<link rel="import" href="../datastores/quiver-store-behavior.html">
 
 <script src="../../bower_components/timer.js/dist/timer.min.js"></script>
 
@@ -49,7 +49,6 @@
 
 <app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
 <app-route route="{{subroute}}" pattern="/:state" data="{{subrouteData}}"></app-route>
-<app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
 
 <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="stopped" role="main">
   <timer-stopped id="timerStopped" name="stopped" timer-key="[[timerKey]]" timer="[[timer]]"></timer-stopped>
@@ -60,7 +59,7 @@
   Polymer({
     is: "timer-view",
 
-    behaviors: [QuiverColorWheel],
+    behaviors: [QuiverColorWheel, QuiverStoreBehavior],
 
     properties: {
       localRoute: Object,
@@ -78,10 +77,13 @@
         type: Number,
         computed: '_timerKey(routeData.timerKey)'
       },
-      timersData: Object,
+      timers: {
+        type: Array,
+        statePath: 'timers',
+      },
       timer: {
         type: Object,
-        computed: '_timer(timerKey, timersData.value)'
+        computed: '_timer(timerKey, timers)'
       },
       state: {
         type: String,

@@ -1,6 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/app-route/app-route.html">
-<link rel="import" href="../../bower_components/app-pouchdb/app-pouchdb-document.html">
 <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
@@ -11,6 +10,7 @@
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../color-wheel.html">
 <link rel="import" href="../timer-behavior/timer-defaults.html">
+<link rel="import" href="../datastores/quiver-store-behavior.html">
 <link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../configure-period/configure-period.html">
 
@@ -36,11 +36,6 @@
 
 <app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
 
-<app-pouchdb-document id="periodsStorage" db-name="quiver-timer" doc-id="periods" data="{{periodsData}}"></app-pouchdb-document>
-<app-pouchdb-document id="timerNameStorage" db-name="quiver-timer" doc-id="timer-name" data="{{timerNameData}}"></app-pouchdb-document>
-<app-pouchdb-document id="timerDescriptionStorage" db-name="quiver-timer" doc-id="timer-description" data="{{timerDescriptionData}}"></app-pouchdb-document>
-<app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{timersData}}"></app-pouchdb-document>
-
 <div id="top-title" class="layout vertical">
   <h3 id="title" on-click="editName">[[timerName]]</h3>
   <digital-clock id="totalSeconds" total-seconds="[[totalSeconds]]"></digital-clock>
@@ -54,7 +49,7 @@
 <div id="periods-wrapper">
   <paper-fab id="top-fab" icon="save" on-click="save"></paper-fab>
   <template id="periods" is="dom-repeat" items="{{periods}}" as="period">
-    <configure-period class="divided" period="{{period}}" rev="[[period._rev]]" on-period-updated="updatePeriodHandler" index="[[index]]"
+    <configure-period class="divided" period="{{period}}" selected="[[period.selected]]" on-period-updated="updatePeriodHandler" index="[[index]]"
       periods-count="[[periods.length]]"></configure-period>
   </template>
 </div>
@@ -69,43 +64,39 @@
   Polymer({
     is: "configure-view",
 
-    behaviors: [TimerDefaults],
+    behaviors: [TimerDefaults, QuiverStoreBehavior],
 
     properties: {
       localRoute: Object,
       session: String,
       title: {
         type: String,
-        notify: true,
-        computed: '_title(timerName)'
+        statePath: 'editing.name'
       },
       timerKey: {
         type: String,
         computed: '_timerKey(routeData.timerKey)'
       },
-      timersData: Object,
       timers: {
         type: Array,
-        computed: '_value(timersData.value)'
+        statePath: 'timers'
       },
-      timerNameData: Object,
       timerName: {
         type: String,
-        computed: '_timerName(timerNameData.value)'
+        statePath: 'editing.name'
       },
-      timerDescriptionData: Object,
       timerDescription: {
         type: String,
-        computed: '_timerDescription(timerDescriptionData.value)'
+        statePath: 'editing.description'
       },
       periodsData: Object,
       periods: {
         type: Array,
-        computed: '_periods(periodsData, periodsData._rev)'
+        statePath: 'editing.periods'
       },
       totalSeconds: {
         type: Number,
-        computed: '_totalSeconds(periods, periodsData._rev)'
+        computed: '_totalSeconds(periods)'
       },
       selected: {
         type: Array,
@@ -114,7 +105,7 @@
       },
       bulk: {
         type: Boolean,
-        computed: '_bulk(periods, periodsData.value)',
+        computed: '_bulk(periods)',
         notify: true
       },
       sheetPayload: {
@@ -132,22 +123,91 @@
       this.sheetPayload = this._sheetPayload();
     },
 
-    _title: function (name) {
-      return name;
+    actions: {
+      addPeriod: function(type) {
+        return {
+          type: 'addPeriod',
+          periodType: type
+        };
+      },
+      clearSelected: function() {
+        return {
+          type: 'clearSelected'
+        };
+      },
+      deleteSelected: function() {
+        return {
+          type: 'deleteSelected'
+        };
+      },
+      dispatch: function(type) {
+        return {
+          type: type
+        };
+      },
+      duplicatePeriods: function(periods) {
+        return {
+          type: 'duplicatePeriods',
+          periods: periods
+        };
+      },
+      selectAll: function() {
+        return {
+          type: 'selectAll'
+        };
+      },
+      updateValue: function(type, value) {
+        return {
+          type: type,
+          value: value
+        };
+      },
+      updatePeriod: function(index, period) {
+        return {
+          type: 'updatePeriod',
+          index: index,
+          period: period
+        }; 
+      },
+      deletePeriod: function(index) {
+        return {
+          type: 'deletePeriod',
+          index: index
+        }; 
+      },
+      moveUp: function(index) {
+        return {
+          type: 'movePeriodUp',
+          index: index
+        }
+      },
+      moveDown: function(index) {
+        return {
+          type: 'movePeriodDown',
+          index: index
+        }
+      }
     },
 
     // Observers
     observers: [
-      '_setEditing(routeData.timerKey, timersData)'
+      '_setEditing(routeData.timerKey)'
     ],
 
-    _setEditing: function (timerKey, timersData) {
-      if (timersData.value && timersData.value[timerKey]) {
-        this.set('timerNameData.value', timersData.value[timerKey].name);
-        this.set('timerDescriptionData.value', timersData.value[timerKey].description);
-        this.set('periodsData.value', timersData.value[timerKey].periods);
-
+    _setEditing: function (timerKey) {
+      var timer = this.timers[timerKey];
+      if (timer) {
+        setTimeout(function() {
+          this.dispatch('updateValue', 'updateName', timer.name);
+          this.dispatch('updateValue', 'updateDescription', timer.description);
+          this.dispatch('updateValue', 'updatePeriods', timer.periods);
+          this.dispatch('updateValue', 'updateKey', timer.$key);
+        }.bind(this));
       }
+    },
+
+    _title: function (name) {
+      return name;
     },
 
     _timerKey: function (timerKey) {
@@ -165,12 +225,7 @@
     _timerDescription: function (value) {
       return value || newTimerDescription;
     },
-
-    _periods: function (periodsData) {
-      if (periodsData.value && periodsData.value.length) return _.clone(periodsData.value || []);
-      this.addDefaultPeriod();
-    },
-
+    
     _totalSeconds: function (periods) {
       return !periods ? 0 : periods.reduce(function (seconds, period) {
         return seconds + period.totalSeconds;
@@ -207,28 +262,15 @@
     },
 
     moveUp: function (e) {
-      if (e.detail < 1) return console.log('skipping up');
-      var index = e.detail.index;
-      var period = this._cleanPeriod(this.periods[index]);
-      this.periodsData.value.splice(index, 1);
-      this.periodsData.value.splice(index - 1, 0, period);
-      setTimeout(e.detail.callback);
-      this._periodsSave();
+      this.dispatch('moveUp', e.detail.index);
     },
 
     moveDown: function (e) {
-      if (e.detail >= this.periods.length - 1) return console.log('skipping up');
-      var index = e.detail.index;
-      var period = this._cleanPeriod(this.periods[index]);
-      this.periodsData.value.splice(index, 1);
-      this.periodsData.value.splice(index + 1, 0, period);
-      setTimeout(e.detail.callback);
-      this._periodsSave();
+      this.dispatch('moveDown', e.detail.index);
     },
 
     delete: function (e) {
-      this.periodsData.value.splice(e.detail, 1);
-      this._periodsSave();
+      this.dispatch('deletePeriod', +e.detail);
     },
 
     updatePeriodHandler: function (e) {
@@ -247,57 +289,13 @@
 
     // Functions
     _cleanPeriod: function (period) {
-      return _.omit(_.clone(period), ['select', 'deselect']);
-    },
-
-    _periodsSave: _.debounce(function () {
-      this.periodsData.value = this.periodsData.value.map(function (period) {
-        return this._cleanPeriod(period);
-      }.bind(this));
-      this.notifyPath('periodsData.value');
-    }, 50),
-
-    reset: function () {
-      this.timerNameData.value = newTimerName;
-      this.timerDescriptionData.value = newTimerDescription;
-      this.notifyPath('timerNameData.value');
-      if (this.periodsData && this.periodsData.value) {
-        this.periodsData.value.splice(0, this.periodsData.value.length);
-        this.notifyPath('periodsData.value');
-      }
-      this.splice('periods', 0, this.periods.length);
+      return _.clone(period);
     },
 
     save: function () {
-      var timer = {
-        name: this.timerName,
-        description: this.timerDescription,
-        periods: this.periodsData.value.map(function (period) {
-          return this._cleanPeriod(period);
-        }.bind(this)).filter(function(period, i) {
-          return i == 0 || period.type !== 'prepare';
-        }),
-        totalSeconds: this.totalSeconds,
-        updated: Date.now()
-      };
-      if (!this.timersData.value) this.timersData.value = [];
-      if (this.timerKey != 'new') {
-        timer.$key = this.timersData.value[+this.timerKey].$key;
-        this.timersData.value.splice(+this.timerKey, 1, timer);
-      } else {
-        this.timersData.value.push(timer);
-      }
-      this.notifyPath('timersData.value');
-      this.reset();
-      this.saveStorage();
+      this.dispatch('updateValue', 'updateTimer', this.timerKey);
+      this.dispatch('updateValue', 'resetEditing');
       this.fire('redirect', '/timers');  
-    },
-
-    saveStorage: function() {
-      this.$.periodsStorage.save();
-      this.$.timerNameStorage.save();
-      this.$.timerDescriptionStorage.save();
-      this.$.timersStorage.save();
     },
 
     editName: function () {
@@ -305,7 +303,7 @@
         id: 'itemNameDialog',
         name: this.timerName,
         callback: function (name) {
-          this.set('timerNameData.value', name || 'Mistake!!!');
+          this.dispatch('updateValue', 'updateName', name);
         }.bind(this)
       });
     },
@@ -315,7 +313,7 @@
         id: 'itemDescriptionDialog',
         description: this.timerDescription == newTimerDescription ? '' : this.timerDescription,
         callback: function (description) {
-          this.set('timerDescriptionData.value', description);
+          this.dispatch('updateValue', 'updateDescription', description);
         }.bind(this)
       });
     },
@@ -332,77 +330,33 @@
       this.addPeriod('stopwatch');
     },
 
-    addDefaultPeriod: _.debounce(function () {
-      setTimeout(function () {
-        this.addPeriod('prepare');
-      }.bind(this));
-    }, 50),
-
     addPeriod: function (type) {
-      if (!this.periodsData.value) this.periodsData.value = [];
-      if (type == 'prepare' && !this.periodsData.value.filter(function (period) {
-        return !!period.type == 'prepare';
-      })) return;
-      this.periodsData.value.push(this.getPeriodDefault(type, true));
-      this._periodsSave();
-
+      this.dispatch('addPeriod', type);
     },
 
     updatePeriod: function (index, period) {
-      this.periodsData.value[index] = this._cleanPeriod(period);
-      this._periodsSave();
+      this.dispatch('updatePeriod', index, period);
     },
 
     selectAll: function () {
-      this.periodsData.value.forEach(function (period, index) {
-        if (period.type !== 'prepare') {
-          period.selected = true;
-        }
-      }.bind(this));
-      this.periods.forEach(function (period, index) {
-        if (period.type !== 'prepare') {
-          period.selected = true;
-          period.select();
-        }
-      }.bind(this));
-      this._periodsSave();
+      this.dispatch('selectAll');
     },
 
     clearSelected: _.debounce(function () {
-      if (!this.periodsData.value) return;
-      this.periodsData.value.forEach(function (period, index) {
-        if (period.type !== 'prepare') {
-          period.selected = false;
-        }
-      }.bind(this));
-      this.periods.forEach(function (period, index) {
-        if (period.type !== 'prepare') {
-          period.selected = false;
-          period.deselect();
-        }
-      }.bind(this));
-      this._periodsSave();
+      this.dispatch('clearSelected');
+      
       this.$.toggleCheckbox.set('checked', false);
     }, 50),
 
     duplicateSelected: function (e) {
-      this.periods.forEach(function (period, index) {
-        if (period.selected) {
-          var newPeriod = this._cleanPeriod(this.periodsData.value[index]);
-          newPeriod.selected = false;
-          this.periodsData.value.push(newPeriod);
-        }
-      }.bind(this));
+      this.dispatch('duplicatePeriods', this.periods.filter(function(period) {
+        return period.selected;
+      }));
       this.clearSelected();
     },
 
     deleteSelected: function () {
-      var i = this.periods.length;
-      while (i--) {
-        if (this.periods[i].selected) {
-          this.periodsData.value.splice(i, 1);
-        }
-      }
+      this.dispatch('deleteSelected');
       this.clearSelected();
     },
 

@@ -1,0 +1,152 @@
+<link rel="import" href="../timer-behavior/timer-defaults.html">
+
+<script src="../../bower_components/redux/index.js"></script>
+<script src="../third-party/lodash.custom.min.js"></script>
+
+<script>
+  function getPushKey() {
+    return firebase.database().ref().push().key;
+  };
+
+  var QuiverStoreDefaults = {
+    state: {
+        timers: [],
+        editing: {
+          periods: [
+            TimerDefaults.periods.prepare
+          ],
+          name: 'Change timer name',
+          description: 'Add description'  
+        },
+        settings: {
+          flash: true,
+          sound: true,
+          soundFile: 'chime'
+        },
+        path: '/timers'
+      }
+  };
+  var QuiverStore = Redux.createStore(function (state, action) {
+    if (typeof state == 'undefined') {
+      try {
+        state = JSON.parse(localStorage.getItem('QuiverStoreState'));
+      } catch (err) {
+        console.log('localStorage error', err);
+      }
+    }
+
+    if (!state) { // Catch nulls empty localStorage as well as undefineds
+      state = QuiverStoreDefaults.state
+    } 
+    // else {
+    //   state = JSON
+    // }
+
+    state = _.cloneDeep(state);
+
+    switch (action.type) {
+      case 'clearTimers':
+        console.log('clear timers');
+        break;
+      case 'updateTimer':
+        var timer = state.editing;
+        timer.updated = Date.now();
+        timer.totalSeconds = timer.periods.reduce(function(s, period) {
+          return period.totalSeconds + s;
+        }, 0);
+
+        if (action.value == 'new') {
+          timer.$key = getPushKey();
+          state.timers.push(timer);
+        } else {
+          state.timers[+action.value] = timer;
+        }
+        break;
+      case 'deleteTimer':
+        state.timers = state.timers.filter(function(timer, i) {
+          return i != action.index;
+        });
+        break;
+      case 'duplicateTimer':
+        var newTimer = _.cloneDeep(state.timers[action.index]);
+        newTimer.$key =  getPushKey();
+        state.timers.push(newTimer);
+        break;
+      case 'restoreDefaults':
+        state.timers = TimerDefaults.timers.map(function(timer) {
+          timer.$key = getPushKey();
+          timer.updated = Date.now();
+          return timer;
+        });
+        break;
+      case 'resetEditing':
+        state.editing = QuiverStoreDefaults.state.editing;
+        break;
+      case 'clearSelected':
+        state.editing.periods = state.editing.periods.map(function(period) {
+          return period.selected = false, period;
+        });
+        break;
+      case 'addPeriod':
+        state.editing.periods.push(TimerDefaults.periods[action.periodType]);
+        break;
+      case 'deletePeriod':
+        state.editing.periods.splice(action.index, 1);
+        break;
+      case 'updatePeriod':
+        state.editing.periods[action.index] = action.period;
+        break;
+      case 'movePeriodUp':
+        if (action.index > 1) {
+          var tempPeriod = state.editing.periods[action.index];
+          state.editing.periods.splice(action.index, 1);
+          state.editing.periods.splice(action.index - 1, 0, tempPeriod);
+        }
+        break;
+      case 'movePeriodDown':
+        if (action.index < state.editing.periods.length - 1) {
+          var tempPeriod = state.editing.periods[action.index];
+          state.editing.periods.splice(action.index, 1);
+          state.editing.periods.splice(action.index + 1, 0, tempPeriod);
+        }
+        break;
+      case 'selectAll':
+        state.editing.periods.map(function (period, index) {
+          if (period.type !== 'prepare') {
+            period.selected = true;
+          }
+          return period;
+        }.bind(this));
+        break;
+      case 'duplicatePeriods':
+        state.editing.periods = state.editing.periods.concat(action.periods);
+        break;
+      case 'deleteSelected':
+        state.editing.periods = state.editing.periods.filter(function(period) {
+          return !period.selected;
+        });
+        break;
+      case 'updateName':
+        state.editing.name = action.value;
+        break;
+      case 'updateDescription':
+        state.editing.description = action.value;
+        break;
+      case 'updatePeriods':
+        state.editing.periods = action.value;
+        break;
+      case 'updateKey':
+        state.editing.$key = action.value;
+        break;
+      case 'updateSettings':
+        state.settings = action.settings
+        break;
+    }
+
+    return state;
+  });
+
+  QuiverStore.subscribe(function() {
+    localStorage.setItem('QuiverStoreState', JSON.stringify(QuiverStore.getState()));
+  });
+</script>

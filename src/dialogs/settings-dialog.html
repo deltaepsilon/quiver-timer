@@ -8,7 +8,8 @@
 <link rel="import" href="../../bower_components/iron-icons/av-icons.html">
 <link rel="import" href="../../bower_components/paper-radio-group/paper-radio-group.html">
 <link rel="import" href="../../bower_components/paper-radio-button/paper-radio-button.html">
-<link rel="import" href="../../bower_components/app-pouchdb/app-pouchdb-document.html">
+
+<link rel="import" href="../datastores/quiver-store-behavior.html">
 <link rel="import" href="../shared-styles.html">
 
 <script src="../third-party/lodash.custom.min.js"></script>
@@ -20,7 +21,7 @@
         display: block;
       }
     </style>
-    <app-pouchdb-document id="settings" db-name="quiver-timer" doc-id="settings" data="{{settingsData}}" zero-value="{loaded:false}"></app-pouchdb-document>
+
     <div id="sounds">
       <audio id="chime" src="../../sounds/chime.mp3"></audio>
       <audio id="chirp" src="../../sounds/chirp.mp3"></audio>
@@ -32,13 +33,13 @@
       <form id="form" is="iron-form">
         
         <paper-item>
-          <paper-toggle-button checked="{{settingsData.flash}}">Flash Alerts</paper-toggle-button>  
+          <paper-toggle-button checked="{{settings.flash}}">Flash Alerts</paper-toggle-button>  
         </paper-item>
         <paper-item>
-          <paper-toggle-button checked="{{settingsData.sound}}">Sound Alerts</paper-toggle-button>  
+          <paper-toggle-button checked="{{settings.sound}}">Sound Alerts</paper-toggle-button>  
         </paper-item>
         <paper-item>
-          <paper-radio-group class="layout vertical" selected="{{settingsData.soundFile}}" on-selected-changed="play">
+          <paper-radio-group class="layout vertical" selected="{{settings.soundFile}}" on-selected-changed="play">
             <paper-radio-button disabled$="[[disabled]]" name="chime">Chime</paper-radio-button>
             <paper-radio-button disabled$="[[disabled]]" name="chirp">Chirp</paper-radio-button>
             <paper-radio-button disabled$="[[disabled]]" name="heartbeat">Heartbeat</paper-radio-button>
@@ -59,49 +60,27 @@
     Polymer({
        is: "settings-dialog",
 
+       behaviors: [QuiverStoreBehavior],
+
        properties: {
-         defaultSettings: {
-           type: Object,
-           value: {
-             flash: true,
-             sound: true,
-             soundFile: 'chime'
-           }
-         },
-         settingsData: Object,
          settings: {
            type: Object,
-           computed: '_settings(settingsData, settingsData.*)',
-           notify: true
+           statePath: 'settings'
          },
          disabled: {
            type: Boolean,
            computed: '_disabled(settings.sound)'
-         }
+         },
        },
 
        // Observers
        observers: [
-         '_settingsData(settingsData, defaultSettings, settingsData.*)',
-         '_sound(settingsData.sound)'
+         '_sound(settingsData.sound)',
+         'update(settings, settings.*)'
       ],
-
-       _settingsData: function(settingsData, defaultSettings) {
-         if (settingsData._rev && !settingsData.loaded) {
-           this.set('settingsData.loaded', true);
-         } else if (settingsData.loaded && typeof settingsData.flash == 'undefined') {
-           this.set('settingsData.flash', defaultSettings.flash);
-           this.set('settingsData.sound', defaultSettings.sound);
-           this.set('settingsData.soundFile', defaultSettings.soundFile);
-         }
-       },
 
        _sound: function(enabled) {
          if (this.$.dialog.opened && enabled) return this.fire('sound');
-       },
-
-       _settings: function(settingsData) {
-         return _.omit(settingsData, ['_rev', '_id', 'loaded']);
        },
 
        _disabled: function(sound) {
@@ -109,6 +88,13 @@
        },
 
        // Functions
+       update: function(settings) {
+         this.dispatch({
+           type: 'updateSettings',
+           settings: settings
+         });
+       },
+
        open: function(e) {
          this.$.dialog.open();
        },
