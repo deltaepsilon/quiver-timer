@@ -104,6 +104,7 @@
     // Functions
     logout: function () {
       this.firebase.auth().signOut();
+      this.account = undefined;
     },
 
     google: function () {

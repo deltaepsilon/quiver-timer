@@ -17,6 +17,8 @@
 <link rel="import" href="../timer-behavior/timer-defaults.html">
 <link rel="import" href="../shared-styles.html">
 
+<script src="../third-party/lodash.custom.min.js"></script>
+
 <dom-module id="timers-view">
   <template>
     <style include="shared-styles">
@@ -78,18 +80,18 @@
 </a>
 
 
-<paper-toolbar class="layout horizontal center-justified">
-  <paper-button on-click="guestModeDialog">Guest Mode</paper-button>
-</paper-toolbar>
 
-
+<template is="dom-if" if="[[!account]]">
+  <paper-toolbar class="layout horizontal center-justified">
+    <paper-button on-click="guestModeDialog">Guest Mode</paper-button>
+  </paper-toolbar>
+</template>
 
 <template is="dom-if" if="[[showVerifyEmail]]">
   <div class="layout horizontal center-justified">
     <paper-button class="primary" on-click="verifyEmail">Verify Email</paper-button>
   </div>
 </template>
-
 
 <template is="dom-if" if="[[timers.length]]">
   <paper-material class="list" elevation="1">
@@ -191,16 +193,17 @@
     },
 
     delete: function (e) {
-      this.timersData.value.splice(+e.target.index, 1);
-      this.save();
+      this.fire('deleteTimer', +e.target.index);
     },
 
     restoreDefaults: function () {
       if (!this.timersData) {
         this.timersData = {};
       }
-      this.timersData.value = this.timerDefaults;
+
+      this.timersData.value = _.clone(this.timerDefaults);
       this.save();
+      this.fire('forceSync');
     },
 
     verifyEmail: function () {

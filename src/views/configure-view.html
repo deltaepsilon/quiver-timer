@@ -282,6 +282,7 @@
       };
       if (!this.timersData.value) this.timersData.value = [];
       if (this.timerKey != 'new') {
+        timer.$key = this.timersData.value[+this.timerKey].$key;
         this.timersData.value.splice(+this.timerKey, 1, timer);
       } else {
         this.timersData.value.push(timer);

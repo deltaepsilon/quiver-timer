@@ -30,8 +30,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="dialogs/cast-dialog.html">
 <link rel="import" href="dialogs/guest-mode-dialog.html">
 <link rel="import" href="flash-alert/flash-alert.html">
+<!--<link rel="import" href="firebase-sync/firebase-sync.html">-->
 <link rel="import" href="firebase-behavior/firebase-behavior.html">
 
+<script src="../bower_components/redux/index.js"></script>
 <script src="third-party/lodash.custom.min.js"></script>
 
 <!-- Firestore -->
@@ -128,6 +130,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <flash-alert id="flashAlert" flash="[[settings.flash]]" sound="[[settings.sound]]" sound-file="[[settings.soundFile]]"></flash-alert>
 <auth-controller id="authController" firebase="[[firebase]]" login-endpoint="[[model.user.write.login]]" account-endpoint="[[model.user.read.account]]"
   connected="[[connected]]" page="[[page]]" user="{{user}}" account="{{account}}"></auth-controller>
+<!--<firebase-sync id="firebaseSync" firebase="[[firebase]]" model="[[model]]" connected="[[connected]]" account="{{account}}"></firebase-sync>-->
 
 <cast-controller id="castController" route="[[route]]" env="[[env]]"></cast-controller>
 <paper-toast id="toast"></paper-toast>
@@ -141,8 +144,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <login-view id="loginView" name="login" user="[[user]]"></login-view>
     <timers-view id="timersView" name="timers" account="[[account]]"></timers-view>
     <timer-view id="timerView" name="timer" local-route="[[subroute]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]" casting="[[casting]]"></timer-view>
-    <configure-view id="configureView" name="configure" local-route="[[subroute]]" title="{{configureTitle}}"
-      on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
+    <configure-view id="configureView" name="configure" timers-store="[[timersStore]]" local-route="[[subroute]]" on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
     <cast-view id="castView" name="cast" firebase="[[firebase]]" cast-endpoint="[[castEndpoint]]"></cast-view>
     <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
     
@@ -180,6 +182,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         type: Object,
         computed: '_model(rawEnv, env.firebaseConfig, env.environment)'
       },
+      timersStore: {
+        type: Object,
+        value: function() {
+          return Redux.createStore(function(state, action) {
+            console.log('timersStore', state, action);
+            switch (action.type) {
+              case 'clearTimers': 
+                console.log('clear timers');
+              case 'addTimer':
+                console.log('add timer', action.value);
+              case 'changeTimer':
+                console.log('change timer', action.index, action.value);
+              case 'removeTimer':
+                console.log('removeTimer', action.index);
+              default:
+                return state;
+            }
+          });
+        }
+      },
       connected: {
         type: Boolean,
         value: false
@@ -188,10 +210,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         type: String,
         reflectToAttribute: true,
         observer: '_pageChanged'
-      },
-      session: {
-        type: String,
-        value: '123456'
       },
       settings: {
         type: Object,
@@ -310,7 +328,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Space: '_space',
       ArrowLeft: '_arrowLeft',
       ArrowRight: '_arrowRight',
-      cast: '_cast'
+      cast: '_cast',
+      deleteTimer: '_deleteTimer',
+      forceSync: '_forceSync'
     },
     _redirect: function (e) {
       this.set('route.path', e.detail);
@@ -410,6 +430,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       var payload = e.detail;
       payload.settings = this.settings;
       this.$.castController.message(payload);
+    },
+
+    _deleteTimer: function(e) {
+      // this.$.firebaseSync.deleteByIndex(e.detail);
+    },
+
+    _forceSync: function() {
+      // this.$.firebaseSync.forceSync();
     },
 
     // Functions
