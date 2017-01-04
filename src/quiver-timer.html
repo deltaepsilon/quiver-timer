@@ -182,6 +182,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         type: Object,
         computed: '_model(rawEnv, env.firebaseConfig, env.environment)'
       },
+      settings: {
+        type: Object,
+        statePath: 'settings'
+      },
       connected: {
         type: Boolean,
         value: false
