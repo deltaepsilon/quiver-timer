@@ -31,7 +31,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="dialogs/guest-mode-dialog.html">
 <link rel="import" href="flash-alert/flash-alert.html">
 <link rel="import" href="datastores/quiver-store-behavior.html">
-<!--<link rel="import" href="firebase-sync/firebase-sync.html">-->
+<link rel="import" href="firebase-sync/firebase-sync.html">
 <link rel="import" href="firebase-behavior/firebase-behavior.html">
 
 <script src="third-party/lodash.custom.min.js"></script>
@@ -130,7 +130,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <flash-alert id="flashAlert" flash="[[settings.flash]]" sound="[[settings.sound]]" sound-file="[[settings.soundFile]]"></flash-alert>
 <auth-controller id="authController" firebase="[[firebase]]" login-endpoint="[[model.user.write.login]]" account-endpoint="[[model.user.read.account]]"
   connected="[[connected]]" page="[[page]]" user="{{user}}" account="{{account}}"></auth-controller>
-<!--<firebase-sync id="firebaseSync" firebase="[[firebase]]" model="[[model]]" connected="[[connected]]" account="{{account}}"></firebase-sync>-->
+<firebase-sync id="firebaseSync" firebase="[[firebase]]" model="[[model]]" connected="[[connected]]" account="{{account}}"></firebase-sync>
 
 <cast-controller id="castController" route="[[route]]" env="[[env]]"></cast-controller>
 <paper-toast id="toast"></paper-toast>
@@ -255,6 +255,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     // Observers
     observers: [
       '_connected(firebase)',
+      '_route(route)',
       '_routePageChanged(routeData.page)'
     ],
 
@@ -262,6 +263,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       firebase.database().ref().child('.info/connected').on('value', function (snap) {
         this.connected = snap.val();
       }.bind(this));
+    },
+
+    _route: function(route) {
+      this.dispatch({
+        type: 'pathname',
+        pathname: location.pathname
+      });
     },
 
     _routePageChanged: function (page) {

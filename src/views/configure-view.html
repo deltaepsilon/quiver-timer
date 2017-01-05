@@ -225,7 +225,7 @@
     _timerDescription: function (value) {
       return value || newTimerDescription;
     },
-    
+
     _totalSeconds: function (periods) {
       return !periods ? 0 : periods.reduce(function (seconds, period) {
         return seconds + period.totalSeconds;

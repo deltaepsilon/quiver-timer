@@ -7,11 +7,13 @@
     PolymerRedux(QuiverStore),
     {
       properties: {
-        state: Object
+        state: Object,
+        store: Object
       },
 
       created: function () {
         this.state = this.getState();
+        this.store = QuiverStore;
       }
     }
   ]; 

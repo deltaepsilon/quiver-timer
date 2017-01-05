@@ -23,10 +23,11 @@
           sound: true,
           soundFile: 'chime'
         },
-        path: '/timers'
+        pathname: '/'
       }
   };
   var QuiverStore = Redux.createStore(function (state, action) {
+    console.log('store action', action);
     if (typeof state == 'undefined') {
       try {
         state = JSON.parse(localStorage.getItem('QuiverStoreState'));
@@ -45,6 +46,13 @@
     state = _.cloneDeep(state);
 
     switch (action.type) {
+      case 'pathname':
+        // Reset editing defaults between editing and creating, but not across reloads or editing to editing/creating to creating
+        if (state.pathname.match(/configure\/(\d)/) && !action.pathname.match(/configure/)) {
+          state.editing = QuiverStoreDefaults.state.editing;
+        }
+        state.pathname = action.pathname
+        break;
       case 'clearTimers':
         console.log('clear timers');
         break;
