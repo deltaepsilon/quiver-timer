@@ -16,7 +16,9 @@
             TimerDefaults.periods.prepare
           ],
           name: 'Change timer name',
-          description: 'Add description'  
+          description: 'Add description',
+          private: false,
+          owned: true
         },
         settings: {
           flash: true,
@@ -39,10 +41,6 @@
     if (!state) { // Catch nulls empty localStorage as well as undefineds
       state = QuiverStoreDefaults.state
     } 
-
-    // else {
-    //   state = JSON
-    // }
 
     state = _.cloneDeep(state);
 
@@ -67,6 +65,8 @@
         timer.totalSeconds = timer.periods.reduce(function(s, period) {
           return period.totalSeconds + s;
         }, 0);
+        
+        if (timer.description == QuiverStoreDefaults.state.editing.description) delete timer.description;
 
         if (action.value == 'new') {
           timer.$key = getPushKey();
@@ -83,12 +83,18 @@
       case 'duplicateTimer':
         var newTimer = _.cloneDeep(state.timers[action.index]);
         newTimer.$key =  getPushKey();
+        newTimer.owned = true;
+        newTimer.private = false;
+        newTimer.name = newTimer.name + ' copy';
+        newTimer.copy = true;
         state.timers.push(newTimer);
         break;
       case 'restoreDefaults':
         state.timers = TimerDefaults.timers.map(function(timer) {
           timer.$key = getPushKey();
           timer.updated = Date.now();
+          timer.private = true;
+          timer.owned = false;
           return timer;
         });
         break;
@@ -150,6 +156,12 @@
         break;
       case 'updateKey':
         state.editing.$key = action.value;
+        break;
+      case 'updatePrivate':
+        state.editing.private = !state.editing.owned ? true : action.value;
+        break;
+      case 'updateOwned':
+        state.editing.owned = action.value;
         break;
       case 'updateSettings':
         state.settings = action.settings

@@ -6,6 +6,7 @@
 <link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../../bower_components/paper-styles/shadow.html">
 <link rel="import" href="../../bower_components/marked-element/marked-element.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../color-wheel.html">
@@ -39,7 +40,12 @@
 <div id="top-title" class="layout vertical">
   <h3 id="title" on-click="editName">[[timerName]]</h3>
   <digital-clock id="totalSeconds" total-seconds="[[totalSeconds]]"></digital-clock>
+  <template is="dom-if" if="[[owned]]">
+    <paper-toggle-button id="private" checked="{{private}}">Make Private</paper-toggle-button>
+  </template>  
 </div>
+
+
 
 <div style="margin-left: 10px;">
   <marked-element markdown="[[timerDescription]]" on-click="editDescription"></marked-element>  
@@ -59,8 +65,8 @@
 </div>
 </template>
 <script>
-  var newTimerName = 'New Timer';
-  var newTimerDescription = 'Add description';
+  var newTimerName = QuiverStoreDefaults.state.editing.name;
+  var newTimerDescription = QuiverStoreDefaults.state.editing.description;
   Polymer({
     is: "configure-view",
 
@@ -89,7 +95,14 @@
         type: String,
         statePath: 'editing.description'
       },
-      periodsData: Object,
+      private: {
+        type: Boolean,
+        statePath: 'editing.private'
+      },
+      owned: {
+        type: Boolean,
+        statePath: 'editing.owned'
+      },
       periods: {
         type: Array,
         statePath: 'editing.periods'
@@ -112,7 +125,10 @@
         type: Object,
         notify: true
       },
-      storageReady: Boolean,
+      ready: {
+        type: Boolean,
+        value: false  
+      },
       showSelectAll: {
         type: Boolean,
         computed: '_showSelectAll(periods.length)'
@@ -121,6 +137,7 @@
 
     attached: function () {
       this.sheetPayload = this._sheetPayload();
+      this.ready = true;
     },
 
     actions: {
@@ -191,17 +208,28 @@
 
     // Observers
     observers: [
-      '_setEditing(routeData.timerKey)'
+      '_setEditing(ready, routeData.timerKey)',
+      '_private(ready, private)'
     ],
 
-    _setEditing: function (timerKey) {
+    _setEditing: function (ready, timerKey) {
       var timer = this.timers[timerKey];
-      if (timer) {
+      if (ready && timer) {
         setTimeout(function() {
-          this.dispatch('updateValue', 'updateName', timer.name);
-          this.dispatch('updateValue', 'updateDescription', timer.description);
-          this.dispatch('updateValue', 'updatePeriods', timer.periods);
           this.dispatch('updateValue', 'updateKey', timer.$key);
+          this.dispatch('updateValue', 'updateName', timer.name);
+          this.dispatch('updateValue', 'updateDescription', timer.description || QuiverStoreDefaults.state.editing.description);
+          this.dispatch('updateValue', 'updatePeriods', timer.periods);
+          this.dispatch('updateValue', 'updateOwned', timer.owned);
+          this.dispatch('updateValue', 'updatePrivate', timer.private);
+        }.bind(this));
+      }
+    },
+
+    _private: function(ready, private) {
+      if (ready && private !== this.store.getState().editing.private) {
+        setTimeout(function() {
+          this.dispatch('updateValue', 'updatePrivate', private);  
         }.bind(this));
       }
     },
