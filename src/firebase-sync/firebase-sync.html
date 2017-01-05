@@ -35,172 +35,56 @@
 
     attached: function() {
       this.store.subscribe(function() {
-        console.log('firebase sync state', this.state);
+        this.state = this.store.getState();
+        this.sync();
       }.bind(this));
     },
 
-    // observers: [
-    //   '_startSync(connected, model, account.uid, account.isAnonymous)'
-    // ],
+    observers: [
+      '_startSync(connected, model, account.uid, account.isAnonymous)'
+    ],
 
-    // _startSync: function (connected, model, uid, isAnonymous) {
-    //   if (this.handler && this.timersRef && !connected || isAnonymous) {
-    //     this.timersRef.off('value', this.handler);
-    //     this.timersRef = undefined;
-    //     this.handler = undefined;
-    //   } else if (!this.handler && !this.timersRef) {
-    //     this.timersRef = this.firebase.database().ref(this.replaceWildcard(model.user.owned.timers, 'uid', uid));
-    //     this.handler = this.timersRef.on('value', function (snap) {
-    //       this.firebaseTimers = snap.val();
-    //       this.sync();
-    //     }.bind(this));
-    //   }
-    // },
+    _startSync: function (connected, model, uid, isAnonymous) {
+      if (this.handler && this.stateRef && !connected || isAnonymous) {
+        this.stateRef.off('value', this.handler);
+        this.stateRef = undefined;
+        this.handler = undefined;
+      } else if (!this.handler && !this.stateRef) {
+        this.stateRef = this.firebase.database().ref(this.replaceWildcard(model.user.owned.state, 'uid', uid));
+        this.handler = this.stateRef.on('value', function (snap) {
+          this.firebaseState = snap.val();
+          this.sync();
+        }.bind(this));
+      }
+    },
 
-    // _data: function (e) {
-    //   var localTimers = this.localTimers && this.localTimers.value ? _.clone(this.localTimers.value) : [];
-    //   var addedKey = false;
+    sync: function() {
+      if (!this.connected || !this.stateRef) return;
 
-    //   if (this.connected && this.timersRef && localTimers.length) {
-    //     localTimers = localTimers.map(function (timer) {
-    //       if (timer && !timer.$key && !this.match(timer, localTimers)) {
-    //         addedKey = true;
-    //         timer.$key = this.timersRef.push().key;
-    //       }
-    //       return timer;
-    //     }.bind(this));
-    //   }
+      if (!this.firebaseState || !this.firebaseState.version || this.firebaseState.version < this.state.version) {
+        this.stateRef.update({
+          timers: this.state.timers.reduce(function(timers, timer) {
+            return timers[timer.$key] = _.omit(timer, ['$key']), timers;
+          }, {}),
+          version: this.state.version
+        });
+      } else if (this.firebaseState && this.firebaseState && this.firebaseState.version > this.state.version) {
+        var timers = [];
+        var timer;
 
-    //   if (addedKey) {
-    //     console.log('addedKey', localTimers[0].$key);
-    //     this.localTimers.value = localTimers;
-    //     this.$.timersStorage.save();
-    //   } else {
-    //     this.sync();
-    //   }
-    // },
+        for (var key in this.firebaseState.timers) {
+          timer = this.firebaseState.timers[key];
+          timer.$key = key;
+          timers.push(timer);
+        }
 
-    // // Functions
-    // isEqual: function (a, b) {
-    //   if (!a || !b) return false;
-    //   if (a.name !== b.name) return false;
-    //   if (a.description !== b.description) return false;
-    //   if (a.totalSeconds !== b.totalSeconds) return false;
-    //   if (a.version !== b.version) return false;
-    //   if (a.periods.length !== b.periods.length) return false;
-
-    //   var i = a.periods.length;
-
-    //   while (i--) {
-    //     if (a.periods[i].type !== b.periods[i].type) return false;
-    //     if (a.periods[i].totalSeconds !== b.periods[i].totalSeconds) return false;
-    //     if (a.periods[i].name !== b.periods[i].name) return false;
-    //     if (a.periods[i].timestamp !== b.periods[i].timestamp) return false;
-    //   }
-
-    //   return true;
-    // },
-
-    // match: function (a, timers) {
-    //   var arr = _.toArray(timers);
-    //   var i = arr.length;
-
-    //   while (i--) {
-    //     if (this.isEqual(a, arr[i])) return arr[i];
-    //   }
-    // },
-
-    // sync: function () {
-    //   if (!this.connected || !this.timersRef) return;
-    //   if (!this.localTimers || !this.localTimers.value) return;
-
-    //   var localTimers = this.localTimers && this.localTimers.value ? _.clone(this.localTimers.value) : [];
-    //   var firebaseTimers = this.firebaseTimers || {};
-    //   var updates = {};
-    //   var localTimersChanged = false;
-
-    //   function findByKey(key) {
-    //     return firebaseTimers[key];
-    //   };
-
-    //   function findLocalIndex(key) {
-    //     var i = localTimers.length;
-
-    //     while (i--) {
-    //       if (localTimers[i].$key == key) return i;
-    //     }
-    //   };
-
-
-    //   if (localTimers.length) { // Sync to Firebase
-    //     localTimers.forEach(function (localTimer) {
-    //       // Try to find a match, otherwise push to Firebase
-    //       if (!localTimer.$key) return;
-
-    //       if (!this.match(localTimer, firebaseTimers)) {
-    //         localTimer.updated = Date.now();
-    //         updates[localTimer.$key] = _.omit(localTimer, ['$key']);
-    //       }
-    //     }.bind(this));
-
-    //     if (this.timersRef && Object.keys(updates).length) {
-    //       this.timersRef.update(updates);
-    //     }
-    //   }
-
-    //   var localTimer;
-    //   var firebaseTimer;
-    //   var localIndex;
-    //   var saveTimers = false;
-    //   for (var key in firebaseTimers) { // Sync to local
-    //     firebaseTimer = firebaseTimers[key];
-    //     localIndex = findLocalIndex(key);
-
-    //     if (typeof localIndex !== 'undefined') {
-    //       localTimer = localTimers[localIndex];
-    //       if (!this.isEqual(localTimer, firebaseTimer) && firebaseTimer.updated > localTimer.updated) {
-    //         localTimer.name = firebaseTimer.name;
-    //         localTimer.description = firebaseTimer.description;
-    //         localTimer.periods = firebaseTimer.periods;
-    //         localTimer.totalSeconds = firebaseTimer.totalSeconds;
-    //         localTimer.updated = firebaseTimer.updated;
-    //         this.localTimers.value[localIndex] = localTimer;
-    //         saveTimers = true;
-    //       }
-    //     } else {
-    //       firebaseTimer.$key = key;
-    //       this.localTimers.value.push(firebaseTimer);
-    //       saveTimers = true;
-    //     }
-    //     if (saveTimers) {
-    //       this.$.timersStorage.save();
-    //     }
-    //   }
-
-    // },
-
-    // deleteByIndex: function (i) {
-    //   var key = this.localTimers.value[i] ? this.localTimers.value[i].$key : false;
-    //   this.localTimers.value.splice(i, 1);
-    //   this.$.timersStorage.save();
-
-    //   if (this.connected && this.timersRef && key) {
-    //     this.timersRef.child(key).remove();
-    //   } else {
-    //     this.fire('error', 'Timer could not be deleted on server.');
-    //   }
-    // },
-
-    // forceSync: function () {
-    //   if (!this.connected || !this.timersRef) return;
-    //   this.timersRef.remove()
-    //     .then(function () {
-    //       this.localTimers.value = this.localTimers.value.map(function (timer) {
-    //         timer.$key = this.timersRef.push().key;
-    //         return timer;
-    //       }.bind(this));
-    //     }.bind(this));
-    // }
+        this.dispatch({
+          type: 'setTimers',
+          timers: timers,
+          version: this.firebaseState.version
+        });
+      }
+    }
   });
 </script>
 </dom-module>

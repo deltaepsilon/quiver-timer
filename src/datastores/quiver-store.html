@@ -23,11 +23,11 @@
           sound: true,
           soundFile: 'chime'
         },
-        pathname: '/'
+        pathname: '/',
+        version: 1
       }
   };
   var QuiverStore = Redux.createStore(function (state, action) {
-    console.log('store action', action);
     if (typeof state == 'undefined') {
       try {
         state = JSON.parse(localStorage.getItem('QuiverStoreState'));
@@ -39,6 +39,7 @@
     if (!state) { // Catch nulls empty localStorage as well as undefineds
       state = QuiverStoreDefaults.state
     } 
+
     // else {
     //   state = JSON
     // }
@@ -52,6 +53,10 @@
           state.editing = QuiverStoreDefaults.state.editing;
         }
         state.pathname = action.pathname
+        break;
+      case 'setTimers':
+        state.timers = action.timers;
+        state.version = action.version;
         break;
       case 'clearTimers':
         console.log('clear timers');
@@ -148,6 +153,16 @@
         break;
       case 'updateSettings':
         state.settings = action.settings
+        break;
+    }
+
+    switch (action.type) {
+      case 'clearTimers':
+      case 'updateTimer':
+      case 'deleteTimer':
+      case 'duplicateTimer':
+      case 'restoreDefaults':
+        state.version = Date.now();
         break;
     }
 
