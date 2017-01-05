@@ -140,7 +140,10 @@
     behaviors: [TimerDefaults, QuiverStoreBehavior],
 
     properties: {
-      account: Object,
+      account: {
+        type: Object,
+        value: false
+      },
       timers: {
         type: Array,
         statePath: 'timers'
@@ -155,11 +158,17 @@
       }
     },
 
-    // Observers
-    observers: ['_restoreDefaults(timersData, ready)'],
+    attached: function() {
+      this.ready = true;
+    },
 
-    _restoreDefaults: function (timers, ready) {
-      if (ready && timers._rev && !timers.value) {
+    // Observers
+    observers: [
+      '_restoreDefaults(ready)'
+    ],
+
+    _restoreDefaults: function (ready) {
+      if (ready && this.timers && !this.timers.length) {
         this.restoreDefaults();
       }
     },
@@ -170,13 +179,6 @@
 
     _showVerifyEmail: function(isAnonymous, emailVerified) {
       return !isAnonymous && !emailVerified;
-    },
-
-    //  Listeners
-    _data: function (e) {
-      if (e.detail.value._id) {
-        this.ready = true;
-      };
     },
 
     // Functions
