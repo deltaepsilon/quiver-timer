@@ -14,15 +14,22 @@ path /timer/{environment}/user/owned/{object}/{uid} {
   read() {isUser(uid) || isAdmin(environment)}
   write() {isUser(uid) || isAdmin(environment)}
 }
+
 path /timer/{environment}/user/read/{object}/{uid} {
   read() {isUser(uid) || isAdmin(environment)}
   write() {isAdmin(environment)}
 }
+
 path /timer/{environment}/user/write/{object}/{uid} {
   write() {isUser(uid) || isAdmin(environment)}
   read() {isAdmin(environment)}
 }
+
 path /timer/{environment}/admin {
   read()  {isAdmin(environment)}
   write() {isAdmin(environment)}
+}
+
+path /timer/{environment}/admin/search/timers {
+  index() {["hd5Hash"]}
 }

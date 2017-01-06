@@ -13,5 +13,10 @@ module.exports = [
     name: 'timers',
     path: '/user/owned/state/{uid}/timers/{key}',
     func: require('./actions/timers')
+  },
+  {
+    name: 'search',
+    path: '/admin/search/timers/{key}',
+    func: require('./actions/timers-search')
   }
 ];

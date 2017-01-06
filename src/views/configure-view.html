@@ -220,7 +220,7 @@
           this.dispatch('updateValue', 'updateName', timer.name);
           this.dispatch('updateValue', 'updateDescription', timer.description || QuiverStoreDefaults.state.editing.description);
           this.dispatch('updateValue', 'updatePeriods', timer.periods);
-          this.dispatch('updateValue', 'updateOwned', timer.owned);
+          this.dispatch('updateValue', 'updateOwned', timer.owned || false);
           this.dispatch('updateValue', 'updatePrivate', timer.private);
         }.bind(this));
       }
