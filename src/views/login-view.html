@@ -69,7 +69,7 @@
        observers: ['_user(user, pathname)'],
 
        _user: function(user, pathname) {
-         if (user && pathname == '/timers') this.fire('redirect', '/timers');
+         if (user && pathname == '/login') this.fire('redirect', '/timers');
        },
 
        // Functions
