@@ -10,6 +10,9 @@
 
   var QuiverStoreDefaults = {
     state: {
+      user: false,
+      account: false,
+      connected: false,
       timers: [],
       editing: {
         periods: [
@@ -62,6 +65,15 @@
           state.editing = QuiverStoreDefaults.state.editing;
         }
         state.pathname = action.pathname
+        break;
+      case 'setUser':
+        state.user = action.user;
+        break;
+      case 'setAccount':
+        state.account = action.account;
+        break;
+      case 'setConnected':
+        state.connected = action.connected;
         break;
       case 'setTimers':
         state.timers = action.timers;

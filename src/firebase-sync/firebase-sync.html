@@ -14,8 +14,6 @@
       }
     </style>
 
-<app-pouchdb-document id="timersStorage" db-name="quiver-timer" doc-id="timers" data="{{localTimers}}" on-data-changed="_data"></app-pouchdb-document>
-
 </template>
 <script>
   Polymer({
@@ -61,7 +59,7 @@
     sync: function() {
       if (!this.connected || !this.stateRef) return;
 
-      if (!this.firebaseState || !this.firebaseState.version || this.firebaseState.version < this.state.version) {
+      if (!this.firebaseState || !this.firebaseState.version || this.firebaseState.version <= this.state.version) {
         this.stateRef.update({
           timers: this.state.timers.reduce(function(timers, timer) {
             return timers[timer.$key] = _.omit(timer, ['$key']), timers;

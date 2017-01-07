@@ -60,15 +60,16 @@
        is: "login-view",
 
        properties: {
-         user: {
-           type: Object,
-           observer: '_user'
-         }
+         user: Object,
+         pathname: String
        },
 
+
        // Observers
-       _user: function(user) {
-         if (user) this.fire('redirect', '/timers');
+       observers: ['_user(user, pathname)'],
+
+       _user: function(user, pathname) {
+         if (user && pathname == '/timers') this.fire('redirect', '/timers');
        },
 
        // Functions

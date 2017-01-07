@@ -63,10 +63,7 @@
     behaviors: [QuiverStoreBehavior],
 
     properties: {
-      settings: {
-        type: Object,
-        statePath: 'settings'
-      },
+      settings: Object,
       disabled: {
         type: Boolean,
         computed: '_disabled(settings.sound)'

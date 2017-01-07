@@ -1,5 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../firebase-behavior/firebase-behavior.html">
+<link rel="import" href="../datastores/quiver-store-behavior.html">
 <link rel="import" href="../shared-styles.html">
 
 <script src="../third-party/lodash.custom.min.js"></script>
@@ -22,20 +23,12 @@
   Polymer({
     is: "auth-controller",
 
-    behaviors: [FirebaseBehavior],
+    behaviors: [FirebaseBehavior, QuiverStoreBehavior],
 
     properties: {
       firebase: Object,
       loginEndpoint: String,
       accountEndpoint: String,
-      user: {
-        type: Object,
-        notify: true
-      },
-      account: {
-        type: Object,
-        notify: true
-      },
       connected: {
         type: Boolean,
         value: false
@@ -57,7 +50,11 @@
       var handler;
       var accountRef;
       firebase.auth().onAuthStateChanged(function (user) {
-        this.user = user;
+        this.dispatch({
+          type: 'setUser',
+          user: user
+        });
+        
         if (!user && handler && accountRef) {
           accountRef.off('value', handler);
         } if (user && !user.isAnonymous) {
@@ -89,7 +86,10 @@
           
           accountRef = firebase.database().ref(this.replaceWildcard(this.accountEndpoint, 'uid', user.uid));
           handler = accountRef.on('value', function(snap) {
-            this.set('account', snap.val());
+            this.dispatch({
+              type: 'setAccount',
+              account: snap.val()
+            });
           }.bind(this));
         }
       }.bind(this));
@@ -104,7 +104,10 @@
     // Functions
     logout: function () {
       this.firebase.auth().signOut();
-      this.account = undefined;
+      this.dispatch({
+        type: 'setAccount',
+        account: false
+      });
     },
 
     google: function () {

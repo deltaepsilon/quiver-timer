@@ -129,8 +129,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <app-scrollpos-control selected="{{page}}"></app-scrollpos-control>
 <flash-alert id="flashAlert" flash="[[settings.flash]]" sound="[[settings.sound]]" sound-file="[[settings.soundFile]]"></flash-alert>
 <auth-controller id="authController" firebase="[[firebase]]" login-endpoint="[[model.user.write.login]]" account-endpoint="[[model.user.read.account]]"
-  connected="[[connected]]" page="[[page]]" user="{{user}}" account="{{account}}"></auth-controller>
-<firebase-sync id="firebaseSync" firebase="[[firebase]]" model="[[model]]" connected="[[connected]]" account="{{account}}"></firebase-sync>
+  connected="[[connected]]" page="[[page]]" user="[[user]]" account="[[account]]"></auth-controller>
+<firebase-sync id="firebaseSync" firebase="[[firebase]]" model="[[model]]" connected="[[connected]]" account="[[account]]"></firebase-sync>
 
 <cast-controller id="castController" route="[[route]]" env="[[env]]"></cast-controller>
 <paper-toast id="toast"></paper-toast>
@@ -141,10 +141,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <nav-controller page="[[page]]" tail="{{subroute}}" uid="[[user.uid]]" casting="[[casting]]"></nav-controller>
   <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="fourohfour" role="main">
     <landing-view id="landingView" name="landing"></landing-view>
-    <login-view id="loginView" name="login" user="[[user]]"></login-view>
-    <timers-view id="timersView" name="timers" account="[[account]]"></timers-view>
-    <timer-view id="timerView" name="timer" local-route="[[subroute]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]" casting="[[casting]]"></timer-view>
-    <configure-view id="configureView" name="configure" local-route="[[subroute]]" on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
+    <login-view id="loginView" name="login" pathname="[[pathname]]" user="[[user]]"></login-view>
+    <timers-view id="timersView" name="timers" timers="[[timers]]" account="[[account]]"></timers-view>
+    <timer-view id="timerView" name="timer" timers="[[timers]]" local-route="[[subroute]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]" casting="[[casting]]"></timer-view>
+    <configure-view id="configureView" name="configure" timers="[[timers]]" local-route="[[subroute]]" on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
     <cast-view id="castView" name="cast" firebase="[[firebase]]" cast-endpoint="[[castEndpoint]]"></cast-view>
     <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
     
@@ -154,7 +154,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- Dialogs -->
 <item-name-dialog id="itemNameDialog"></item-name-dialog>
 <item-description-dialog id="itemDescriptionDialog"></item-description-dialog>
-<settings-dialog id="settingsDialog"></settings-dialog>
+<settings-dialog id="settingsDialog" settings="[[settings]]"></settings-dialog>
 <sound-dialog id="soundDialog"></sound-dialog>
 <cast-dialog id="castDialog" uid="[[user.uid]]" casting="{{casting}}"></cast-dialog>
 <guest-mode-dialog id="guestModeDialog"></guest-mode-dialog>
@@ -182,18 +182,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         type: Object,
         computed: '_model(rawEnv, env.firebaseConfig, env.environment)'
       },
+      user: {
+        type: Object,
+        statePath: 'user'
+      },
+      account: {
+        type: Object,
+        statePath: 'account'
+      },
       settings: {
         type: Object,
         statePath: 'settings'
       },
       connected: {
         type: Boolean,
-        value: false
+        statePath: 'connected'
+      },
+      timers: {
+        type: Array,
+        statePath: 'timers',
       },
       page: {
         type: String,
         reflectToAttribute: true,
         observer: '_pageChanged'
+      },
+      pathname: {
+        type: String,
+        statePath: 'pathname'
       },
       timerEndpoint: {
         type: String,
@@ -261,7 +277,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     _connected: function (firebase) {
       firebase.database().ref().child('.info/connected').on('value', function (snap) {
-        this.connected = snap.val();
+        this.dispatch({
+          type: 'setConnected',
+          connected: snap.val()
+        });
       }.bind(this));
     },
 
