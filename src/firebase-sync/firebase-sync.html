@@ -31,41 +31,61 @@
       account: Object
     },
 
-    attached: function() {
-      this.store.subscribe(function() {
+    attached: function () {
+      this.store.subscribe(function () {
         this.state = this.store.getState();
         this.sync();
       }.bind(this));
     },
 
     observers: [
-      '_startSync(connected, model, account.uid, account.isAnonymous)'
+      '_startSync(connected, model, account)',
+      'syncTags(firebase, model)'
     ],
 
-    _startSync: function (connected, model, uid, isAnonymous) {
-      if (this.handler && this.stateRef && !connected || isAnonymous) {
-        this.stateRef.off('value', this.handler);
+    _startSync: function (connected, model, account) {
+      if (this.stateHandler && this.stateRef && (!account || account.isAnonymous || !connected)) {
+        this.stateRef.off('value', this.stateHandler);
         this.stateRef = undefined;
-        this.handler = undefined;
-      } else if (!this.handler && !this.stateRef) {
-        this.stateRef = this.firebase.database().ref(this.replaceWildcard(model.user.owned.state, 'uid', uid));
-        this.handler = this.stateRef.on('value', function (snap) {
-          this.firebaseState = snap.val();
+        this.stateHandler = undefined;
+      } else if (!this.stateHandler && !this.stateRef && connected && account.uid && !account.isAnonymous) {
+        this.stateRef = this.firebase.database().ref(this.replaceWildcard(model.user.owned.state, 'uid', account.uid));
+        this.stateHandler = this.stateRef.on('value', function (snap) {
+          this.firebaseState = snap.val() || false;
           this.sync();
         }.bind(this));
       }
+
+
     },
 
-    sync: function() {
-      if (!this.connected || !this.stateRef) return;
+    sync: function () {
+      if (!this.connected || !this.stateRef || (!this.firebaseState && this.firebaseState !== false)) return;
 
-      if (!this.firebaseState || !this.firebaseState.version || this.firebaseState.version <= this.state.version) {
-        this.stateRef.update({
-          timers: this.state.timers.reduce(function(timers, timer) {
-            return timers[timer.$key] = _.omit(timer, ['$key']), timers;
-          }, {}),
-          version: this.state.version
-        });
+      if (this.firebaseState === false || !this.firebaseState.version || this.firebaseState.version <= this.state.version && this.account && this.connected) {
+        if (!this.state.timers.length && !this.firebaseState.version) { // Auto-populate empty, unsynced timers
+          this.dispatch({
+            type: 'restoreDefaults'
+          });
+        } else {
+          this.stateRef.update({
+            timers: this.state.timers.map(function (t) {
+              timer = _.clone(t);
+              if (timer.tags && Array.isArray(timer.tags) && timer.tags.length) {
+                timer.tags = timer.tags.reduce(function (tags, tag) {
+                  return tags[tag.$key] = tag.value, tags;
+                }, {});
+              } else {
+                timer.tags = null;
+              }
+              return timer;
+            }).reduce(function (timers, timer) {
+              return timers[timer.$key] = _.omit(timer, ['$key']), timers;
+            }, {}),
+            version: this.state.version
+          });
+        }
+
       } else if (this.firebaseState && this.firebaseState && this.firebaseState.version > this.state.version) {
         var timers = [];
         var timer;
@@ -82,6 +102,24 @@
           version: this.firebaseState.version
         });
       }
+    },
+
+    syncTags: function (firebase, model) {
+      if (!firebase || !model) return;
+
+      this.tagsHandler = firebase.database().ref(model.public.tags).on('value', function (snap) {
+        var tags = [];
+        snap.forEach(function (tagSnap) {
+          tags.push({
+            $key: tagSnap.key,
+            value: tagSnap.val()
+          });
+        });
+        this.dispatch({
+          type: 'updateTags',
+          tags: tags
+        });
+      }.bind(this));
     }
   });
 </script>

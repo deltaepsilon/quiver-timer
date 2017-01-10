@@ -138,14 +138,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <!-- Main content -->
 <div id="main">
-  <nav-controller page="[[page]]" tail="{{subroute}}" uid="[[user.uid]]" casting="[[casting]]"></nav-controller>
-  <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="fourohfour" role="main">
+  <nav-controller id="navController" page="[[page]]" tail="{{subroute}}" uid="[[user.uid]]" is-admin="[[account.isAdmin]]" connected="[[connected]]" casting="[[casting]]"></nav-controller>
+  <iron-pages id="ironPages" selected="[[page]]" attr-for-selected="name" fallback-selection="fourohfour" role="main">
     <landing-view id="landingView" name="landing"></landing-view>
     <login-view id="loginView" name="login" pathname="[[pathname]]" user="[[user]]"></login-view>
     <timers-view id="timersView" name="timers" timers="[[timers]]" account="[[account]]"></timers-view>
     <timer-view id="timerView" name="timer" timers="[[timers]]" local-route="[[subroute]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]" casting="[[casting]]"></timer-view>
-    <configure-view id="configureView" name="configure" timers="[[timers]]" local-route="[[subroute]]" on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
+    <configure-view id="configureView" name="configure" account="[[account]]" timers="[[timers]]" local-route="[[subroute]]" on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
     <cast-view id="castView" name="cast" firebase="[[firebase]]" cast-endpoint="[[castEndpoint]]"></cast-view>
+    <admin-view id="adminView" name="admin" firebase="[[firebase]]" model="[[model]]"></admin-view>
     <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
     
   </iron-pages>

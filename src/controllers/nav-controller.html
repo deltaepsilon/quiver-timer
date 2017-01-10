@@ -16,6 +16,10 @@
         display: none;
       }
 
+      .show {
+        display: inherit !important;
+      }
+
       .none {
         display: none;
       }
@@ -43,13 +47,14 @@
 <a href="/timers" class$="[[arrowClass]]" style="margin-left: -2px;">
   <paper-icon-button icon="arrow-back"></paper-icon-button>
 </a>
+<a class$="hidden [[adminClass]]" href="/admin">
+  <paper-icon-button icon="build"></paper-icon-button>
+</a>
 <h3 id="title" class$="[[titleClass]]">[[pageTitle]]</h3>
 <div class="flex layout horizontal end-justified">
-  <template is="dom-if" if="[[uid]]">
-    <paper-icon-button class$="[[exitClass]]" casting$="[[casting]]" icon="social:share" on-click="openCast"></paper-icon-button>
-  </template>
-  <paper-icon-button class$="[[exitClass]]" icon="extended:exit" on-click="logout"></paper-icon-button>
-  <paper-icon-button class$="[[settingsClass]]" icon="settings" on-click="openSettings"></paper-icon-button>
+  <paper-icon-button class$="hidden [[castClass]]" casting$="[[casting]]" icon="social:share" on-click="openCast"></paper-icon-button>
+  <paper-icon-button class$="hidden [[settingsClass]]" icon="settings" on-click="openSettings"></paper-icon-button>
+  <paper-icon-button class$="hidden [[exitClass]]" icon="power-settings-new" on-click="logout"></paper-icon-button>
 </div>
 
 </div>
@@ -61,7 +66,18 @@
     properties: {
       page: String,
       tail: Object,
-      uid: String,
+      uid: {
+        type: String,
+        value: ''  
+      },
+      isAdmin: {
+        type: Boolean,
+        value: false  
+      },
+      connected: {
+        type: Boolean,
+        value: false
+      },
       casting: {
         type: Boolean,
         value: false
@@ -78,13 +94,41 @@
         type: String,
         computed: '_arrowClass(page, tail)'
       },
+      loggedInPages: {
+        type: Array,
+        value: ['admin', 'timers', 'timer', 'configure']
+      },
+      isLoggedInPage: {
+        type: Boolean,
+        computed: '_isLoggedInPage(loggedInPages, page)'
+      },
+      isTimerPage: {
+        type: Boolean,
+        computed: '_isTimerPage(page)'
+      },
+      isPublicPage: {
+        type: Boolean,
+        computed: '_isPublicPage(page)'
+      },
+      isAdminPage: {
+        type: Boolean,
+        computed: '_isAdminPage(page)'
+      },
       exitClass: {
         type: String,
-        computed: '_settingsClass(page)'
+        computed: '_showHide(isLoggedInPage)'
       },
       settingsClass: {
         type: String,
-        computed: '_settingsClass(page)'
+        computed: '_showHide(isLoggedInPage)'
+      },
+      castClass: {
+        type: String,
+        computed: '_showHide(isLoggedInPage, isTimerPage, uid, connected)'
+      },
+      adminClass: {
+        type: String,
+        computed: '_showHide(isLoggedInPage, isAdmin, isPublicPage)'
       }
     },
 
@@ -100,14 +144,38 @@
     },
 
     _arrowClass: function (page, tail) {
-      var showPages = ['timer', 'configure', 'fourohfour'];
+      var showPages = ['admin', 'timer', 'configure', 'fourohfour'];
       // if (tail.path.match(/playing/)) return 'none';
       return !!~showPages.indexOf(page) ? 'show' : 'hidden';
     },
 
-    _settingsClass: function (page) {
-      var showPages = ['timers', 'timer', 'configure'];
-      return !!~showPages.indexOf(page) ? 'show' : 'hidden';
+
+    _isLoggedInPage: function(pages, page) {
+      return !!~pages.indexOf(page);
+    },
+
+    _isTimerPage: function(page) {
+      return page == 'timer';
+    },
+
+    _isAdminPage: function(page) {
+      return page == 'admin';
+    },
+
+    _isPublicPage: function(page) {
+      return page != 'admin';
+    },
+
+    _showHide: function() {
+      var args = Array.prototype.slice.call(arguments);
+      var i = args.length;
+
+      if (!args.length) return 'hidden';
+
+      while (i--) {
+        if (!args[i]) return 'hidden';
+      }
+      return 'show';
     },
 
     openSettings: function () {

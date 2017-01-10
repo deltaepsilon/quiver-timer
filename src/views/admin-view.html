@@ -1,0 +1,89 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="../datastores/quiver-store-behavior.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="admin-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        --paper-input-container-color: var(--color-rich-black);
+        --paper-input-container-focus-color: var(--color-metallic-seaweed);
+        --paper-input-container-input-color: var(--color-rich-black);
+      }
+
+      .list {
+        padding: 1rem !important;
+      }
+
+    </style>
+
+<paper-material elevation="1" class="list">
+
+  <h3>Tags</h3>
+
+  <form is="iron-form" id="form">
+    <div class="layout horizontal">
+      <paper-input id="newTag" class="flex" label="New tag" value="{{newTag}}" type="text"></paper-input>
+      <paper-button on-click="addTag">Add</paper-button>  
+    </div>
+  </form>
+
+  <template is="dom-repeat" items="[[tags]]" as="tag">
+    <paper-item class="layout horizontal justified">
+      <span>[[tag.value]]</span>
+      <paper-icon-button key$="[[tag.$key]]" icon="delete" on-click="deleteTag"></paper-icon-button>
+    </paper-item>
+  </template>
+</paper-material>
+
+</template>
+<script>
+  Polymer({
+    is: "admin-view",
+
+    behaviors: [QuiverStoreBehavior],
+
+    properties: {
+      firebase: Object,
+      model: Object,
+      tagsRef: {
+        type: Object,
+        computed: '_tagsRef(firebase, model)'
+      },
+      tags: {
+        type: Array,
+        statePath: 'tags'
+      }
+    },
+
+    _tagsRef: function(firebase, model) {
+      return firebase.database().ref(model.public.tags);
+    },
+
+    addTag: function() {
+      this.tagsRef.push(this.newTag);
+      this.newTag = '';
+      this.$.newTag.focus();
+    },
+
+    deleteTag: function(e) {
+      return this.tagsRef.child(e.target.getAttribute('key')).remove();
+    },
+
+    updateTags: function (tags) {
+      this.dispatch({
+        type: 'updateTag',
+        tags: tags
+      });
+    }
+  });
+</script>
+</dom-module>

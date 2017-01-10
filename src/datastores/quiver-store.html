@@ -14,6 +14,7 @@
       account: false,
       connected: false,
       timers: [],
+      tags: [],
       editing: {
         periods: [
           TimerDefaults.periods.prepare
@@ -21,7 +22,8 @@
         name: 'Change timer name',
         description: 'Add description',
         private: false,
-        owned: true
+        owned: true,
+        tags: []
       },
       settings: {
         flash: true,
@@ -57,7 +59,7 @@
     }
 
     state = _.cloneDeep(state);
-
+    console.log('action.type', action.type);
     switch (action.type) {
       case 'pathname':
         // Reset editing defaults between editing and creating, but not across reloads or editing to editing/creating to creating
@@ -83,13 +85,23 @@
         console.log('clear timers');
         break;
       case 'updateTimer':
-        var timer = state.editing;
+        var timer = _.clone(state.editing);
         timer.updated = Date.now();
         timer.totalSeconds = timer.periods.reduce(function (s, period) {
           return period.totalSeconds + s;
         }, 0);
 
         if (timer.description == QuiverStoreDefaults.state.editing.description) delete timer.description;
+
+        timer.flatTags = timer.tags.map(function(tag) {
+          return tag.value;
+        }).join(',');
+
+        // timer.tags = timer.tags.reduce(function(tags, tag) {
+        //   return tags[tag.$key] = tag.value, tags;
+        // }, {});
+
+        // timer.tags = 'farts';
 
         if (action.value == 'new') {
           timer.$key = getPushKey();
@@ -182,6 +194,33 @@
         break;
       case 'updateSettings':
         state.settings = action.settings
+        break;
+      case 'updateTags':
+        state.tags = action.tags;
+        break;
+      case 'updateEditingTags':
+        state.editing.tags = action.value || [];
+        break;
+      case 'toggleTag':
+        var tag = state.tags.find(function (tag) {
+          return tag.$key == action.key;
+        });
+        if (action.checked && !state.editing.tags.find(function (tag) {
+          return tag.$key == action.key;
+        })) {
+          state.editing.tags.push(tag);
+        } else if (!action.checked) {
+          state.editing.tags = state.editing.tags.filter(function(tag) {
+            return tag.$key != action.key;
+          });
+        }
+        break;
+      case 'updateDefault':
+        if (action.value) {
+          state.editing.default = true;
+        } else {
+          delete state.editing.default;
+        }
         break;
     }
 

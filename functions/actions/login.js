@@ -25,6 +25,8 @@ module.exports = function (e) {
 
   if (~env.admin.emails.indexOf(user.email)) {
     user.isAdmin = true;
+  } else {
+    user.isAdmin = null;
   }
 
   return accountRef.once('value')

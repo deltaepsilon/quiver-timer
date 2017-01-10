@@ -33,6 +33,10 @@
       #timer-description {
         margin-left: 10px;
       }
+
+      .toggle-tag {
+        margin: .25rem .5rem;
+      }
     </style>
 
 <app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
@@ -40,23 +44,35 @@
 <div id="top-title" class="layout vertical">
   <h3 id="title" on-click="editName">[[timerName]]</h3>
   <digital-clock id="totalSeconds" total-seconds="[[totalSeconds]]"></digital-clock>
-  <template is="dom-if" if="[[owned]]">
-    <paper-toggle-button id="private" checked="{{private}}">Make Private</paper-toggle-button>
-  </template>  
+</div>
+
+<hr>
+
+<div class="layout horizontal justified wrap" style="padding: 1rem .5rem;">
+  <div class="layout vertical">
+    <paper-toggle-button id="private" checked="{{private}}" hidden$="[[!isOwned]]">Make Private</paper-toggle-button>
+    <paper-toggle-button id="default" hidden$="[[!account.isAdmin]]" on-checked-changed="toggleDefault">Make Default</paper-toggle-button>
+  </div>
+  <div id="tagsWrapper" class="layout vertical" hidden$="[[!account.isAdmin]]">
+    <template is="dom-repeat" items="[[tags]]" as="tag">
+      <paper-checkbox class="toggle-tag" key$="[[tag.$key]]" on-click="toggleTag">[[tag.value]]</paper-checkbox>
+    </template>
+
+  </div>
+
 </div>
 
 
-
 <div style="margin-left: 10px;">
-  <marked-element markdown="[[timerDescription]]" on-click="editDescription"></marked-element>  
+<marked-element markdown="[[timerDescription]]" on-click="editDescription"></marked-element>
 </div>
 
 <div style="padding: 0rem 1rem 6rem;">
 <div id="periods-wrapper">
   <paper-fab id="top-fab" icon="save" on-click="save"></paper-fab>
   <template id="periods" is="dom-repeat" items="{{periods}}" as="period">
-    <configure-period class="divided" period="{{period}}" selected="[[period.selected]]" on-period-updated="updatePeriodHandler" index="[[index]]"
-      periods-count="[[periods.length]]"></configure-period>
+    <configure-period class="divided" period="{{period}}" selected="[[period.selected]]" on-period-updated="updatePeriodHandler"
+      index="[[index]]" periods-count="[[periods.length]]"></configure-period>
   </template>
 </div>
 <div class="layout horizontal end-justified" style="padding: 30px 24px;" hidden$="[[!showSelectAll]]">
@@ -74,7 +90,7 @@
 
     properties: {
       localRoute: Object,
-      session: String,
+      account: Object,
       title: {
         type: String,
         statePath: 'editing.name'
@@ -86,6 +102,10 @@
       timers: {
         type: Array,
         value: []
+      },
+      editing: {
+        type: Object,
+        statePath: 'editing'
       },
       timerName: {
         type: String,
@@ -99,9 +119,21 @@
         type: Boolean,
         statePath: 'editing.private'
       },
+      default: {
+        type: Boolean,
+        statePath: 'editing.default'
+      },
       owned: {
         type: Boolean,
         statePath: 'editing.owned'
+      },
+      tags: {
+        type: Array,
+        statePath: 'tags'
+      },
+      timerTags: {
+        type: Array,
+        statePath: 'editing.tags'
       },
       periods: {
         type: Array,
@@ -127,7 +159,7 @@
       },
       ready: {
         type: Boolean,
-        value: false  
+        value: false
       },
       showSelectAll: {
         type: Boolean,
@@ -141,67 +173,74 @@
     },
 
     actions: {
-      addPeriod: function(type) {
+      addPeriod: function (type) {
         return {
           type: 'addPeriod',
           periodType: type
         };
       },
-      clearSelected: function() {
+      clearSelected: function () {
         return {
           type: 'clearSelected'
         };
       },
-      deleteSelected: function() {
+      deleteSelected: function () {
         return {
           type: 'deleteSelected'
         };
       },
-      dispatch: function(type) {
+      dispatch: function (type) {
         return {
           type: type
         };
       },
-      duplicatePeriods: function(periods) {
+      duplicatePeriods: function (periods) {
         return {
           type: 'duplicatePeriods',
           periods: periods
         };
       },
-      selectAll: function() {
+      selectAll: function () {
         return {
           type: 'selectAll'
         };
       },
-      updateValue: function(type, value) {
+      updateValue: function (type, value) {
         return {
           type: type,
           value: value
         };
       },
-      updatePeriod: function(index, period) {
+      updatePeriod: function (index, period) {
         return {
           type: 'updatePeriod',
           index: index,
           period: period
-        }; 
+        };
       },
-      deletePeriod: function(index) {
+      deletePeriod: function (index) {
         return {
           type: 'deletePeriod',
           index: index
-        }; 
+        };
       },
-      moveUp: function(index) {
+      moveUp: function (index) {
         return {
           type: 'movePeriodUp',
           index: index
         }
       },
-      moveDown: function(index) {
+      moveDown: function (index) {
         return {
           type: 'movePeriodDown',
           index: index
+        }
+      },
+      toggleTag: function (key, checked) {
+        return {
+          type: 'toggleTag',
+          key: key,
+          checked: checked
         }
       }
     },
@@ -209,29 +248,58 @@
     // Observers
     observers: [
       '_setEditing(ready, routeData.timerKey)',
-      '_private(ready, private)'
+      '_private(ready, private)',
+      '_default(ready, default)',
+      '_tags(ready, editing.tags)'
     ],
 
     _setEditing: function (ready, timerKey) {
       var timer = this.timers[timerKey];
       if (ready && timer) {
-        setTimeout(function() {
+        setTimeout(function () {
           this.dispatch('updateValue', 'updateKey', timer.$key);
           this.dispatch('updateValue', 'updateName', timer.name);
           this.dispatch('updateValue', 'updateDescription', timer.description || QuiverStoreDefaults.state.editing.description);
           this.dispatch('updateValue', 'updatePeriods', timer.periods);
           this.dispatch('updateValue', 'updateOwned', timer.owned || false);
           this.dispatch('updateValue', 'updatePrivate', timer.private);
+          this.dispatch('updateValue', 'updateEditingTags', timer.tags);
+          this.dispatch('updateValue', 'updateDefault', timer.default);
         }.bind(this));
       }
     },
 
-    _private: function(ready, private) {
+    _private: function (ready, private) {
       if (ready && private !== this.store.getState().editing.private) {
-        setTimeout(function() {
-          this.dispatch('updateValue', 'updatePrivate', private);  
+        setTimeout(function () {
+          this.dispatch('updateValue', 'updatePrivate', private);
         }.bind(this));
       }
+    },
+
+    _default: function (ready, isDefault) {
+      var checked = this.$.default.checked;
+      if (isDefault && !checked) {
+        this.$.default.setAttribute('checked', true);
+      } else if (!isDefault && checked) {
+        this.$.default.removeAttribute('checked', true);
+      }
+    },
+
+    _tags: function (ready, tags) {
+      var keys = !tags || !Array.isArray(tags) ? Object.keys(tags || {}) : tags.map(function (tag) {
+        return tag.$key;
+      });
+      this.$.tagsWrapper.querySelectorAll('paper-checkbox').forEach(function (checkbox) {
+        var isChecked = typeof checkbox.getAttribute('checked') == 'string';
+        var shouldBeChecked = !!~keys.indexOf(checkbox.getAttribute('key'));
+        console.log(checkbox.innerHTML, isChecked);
+        if (shouldBeChecked && !isChecked) {
+          checkbox.setAttribute('checked', "");
+        } else if (!shouldBeChecked && isChecked) {
+          checkbox.removeAttribute('checked');
+        }
+      });
     },
 
     _title: function (name) {
@@ -323,7 +391,7 @@
     save: function () {
       this.dispatch('updateValue', 'updateTimer', this.timerKey);
       this.dispatch('updateValue', 'resetEditing');
-      this.fire('redirect', '/timers');  
+      this.fire('redirect', '/timers');
     },
 
     editName: function () {
@@ -350,7 +418,7 @@
       this.addPeriod('work');
     },
 
-    addRest: function () {  
+    addRest: function () {
       this.addPeriod('rest');
     },
 
@@ -372,12 +440,12 @@
 
     clearSelected: _.debounce(function () {
       this.dispatch('clearSelected');
-      
+
       this.$.toggleCheckbox.set('checked', false);
     }, 50),
 
     duplicateSelected: function (e) {
-      this.dispatch('duplicatePeriods', this.periods.filter(function(period) {
+      this.dispatch('duplicatePeriods', this.periods.filter(function (period) {
         return period.selected;
       }));
       this.clearSelected();
@@ -387,6 +455,16 @@
       this.dispatch('deleteSelected');
       this.clearSelected();
     },
+
+    toggleTag: function (e) {
+      this.dispatch('toggleTag', e.target.getAttribute('key'), e.target.checked);
+    },
+
+    toggleDefault: function (e) {
+      if (!this.ready) return;
+      console.log('toggle default', e.target.checked);
+      this.dispatch('updateValue', 'updateDefault', e.target.checked);
+    }
 
   });
 </script>
