@@ -293,7 +293,6 @@
       this.$.tagsWrapper.querySelectorAll('paper-checkbox').forEach(function (checkbox) {
         var isChecked = typeof checkbox.getAttribute('checked') == 'string';
         var shouldBeChecked = !!~keys.indexOf(checkbox.getAttribute('key'));
-        console.log(checkbox.innerHTML, isChecked);
         if (shouldBeChecked && !isChecked) {
           checkbox.setAttribute('checked', "");
         } else if (!shouldBeChecked && isChecked) {

@@ -41,6 +41,12 @@ module.exports = function (e) {
       if (snap.val() && !~Object.keys(snap.val()).indexOf(e.params.key)) return true;
       // console.log('updating', searchRef.toString());
       return searchRef.update(_.omit(timer, ['owned', 'private']));
+    })
+    .then(function() {
+      if (!timer.default) return true;
+
+      var defaultsRef = e.data.adminRef.root.child(env.model.public.defaults.timers + '/' + e.params.key);
+      defaultsRef.update(timer);
     });
   
 };

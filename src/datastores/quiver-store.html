@@ -234,6 +234,18 @@
         break;
     }
 
+    switch (action.type) {
+      case 'setTimers':
+      case 'updateTimer':
+      case 'deleteTimer':
+      case 'duplicateTimer':
+      case 'restoreDefaults':
+        state.timers = state.timers.sort(function(a, b) {
+          return a.name > b.name;
+        });
+        break;
+    }
+
     return state;
   });
 
