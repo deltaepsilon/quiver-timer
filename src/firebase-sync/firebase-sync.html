@@ -34,7 +34,7 @@
     attached: function () {
       this.store.subscribe(function () {
         this.state = this.store.getState();
-        this.sync();
+        this.sync('store');
       }.bind(this));
     },
 
@@ -52,41 +52,55 @@
         this.stateRef = this.firebase.database().ref(this.replaceWildcard(model.user.owned.state, 'uid', account.uid));
         this.stateHandler = this.stateRef.on('value', function (snap) {
           this.firebaseState = snap.val() || false;
-          this.sync();
+          this.sync('firebase');
         }.bind(this));
       }
-
-
     },
 
-    sync: function () {
+    sync: function (source) {
       if (!this.connected || !this.stateRef || (!this.firebaseState && this.firebaseState !== false)) return;
 
-      if (this.firebaseState === false || !this.firebaseState.version || this.firebaseState.version <= this.state.version && this.account && this.connected) {
-        if (!this.state.timers.length && !this.firebaseState.version) { // Auto-populate empty, unsynced timers
-          this.dispatch({
-            type: 'restoreDefaults'
-          });
-        } else {
-          this.stateRef.update({
-            timers: this.state.timers.map(function (t) {
-              timer = _.clone(t);
-              if (timer.tags && Array.isArray(timer.tags) && timer.tags.length) {
-                timer.tags = timer.tags.reduce(function (tags, tag) {
-                  return tags[tag.$key] = tag.value, tags;
-                }, {});
-              } else {
-                timer.tags = null;
-              }
-              return timer;
-            }).reduce(function (timers, timer) {
-              return timers[timer.$key] = _.omit(timer, ['$key']), timers;
-            }, {}),
-            version: this.state.version
-          });
-        }
 
-      } else if (this.firebaseState && this.firebaseState && this.firebaseState.version > this.state.version) {
+      if (source == 'store') {
+        if (this.state.version <= (this.firebaseState.version || 0)) return;
+        console.log('sync store', this.state.version, this.firebaseState.version);
+        var updates = { version: this.state.version };
+        var stateKeys = this.state.timers.map(function (timer) {
+          return timer.$key;
+        });
+        var firebaseKeys = Object.keys(this.firebaseState.timers || {});
+        var toRemove = _.difference(firebaseKeys, stateKeys);
+
+        toRemove.forEach(function (key) {
+          updates['timers/' + key] = null;
+        });
+
+        this.state.timers.map(function (t) {
+          timer = _.clone(t);
+          if (timer.tags && Array.isArray(timer.tags) && timer.tags.length) {
+            timer.tags = timer.tags.reduce(function (tags, tag) {
+              return tags[tag.$key] = tag.value, tags;
+            }, {});
+          } else {
+            delete timer.tags;
+          }
+          if (timer.flatTags && !timer.flatTags.length) delete timer.flatTags;
+          return timer;
+        }).filter(function (timer) {
+          if (!timer.owned) return false;
+          if (!this.firebaseState.timers) return true;
+          if (!this.firebaseState.timers[timer.$key]) return true;
+          if (this.firebaseState.timers[timer.$key].updated == timer.updated) return false;
+          return true;
+        }.bind(this)).forEach(function (timer) {
+          updates['timers/' + timer.$key] = _.omit(timer, ['$key']);
+        });
+
+        this.stateRef.update(updates);
+      } else if (source == 'firebase') {
+        if (!this.firebaseState.version) return;
+        if (this.state.version >= this.firebaseState.version) return;
+        console.log('sync firebase', this.state.version, this.firebaseState.version);
         var timers = [];
         var timer;
 
@@ -103,9 +117,9 @@
         });
       }
     },
-
+    
     syncTags: function (firebase, model) {
-      if (!firebase || !model) return;
+      if (!firebase || !model || this.tagsHandler) return;
 
       this.tagsHandler = firebase.database().ref(model.public.tags).on('value', function (snap) {
         var tags = [];
@@ -115,9 +129,26 @@
             value: tagSnap.val()
           });
         });
+        var DefaultTagValue = '.Default'
+        var defaultTags = tags.filter(function (tag) {
+          return tag.value == DefaultTagValue;
+        });
+
+        if (!defaultTags.length) {
+          var defaultTag = {
+            $key: snap.ref.push().key,
+            value: DefaultTagValue
+          };
+
+          tags.push(defaultTag);
+          snap.ref.child(defaultTag.$key).set(defaultTag.value);
+        }
+
         this.dispatch({
           type: 'updateTags',
-          tags: tags
+          tags: tags.sort(function (a, b) {
+            return a.value > b.value;
+          })
         });
       }.bind(this));
     }

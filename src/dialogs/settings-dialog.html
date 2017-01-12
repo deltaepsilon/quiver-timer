@@ -31,7 +31,9 @@
 
 <paper-dialog id="dialog" with-backdrop always-on-top="false">
   <form id="form" is="iron-form">
-
+    <paper-item>
+      <span>[[email]]</span>
+    </paper-item>
     <paper-item>
       <paper-toggle-button checked="{{settings.flash}}">Flash Alerts</paper-toggle-button>
     </paper-item>
@@ -64,6 +66,11 @@
 
     properties: {
       settings: Object,
+      account: Object,
+      email: {
+        type: String,
+        computed: '_email(account)'
+      },
       disabled: {
         type: Boolean,
         computed: '_disabled(settings.sound)'
@@ -82,6 +89,10 @@
 
     _disabled: function (sound) {
       return !sound;
+    },
+
+    _email: function(account) {
+      return account.email || 'Guest Mode';
     },
 
     // Functions

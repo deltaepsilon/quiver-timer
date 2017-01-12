@@ -31,5 +31,5 @@ path /timer/{environment}/admin {
 }
 
 path /timer/{environment}/admin/search/timers {
-  index() {["md5Hash"]}
+  index() {["md5Hash", "uid"]}
 }

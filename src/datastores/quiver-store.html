@@ -39,8 +39,8 @@
     return TimerDefaults.timers.map(function (timer) {
       timer.$key = getPushKey();
       timer.updated = Date.now();
-      timer.private = true;
-      timer.owned = false;
+      timer.private = false;
+      timer.owned = true;
       return timer;
     });
   };
@@ -95,7 +95,7 @@
 
         timer.flatTags = timer.tags.map(function(tag) {
           return tag.value;
-        }).join(',');
+        });
 
         // timer.tags = timer.tags.reduce(function(tags, tag) {
         //   return tags[tag.$key] = tag.value, tags;
@@ -199,7 +199,17 @@
         state.tags = action.tags;
         break;
       case 'updateEditingTags':
-        state.editing.tags = action.value || [];
+        if (typeof action.value == 'object' && !Array.isArray(action.value)) {
+          state.editing.tags = [];
+          for (var key in action.value) {
+            state.editing.tags.push({
+              $key: key,
+              value: action.value[key]
+            });
+          }
+        } else {
+          state.editing.tags = action.value || [];
+        }
         break;
       case 'toggleTag':
         var tag = state.tags.find(function (tag) {
@@ -215,13 +225,13 @@
           });
         }
         break;
-      case 'updateDefault':
-        if (action.value) {
-          state.editing.default = true;
-        } else {
-          delete state.editing.default;
-        }
-        break;
+      // case 'updateDefault':
+      //   if (action.value) {
+      //     state.editing.default = true;
+      //   } else {
+      //     delete state.editing.default;
+      //   }
+      //   break;
     }
 
     switch (action.type) {

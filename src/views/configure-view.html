@@ -51,7 +51,7 @@
 <div class="layout horizontal justified wrap" style="padding: 1rem .5rem;">
   <div class="layout vertical">
     <paper-toggle-button id="private" checked="{{private}}" hidden$="[[!isOwned]]">Make Private</paper-toggle-button>
-    <paper-toggle-button id="default" hidden$="[[!account.isAdmin]]" on-checked-changed="toggleDefault">Make Default</paper-toggle-button>
+    <!--<paper-toggle-button id="default" hidden$="[[!account.isAdmin]]" on-checked-changed="toggleDefault">Make Default</paper-toggle-button>-->
   </div>
   <div id="tagsWrapper" class="layout vertical" hidden$="[[!account.isAdmin]]">
     <template is="dom-repeat" items="[[tags]]" as="tag">
@@ -119,10 +119,10 @@
         type: Boolean,
         statePath: 'editing.private'
       },
-      default: {
-        type: Boolean,
-        statePath: 'editing.default'
-      },
+      // default: {
+      //   type: Boolean,
+      //   statePath: 'editing.default'
+      // },
       owned: {
         type: Boolean,
         statePath: 'editing.owned'
@@ -249,7 +249,7 @@
     observers: [
       '_setEditing(ready, routeData.timerKey)',
       '_private(ready, private)',
-      '_default(ready, default)',
+      // '_default(ready, default)',
       '_tags(ready, editing.tags)'
     ],
 
@@ -264,7 +264,7 @@
           this.dispatch('updateValue', 'updateOwned', timer.owned || false);
           this.dispatch('updateValue', 'updatePrivate', timer.private);
           this.dispatch('updateValue', 'updateEditingTags', timer.tags);
-          this.dispatch('updateValue', 'updateDefault', timer.default);
+          // this.dispatch('updateValue', 'updateDefault', timer.default);
         }.bind(this));
       }
     },
@@ -277,14 +277,14 @@
       }
     },
 
-    _default: function (ready, isDefault) {
-      var checked = this.$.default.checked;
-      if (isDefault && !checked) {
-        this.$.default.setAttribute('checked', true);
-      } else if (!isDefault && checked) {
-        this.$.default.removeAttribute('checked', true);
-      }
-    },
+    // _default: function (ready, isDefault) {
+    //   var checked = this.$.default.checked;
+    //   if (isDefault && !checked) {
+    //     this.$.default.setAttribute('checked', true);
+    //   } else if (!isDefault && checked) {
+    //     this.$.default.removeAttribute('checked', true);
+    //   }
+    // },
 
     _tags: function (ready, tags) {
       var keys = !tags || !Array.isArray(tags) ? Object.keys(tags || {}) : tags.map(function (tag) {
@@ -459,11 +459,11 @@
       this.dispatch('toggleTag', e.target.getAttribute('key'), e.target.checked);
     },
 
-    toggleDefault: function (e) {
-      if (!this.ready) return;
-      console.log('toggle default', e.target.checked);
-      this.dispatch('updateValue', 'updateDefault', e.target.checked);
-    }
+    // toggleDefault: function (e) {
+    //   if (!this.ready) return;
+    //   console.log('toggle default', e.target.checked);
+    //   this.dispatch('updateValue', 'updateDefault', e.target.checked);
+    // }
 
   });
 </script>
