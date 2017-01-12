@@ -1,0 +1,166 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/marked-element/marked-element.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/iron-icons/av-icons.html">
+
+
+<link rel="import" href="../datastores/quiver-store-behavior.html">
+<link rel="import" href="../shared-styles.html">
+
+<script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearchLite.min.js"></script>
+
+<dom-module id="timer-search">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        /*--paper-input-container-color: var(--color-rich-black);
+        --paper-input-container-focus-color: var(--color-metallic-seaweed);
+        --paper-input-container-input-color: var(--color-rich-black);*/
+      }
+
+      paper-icon-item {
+        padding: 0;
+      }
+
+      #search-wrapper {
+        padding: 0 1rem;
+        position: relative;
+      }
+
+      #search-wrapper paper-icon-button {
+        position: absolute;
+        right: 3px;
+        bottom: 4px;
+        display: none;
+      }
+
+      #search-wrapper[show-clear] paper-icon-button {
+        display: inherit;
+      }
+    </style>
+
+<div id="search-wrapper" class="layout horizontal center" show-clear$="[[showClear]]">
+  <paper-input class="flex" label="Search" value="{{searchTerm}}" type="text"></paper-input>
+  <paper-icon-button icon="clear" on-click="clear"></paper-icon-button>
+</div>
+
+<paper-material class="list" elevation="1">
+  <!--<h3>Search Timers</h3>-->
+
+
+  <div id="searchList">
+    <template is="dom-repeat" items="[[hits]]" as="timer">
+      <paper-icon-item>
+        <div class="flex layout horizontal center-justified" item-icon>
+          <paper-icon-button icon="av:library-add" on-click="addTimer" key$="[[timer.$key]]"></paper-icon-button>
+        </div>
+        <paper-item-body>
+          <div>
+            <strong>[[timer.name]]</strong>
+          </div>
+          <!--<div secondary>
+            <marked-element markdown="[[timer.description]]"></marked-element>
+          </div>-->
+        </paper-item-body>
+      </paper-icon-item>
+    </template>
+  </div>
+
+</paper-material>
+</template>
+<script>
+  Polymer({
+    is: "timer-search",
+
+    behaviors: [QuiverStoreBehavior],
+
+    properties: {
+      env: Object,
+      email: {
+        type: String,
+        value: ''
+      },
+      client: {
+        type: Object,
+        computed: '_client(env.algolia)'
+      },
+      index: {
+        type: Object,
+        computed: '_index(env.algolia.indexPrefix, env.environment, client)'
+      },
+      searchTerm: {
+        type: String,
+        value: '',
+        notify: true
+      },
+      showClear: {
+        type: Boolean,
+        computed: '_showClear(searchTerm)'
+      },
+      hits: {
+        type: Array,
+        value: []
+      },
+      hitsPerPage: Number,
+      hitsCount: Number,
+      pageCount: Number,
+      page: Number
+    },
+
+    // Observers 
+    observers: [
+      'search(searchTerm, email, index)'
+    ],
+
+    _client: function (algoliaConfig) {
+      return algoliasearch(algoliaConfig.applicationID, algoliaConfig.searchAPIKey);
+    },
+
+    _index: function (prefix, environment, client) {
+      return client.initIndex([prefix, environment, 'timers'].join(':'));
+    },
+
+    _showClear: function (searchTerm) {
+      return !!searchTerm;
+    },
+
+    // Functions
+    search: function (searchTerm, email, index) {
+      if (!searchTerm || !searchTerm.length) {
+        this.splice('hits', 0, this.hits.length);
+        this.hitsPerPage = 0;
+        this.hitsCount = 0;
+        this.pageCount = 0;
+        this.page = 0;
+      } else {
+        index.search(searchTerm, {
+          facets: 'email',
+          filters: 'NOT email:' + email
+        }, function (err, content) {
+          if (err) {
+            console.log('Algolia search error', err);
+            return this.fire('error', err);
+          }
+          this.splice.apply(this, ['hits', 0, this.hits.length].concat(content.hits));
+          this.hitsPerPage = content.hitsPerPage;
+          this.hitsCount = content.nbHits;
+          this.pageCount = content.nbPage;
+          this.page = content.page;
+          console.log('results', err, content);
+        }.bind(this));
+      }
+    },
+
+    clear: function () {
+      this.searchTerm = '';
+    }
+  });
+</script>
+</dom-module>

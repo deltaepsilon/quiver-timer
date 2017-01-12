@@ -12,7 +12,6 @@ module.exports = function (e) {
     algolia: env.algolia
   }, indexName);
 
-
   if (!timer) {
     return firebaseSearch.algolia.exists()
       .then(function (exists) {
@@ -49,7 +48,14 @@ module.exports = function (e) {
         if (_.isEqual(record, searchTimer)) return true;
         return firebaseSearch.algolia.saveObject(searchTimer);
       })
-      .catch(function () {
+      .catch(function() {
+        return firebaseSearch.algolia.setSettings({
+          searchableAttributes: ['displayName', 'email', 'flatTags', 'name', 'description'],
+          attributesForFaceting: ['email', 'flatTags'],
+          customRanking: ['asc(name)', 'asc(email)', 'asc(description)',]
+        });
+      })
+      .then(function() {
         return firebaseSearch.algolia.addObject(searchTimer);
       });
   }

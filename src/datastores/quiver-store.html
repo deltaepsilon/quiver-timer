@@ -36,13 +36,15 @@
   };
 
   function getDefaultTimers() {
-    return TimerDefaults.timers.map(function (timer) {
-      timer.$key = getPushKey();
-      timer.updated = Date.now();
-      timer.private = false;
-      timer.owned = true;
-      return timer;
-    });
+    // return TimerDefaults.timers.map(function (timer) {
+    //   timer.$key = getPushKey();
+    //   timer.updated = Date.now();
+    //   timer.private = false;
+    //   timer.owned = true;
+    //   return timer;
+    // });
+    console.info('repalce getDefaultTimers. Returning empty array');
+    return [];
   };
 
   var QuiverStore = Redux.createStore(function (state, action) {
@@ -59,8 +61,15 @@
     }
 
     state = _.cloneDeep(state);
-    console.log('action.type', action.type);
+
+    // console.log('action.type', action.type);
+
     switch (action.type) {
+      case 'clearState':
+        var newState = _.cloneDeep(QuiverStoreDefaults.state);
+        newState.connected = state.connected;
+        state = newState;
+        break;
       case 'pathname':
         // Reset editing defaults between editing and creating, but not across reloads or editing to editing/creating to creating
         if (state.pathname.match(/configure\/(\d)/) && !action.pathname.match(/configure/)) {
@@ -225,13 +234,6 @@
           });
         }
         break;
-      // case 'updateDefault':
-      //   if (action.value) {
-      //     state.editing.default = true;
-      //   } else {
-      //     delete state.editing.default;
-      //   }
-      //   break;
     }
 
     switch (action.type) {

@@ -44,11 +44,11 @@
     ],
 
     _startSync: function (connected, model, account) {
-      if (this.stateHandler && this.stateRef && (!account || account.isAnonymous || !connected)) {
+      if (this.stateHandler && this.stateRef && (!account || account.isAnonymous ||!connected)) {
         this.stateRef.off('value', this.stateHandler);
         this.stateRef = undefined;
         this.stateHandler = undefined;
-      } else if (!this.stateHandler && !this.stateRef && connected && account.uid && !account.isAnonymous) {
+      } else if (!this.stateHandler && !this.stateRef && account && account.uid && !account.isAnonymous && connected) {
         this.stateRef = this.firebase.database().ref(this.replaceWildcard(model.user.owned.state, 'uid', account.uid));
         this.stateHandler = this.stateRef.on('value', function (snap) {
           this.firebaseState = snap.val() || false;
@@ -59,7 +59,6 @@
 
     sync: function (source) {
       if (!this.connected || !this.stateRef || (!this.firebaseState && this.firebaseState !== false)) return;
-
 
       if (source == 'store') {
         if (this.state.version <= (this.firebaseState.version || 0)) return;

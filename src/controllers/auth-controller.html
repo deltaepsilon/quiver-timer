@@ -98,6 +98,8 @@
     _redirect: function (connected, user, page, loginPages) {
       if (connected && !user && !!~loginPages.indexOf(page)) {
         this.fire('redirect', '/login');
+      } else if (user && page == 'login') {
+        this.fire('redirect', '/timers');
       }
     },
 
@@ -134,8 +136,10 @@
           console.log('err', err);
           if (err.code == 'auth/account-exists-with-different-credential') {
             this.fire('error', 'Account already exists with this email. Try other login method.');
+          } else if (err.code == 'auth/internal-error') {
+            this.fire('log', err);
           } else {
-            this.fire('error', err.toString());
+            this.fire('error', err);
           }
         }.bind(this));
     },
@@ -147,7 +151,7 @@
           this.fire('alert', 'Email sent. Reload page after verification.');
         }.bind(this))
         .catch(function(err) {
-          this.fire('error', err.toString());
+          this.fire('error', err);
         }.bind(this));
     }
   });

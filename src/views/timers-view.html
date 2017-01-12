@@ -15,9 +15,12 @@
 <link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../timer-behavior/timer-defaults.html">
 <link rel="import" href="../datastores/quiver-store-behavior.html">
+<link rel="import" href="../search/timer-search.html">
 <link rel="import" href="../shared-styles.html">
 
+<script src="../../bower_components/fuse.js/src/fuse.min.js"></script>
 <script src="../third-party/lodash.custom.min.js"></script>
+
 
 <dom-module id="timers-view">
   <template>
@@ -71,13 +74,21 @@
         text-overflow: ellipsis;
         width: calc(100% - 3.2rem);
       }
+
+      .show-filtered {
+        display: none;
+      }
+
+      [filtered] .show-filtered {
+        display: inherit;
+      }
     </style>
 
 <a id="add" href="/configure/new">
   <paper-fab icon="add"></paper-fab>
 </a>
 
-
+<timer-search id="timerSearch" env="[[env]]" email="[[account.email]]" search-term="{{searchTerm}}"></timer-search>
 
 <template is="dom-if" if="[[!account]]">
   <paper-toolbar class="layout horizontal center-justified">
@@ -92,8 +103,11 @@
 </template>
 
 <template is="dom-if" if="[[timers.length]]">
-  <paper-material class="list" elevation="1">
-    <template is="dom-repeat" items="[[timers]]" as="timer">
+  <paper-material class="list" elevation="1" filtered$="[[filtered]]">
+    <div class="layout horizontal center-justified">
+      <paper-button class="show-filtered" on-click="clearSearchTerm">show all</paper-button>
+    </div>
+    <template is="dom-repeat" items="[[filteredTimers]]" as="timer">
       <div>
         <paper-icon-item two-line style="padding: 0;">
 <a class="flex layout horizontal center-justified" href="/timer/[[index]]/stopped" item-icon>
@@ -140,6 +154,7 @@
     behaviors: [TimerDefaults, QuiverStoreBehavior],
 
     properties: {
+      env: Object,
       account: {
         type: Object,
         value: false
@@ -148,6 +163,10 @@
         type: Array,
         value: []
       },
+      filteredTimers: {
+        type: Array,
+        computed: '_filteredTimers(searchTerm, timers, fuse)'
+      },
       ready: {
         type: Boolean,
         value: false
@@ -155,30 +174,42 @@
       showVerifyEmail: {
         type: Boolean,
         computed: '_showVerifyEmail(user.isAnonymous, user.emailVerified)'
+      },
+      searchTerm: String,
+      fuse: {
+        type: Object,
+        computed: '_fuse(timers)'
+      },
+      filtered: {
+        type: Boolean,
+        value: false
       }
     },
 
-    attached: function() {
+    attached: function () {
       this.ready = true;
     },
 
     // Observers
-    // observers: [
-    //   '_restoreDefaults(ready)'
-    // ],
-
-    // _restoreDefaults: function (ready) {
-    //   if (ready && this.timers && !this.timers.length) {
-    //     this.restoreDefaults();
-    //   }
-    // },
-
-    _timers: function (timers) {
-      return timers ? timers.slice(0) : [];
+    _showVerifyEmail: function (isAnonymous, emailVerified) {
+      return !isAnonymous && !emailVerified;
     },
 
-    _showVerifyEmail: function(isAnonymous, emailVerified) {
-      return !isAnonymous && !emailVerified;
+    _fuse: function (timers) {
+      return new Fuse(timers, {
+        shouldSort: true,
+        keys: ['name', 'description', 'flatTags']
+      });
+    },
+
+    _filteredTimers: function (searchTerm, timers, fuse) {
+      if (!searchTerm || !searchTerm.length) {
+        this.filtered = false;
+        return timers;
+      } else {
+        this.filtered = true;
+        return fuse.search(searchTerm);
+      }
     },
 
     // Functions
@@ -206,8 +237,12 @@
       this.fire('verifyEmail');
     },
 
-    guestModeDialog: function() {
-     this.fire('openDialog', {id: 'guestModeDialog'}) 
+    guestModeDialog: function () {
+      this.fire('openDialog', { id: 'guestModeDialog' })
+    },
+
+    clearSearchTerm: function () {
+      this.$.timerSearch.clear();
     }
   });
 </script>

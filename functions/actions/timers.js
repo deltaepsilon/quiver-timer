@@ -37,7 +37,7 @@ module.exports = function (e) {
       return searchRef.parent.orderByChild('md5Hash').equalTo(timer.md5Hash).once('value');
     })
     .then(function(snap) {
-      // if (snap.val() && !~Object.keys(snap.val()).indexOf(key)) return true; // Skip records with matching hashes
+      if (snap.val() && !~Object.keys(snap.val()).indexOf(key)) return true; // Skip records with matching hashes
       console.log('set', timer.name, key);
       return searchRef.set(_.omit(timer, ['owned', 'private']));
     })

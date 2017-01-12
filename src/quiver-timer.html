@@ -142,7 +142,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <iron-pages id="ironPages" selected="[[page]]" attr-for-selected="name" fallback-selection="fourohfour" role="main">
     <landing-view id="landingView" name="landing"></landing-view>
     <login-view id="loginView" name="login" pathname="[[pathname]]" user="[[user]]"></login-view>
-    <timers-view id="timersView" name="timers" timers="[[timers]]" account="[[account]]"></timers-view>
+    <timers-view id="timersView" name="timers" timers="[[timers]]" account="[[account]]" env="[[env]]"></timers-view>
     <timer-view id="timerView" name="timer" timers="[[timers]]" local-route="[[subroute]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]" casting="[[casting]]"></timer-view>
     <configure-view id="configureView" name="configure" account="[[account]]" timers="[[timers]]" local-route="[[subroute]]" on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
     <cast-view id="castView" name="cast" firebase="[[firebase]]" cast-endpoint="[[castEndpoint]]"></cast-view>
@@ -277,7 +277,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     ],
 
     _connected: function (firebase) {
-      firebase.database().ref().child('.info/connected').on('value', function (snap) {
+      this.connectedHandler = firebase.database().ref().child('.info/connected').on('value', function (snap) {
         this.dispatch({
           type: 'setConnected',
           connected: snap.val()
@@ -327,6 +327,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       openSettings: 'openSettings',
       alert: '_alert',
       error: '_error',
+      log: '_log',
       restoreDefaults: 'restoreDefaults',
       verifyEmail: 'verifyEmail',
       Space: '_space',
@@ -399,6 +400,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     _logout: function () {
       this.$.authController.logout();
+      this.dispatch({
+        type: 'clearState'
+      });
     },
 
     _alert: function (e) {
@@ -407,6 +411,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     _error: function (e) {
       this.alert(e.detail.toString(), 5000);
+    },
+
+    _log: function (e) {
+      console.warn('must start logging these', e.detail.toString());
     },
 
     _space: function(e) {
