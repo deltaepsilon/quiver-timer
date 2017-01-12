@@ -7,7 +7,7 @@ module.exports = function (e) {
   var timer = e.data.val();
   var key = e.data.key;
   var timersRef = e.data.ref.parent;
-  var indexName = 'quiver-timer:timers';
+  var indexName = 'quiver-timer:' + process.env.NODE_ENV + ':timers';
   var firebaseSearch = new FirebaseSearch(timersRef, {
     algolia: env.algolia
   }, indexName);
@@ -28,7 +28,7 @@ module.exports = function (e) {
         return firebaseSearch.algolia.deleteObject(key);
       });
   } else {
-    var searchTimer = _.omit(timer, ['periods', 'uid', 'totalSeconds', 'updated', 'md5Hash']);
+    var searchTimer = _.omit(timer, ['periods', 'uid', 'tags', 'totalSeconds', 'updated', 'md5Hash']);
     searchTimer.objectID = key;
     searchTimer.minutes = Math.floor(timer.totalSeconds / 60);
     searchTimer.seconds = Math.round(timer.totalSeconds / 60 % 1 * 60);
