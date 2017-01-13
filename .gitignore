@@ -4,5 +4,6 @@ node_modules/
 
 .firebaserc
 .DS_Store
-*.json
+env.*
 *.log
+.vscode

@@ -1,0 +1,29 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/quiver-timer.html",
+  "fragments": [
+    "src/views/cast-view.html",
+    "src/views/configure-view.html",
+    "src/views/fourohfour-view.html",
+    "src/views/landing-view.html",
+    "src/views/login-view.html",
+    "src/views/timer-view.html",
+    "src/views/timers-view.html"
+  ],
+  "sourceGlobs": [
+   "src/**/*",
+   "images/**/*",
+   "sounds/**/*",
+   "bower.json"
+  ],
+  "includeDependencies": [
+    "env.client.json",
+    "manifest.json",
+    "cast.html",
+    "bower_components/webcomponentsjs/webcomponents-lite.min.js",
+    "bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror-worker.js",
+    "bower_components/app-storage/app-indexeddb-mirror/common-worker-scope.js",
+    "bower_components/d3/d3.min.js",
+    "bower_components/timer.js/dist/timer.min.js"
+  ]
+}

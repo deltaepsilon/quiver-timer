@@ -1,0 +1,39 @@
+{
+  "name": "quiver-timer",
+  "version": "1.0.0",
+  "description": "A timer app",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "polymer test",
+    "build": "node build",
+    "serve-tests": "http-server",
+    "deploy": "polymer build && node build && firebase deploy",
+    "serve": "polymer serve -p 8081",
+    "server": "cd functions && nodemon runner.js",
+    "refresh-credentials": "gcloud auth application-default login",
+    "deploy-hosting": "polymer build && firebase deploy --only hosting",
+    "lodash": "cd src/third-party && lodash exports=global include=debounce,pick,omit,merge,clone,isEqual,cloneDeep,toArray,difference"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deltaepsilon/quiver-timer.git"
+  },
+  "keywords": [
+    "quiver",
+    "timer",
+    "polymer",
+    "firebase"
+  ],
+  "author": "Chris Esplin <chris@quiver.is>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/deltaepsilon/quiver-timer/issues"
+  },
+  "homepage": "https://github.com/deltaepsilon/quiver-timer#readme",
+  "devDependencies": {
+    "firebase-tools": "^3.2.1"
+  }
+}

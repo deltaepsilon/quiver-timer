@@ -1,0 +1,22 @@
+{
+  "database": {
+    "rules": "database.rules.bolt"
+  },
+  "hosting": {
+    "public": "build/unbundled",
+    "rewrites": [
+      {
+        "source": "/__/auth/action",
+        "destination": "/__/auth/action"
+      },
+      {
+        "source": "/__/auth/handler",
+        "destination": "/__/auth/handler"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
