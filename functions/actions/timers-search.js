@@ -27,10 +27,10 @@ module.exports = function (e) {
         return firebaseSearch.algolia.deleteObject(key);
       });
   } else {
-    var searchTimer = _.omit(timer, ['periods', 'uid', 'tags', 'totalSeconds', 'updated', 'md5Hash']);
+    var searchTimer = _.omit(timer, ['tags', 'md5Hash']);
     searchTimer.objectID = key;
-    searchTimer.minutes = Math.floor(timer.totalSeconds / 60);
-    searchTimer.seconds = Math.round(timer.totalSeconds / 60 % 1 * 60);
+    // searchTimer.minutes = Math.floor(timer.totalSeconds / 60);
+    // searchTimer.seconds = Math.round(timer.totalSeconds / 60 % 1 * 60);
 
     return firebaseSearch.algolia.exists()
       .then(function (exists) {
@@ -50,8 +50,8 @@ module.exports = function (e) {
       })
       .catch(function() {
         return firebaseSearch.algolia.setSettings({
-          searchableAttributes: ['displayName', 'email', 'flatTags', 'name', 'description'],
-          attributesForFaceting: ['email', 'flatTags'],
+          searchableAttributes: ['displayName', 'email', '_tags', 'name', 'description'],
+          attributesForFaceting: ['email', '_tags'],
           customRanking: ['asc(name)', 'asc(email)', 'asc(description)',]
         });
       })

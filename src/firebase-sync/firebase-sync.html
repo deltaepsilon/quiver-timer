@@ -44,7 +44,7 @@
     ],
 
     _startSync: function (connected, model, account) {
-      if (this.stateHandler && this.stateRef && (!account || account.isAnonymous ||!connected)) {
+      if (this.stateHandler && this.stateRef && (!account || account.isAnonymous || !connected)) {
         this.stateRef.off('value', this.stateHandler);
         this.stateRef = undefined;
         this.stateHandler = undefined;
@@ -65,7 +65,7 @@
         console.log('sync store', this.state.version, this.firebaseState.version);
         var updates = { version: this.state.version };
         var stateKeys = this.state.timers.map(function (timer) {
-          return timer.$key;
+          return typeof timer == 'string' ? timer : timer.$key;
         });
         var firebaseKeys = Object.keys(this.firebaseState.timers || {});
         var toRemove = _.difference(firebaseKeys, stateKeys);
@@ -75,6 +75,8 @@
         });
 
         this.state.timers.map(function (t) {
+          if (!t.owned) return t.$key;
+
           timer = _.clone(t);
           if (timer.tags && Array.isArray(timer.tags) && timer.tags.length) {
             timer.tags = timer.tags.reduce(function (tags, tag) {
@@ -83,16 +85,21 @@
           } else {
             delete timer.tags;
           }
-          if (timer.flatTags && !timer.flatTags.length) delete timer.flatTags;
+          if (timer._tags && !timer._tags.length) delete timer._tags;
           return timer;
         }).filter(function (timer) {
+          if (typeof timer == 'string') return true;
           if (!timer.owned) return false;
           if (!this.firebaseState.timers) return true;
           if (!this.firebaseState.timers[timer.$key]) return true;
           if (this.firebaseState.timers[timer.$key].updated == timer.updated) return false;
           return true;
         }.bind(this)).forEach(function (timer) {
-          updates['timers/' + timer.$key] = _.omit(timer, ['$key']);
+          if (typeof timer == 'string') {
+            updates['timers/' + timer] = true;
+          } else {
+            updates['timers/' + timer.$key] = _.omit(timer, ['$key']);
+          }
         });
 
         this.stateRef.update(updates);
@@ -100,23 +107,38 @@
         if (!this.firebaseState.version) return;
         if (this.state.version >= this.firebaseState.version) return;
         console.log('sync firebase', this.state.version, this.firebaseState.version);
+        var searchRef = this.stateRef.root.child(this.model.admin.search.timers);
+        var promises = [];
         var timers = [];
         var timer;
 
         for (var key in this.firebaseState.timers) {
           timer = this.firebaseState.timers[key];
-          timer.$key = key;
-          timers.push(timer);
+          if (typeof timer == 'boolean') {
+            promises.push(searchRef.child(key).once('value')
+              .then(function (snap) {
+                var timer = snap.val();
+                timer.$key = timer.objectID;
+                delete timer.objectID;
+                timers.push(timer);
+              }));
+          } else {
+            timer.$key = key;
+            timers.push(timer);
+          }
         }
 
-        this.dispatch({
-          type: 'setTimers',
-          timers: timers,
-          version: this.firebaseState.version
-        });
+        Promise.all(promises)
+          .then(function () {
+            this.dispatch({
+              type: 'setTimers',
+              timers: timers,
+              version: this.firebaseState.version
+            });
+          }.bind(this));
       }
     },
-    
+
     syncTags: function (firebase, model) {
       if (!firebase || !model || this.tagsHandler) return;
 

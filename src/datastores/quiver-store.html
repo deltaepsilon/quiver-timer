@@ -102,7 +102,7 @@
 
         if (timer.description == QuiverStoreDefaults.state.editing.description) delete timer.description;
 
-        timer.flatTags = timer.tags.map(function(tag) {
+        timer._tags = timer.tags.map(function(tag) {
           return tag.value;
         });
 
@@ -234,6 +234,13 @@
           });
         }
         break;
+      case 'addTimers':
+        state.timers = _.uniqBy(state.timers.concat(action.timers), '$key');
+        break;
+      case 'addTimer':
+        state.timers.push(action.timer)
+        state.timers = _.uniqBy(state.timers, '$key');
+        break;
     }
 
     switch (action.type) {
@@ -242,6 +249,7 @@
       case 'deleteTimer':
       case 'duplicateTimer':
       case 'restoreDefaults':
+      case 'addTimers':
         state.version = Date.now();
         break;
     }
@@ -251,7 +259,8 @@
       case 'updateTimer':
       case 'deleteTimer':
       case 'duplicateTimer':
-      case 'restoreDefaults':
+      case 'addTimers':
+      case 'addTimer':
         state.timers = state.timers.sort(function(a, b) {
           return a.name > b.name;
         });

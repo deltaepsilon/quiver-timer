@@ -1,7 +1,7 @@
 /**
  * @license
  * Lodash (Custom Build) <https://lodash.com/>
- * Build: `lodash exports="global" include="debounce,pick,omit,merge,clone,isEqual,cloneDeep,toArray,difference"`
+ * Build: `lodash exports="global" include="debounce,pick,omit,merge,clone,isEqual,cloneDeep,toArray,difference,uniqBy"`
  * Copyright JS Foundation and other contributors <https://js.foundation/>
  * Released under MIT license <https://lodash.com/license>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -486,6 +486,19 @@
    */
   function baseIsNaN(value) {
     return value !== value;
+  }
+
+  /**
+   * The base implementation of `_.property` without support for deep paths.
+   *
+   * @private
+   * @param {string} key The key of the property to get.
+   * @returns {Function} Returns the new accessor function.
+   */
+  function baseProperty(key) {
+    return function(object) {
+      return object == null ? undefined : object[key];
+    };
   }
 
   /**
@@ -1878,6 +1891,60 @@
   }
 
   /**
+   * The base implementation of `_.isMatch` without support for iteratee shorthands.
+   *
+   * @private
+   * @param {Object} object The object to inspect.
+   * @param {Object} source The object of property values to match.
+   * @param {Array} matchData The property names, values, and compare flags to match.
+   * @param {Function} [customizer] The function to customize comparisons.
+   * @returns {boolean} Returns `true` if `object` is a match, else `false`.
+   */
+  function baseIsMatch(object, source, matchData, customizer) {
+    var index = matchData.length,
+        length = index,
+        noCustomizer = !customizer;
+
+    if (object == null) {
+      return !length;
+    }
+    object = Object(object);
+    while (index--) {
+      var data = matchData[index];
+      if ((noCustomizer && data[2])
+            ? data[1] !== object[data[0]]
+            : !(data[0] in object)
+          ) {
+        return false;
+      }
+    }
+    while (++index < length) {
+      data = matchData[index];
+      var key = data[0],
+          objValue = object[key],
+          srcValue = data[1];
+
+      if (noCustomizer && data[2]) {
+        if (objValue === undefined && !(key in object)) {
+          return false;
+        }
+      } else {
+        var stack = new Stack;
+        if (customizer) {
+          var result = customizer(objValue, srcValue, key, object, source, stack);
+        }
+        if (!(result === undefined
+              ? baseIsEqual(srcValue, objValue, COMPARE_PARTIAL_FLAG | COMPARE_UNORDERED_FLAG, customizer, stack)
+              : result
+            )) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  /**
    * The base implementation of `_.isNative` without bad shim checks.
    *
    * @private
@@ -1903,6 +1970,30 @@
   function baseIsTypedArray(value) {
     return isObjectLike(value) &&
       isLength(value.length) && !!typedArrayTags[baseGetTag(value)];
+  }
+
+  /**
+   * The base implementation of `_.iteratee`.
+   *
+   * @private
+   * @param {*} [value=_.identity] The value to convert to an iteratee.
+   * @returns {Function} Returns the iteratee.
+   */
+  function baseIteratee(value) {
+    // Don't store the `typeof` result in a variable to avoid a JIT bug in Safari 9.
+    // See https://bugs.webkit.org/show_bug.cgi?id=156034 for more details.
+    if (typeof value == 'function') {
+      return value;
+    }
+    if (value == null) {
+      return identity;
+    }
+    if (typeof value == 'object') {
+      return isArray(value)
+        ? baseMatchesProperty(value[0], value[1])
+        : baseMatches(value);
+    }
+    return property(value);
   }
 
   /**
@@ -1945,6 +2036,43 @@
       }
     }
     return result;
+  }
+
+  /**
+   * The base implementation of `_.matches` which doesn't clone `source`.
+   *
+   * @private
+   * @param {Object} source The object of property values to match.
+   * @returns {Function} Returns the new spec function.
+   */
+  function baseMatches(source) {
+    var matchData = getMatchData(source);
+    if (matchData.length == 1 && matchData[0][2]) {
+      return matchesStrictComparable(matchData[0][0], matchData[0][1]);
+    }
+    return function(object) {
+      return object === source || baseIsMatch(object, source, matchData);
+    };
+  }
+
+  /**
+   * The base implementation of `_.matchesProperty` which doesn't clone `srcValue`.
+   *
+   * @private
+   * @param {string} path The path of the property to get.
+   * @param {*} srcValue The value to match.
+   * @returns {Function} Returns the new spec function.
+   */
+  function baseMatchesProperty(path, srcValue) {
+    if (isKey(path) && isStrictComparable(srcValue)) {
+      return matchesStrictComparable(toKey(path), srcValue);
+    }
+    return function(object) {
+      var objValue = get(object, path);
+      return (objValue === undefined && objValue === srcValue)
+        ? hasIn(object, path)
+        : baseIsEqual(srcValue, objValue, COMPARE_PARTIAL_FLAG | COMPARE_UNORDERED_FLAG);
+    };
   }
 
   /**
@@ -2098,6 +2226,19 @@
   }
 
   /**
+   * A specialized version of `baseProperty` which supports deep paths.
+   *
+   * @private
+   * @param {Array|string} path The path of the property to get.
+   * @returns {Function} Returns the new accessor function.
+   */
+  function basePropertyDeep(path) {
+    return function(object) {
+      return baseGet(object, path);
+    };
+  }
+
+  /**
    * The base implementation of `_.rest` which doesn't validate or coerce arguments.
    *
    * @private
@@ -2218,6 +2359,67 @@
     }
     var result = (value + '');
     return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+  }
+
+  /**
+   * The base implementation of `_.uniqBy` without support for iteratee shorthands.
+   *
+   * @private
+   * @param {Array} array The array to inspect.
+   * @param {Function} [iteratee] The iteratee invoked per element.
+   * @param {Function} [comparator] The comparator invoked per element.
+   * @returns {Array} Returns the new duplicate free array.
+   */
+  function baseUniq(array, iteratee, comparator) {
+    var index = -1,
+        includes = arrayIncludes,
+        length = array.length,
+        isCommon = true,
+        result = [],
+        seen = result;
+
+    if (comparator) {
+      isCommon = false;
+      includes = arrayIncludesWith;
+    }
+    else if (length >= LARGE_ARRAY_SIZE) {
+      var set = iteratee ? null : createSet(array);
+      if (set) {
+        return setToArray(set);
+      }
+      isCommon = false;
+      includes = cacheHas;
+      seen = new SetCache;
+    }
+    else {
+      seen = iteratee ? [] : result;
+    }
+    outer:
+    while (++index < length) {
+      var value = array[index],
+          computed = iteratee ? iteratee(value) : value;
+
+      value = (comparator || value !== 0) ? value : 0;
+      if (isCommon && computed === computed) {
+        var seenIndex = seen.length;
+        while (seenIndex--) {
+          if (seen[seenIndex] === computed) {
+            continue outer;
+          }
+        }
+        if (iteratee) {
+          seen.push(computed);
+        }
+        result.push(value);
+      }
+      else if (!includes(seen, computed, comparator)) {
+        if (seen !== result) {
+          seen.push(computed);
+        }
+        result.push(value);
+      }
+    }
+    return result;
   }
 
   /**
@@ -2494,6 +2696,17 @@
       return object;
     };
   }
+
+  /**
+   * Creates a set object of `values`.
+   *
+   * @private
+   * @param {Array} values The values to add to the set.
+   * @returns {Object} Returns the new set.
+   */
+  var createSet = !(Set && (1 / setToArray(new Set([,-0]))[1]) == INFINITY) ? noop : function(values) {
+    return new Set(values);
+  };
 
   /**
    * Used by `_.omit` to customize its `_.cloneDeep` use to only clone plain
@@ -2776,6 +2989,23 @@
   }
 
   /**
+   * Gets the appropriate "iteratee" function. If `_.iteratee` is customized,
+   * this function returns the custom method, otherwise it returns `baseIteratee`.
+   * If arguments are provided, the chosen function is invoked with them and
+   * its result is returned.
+   *
+   * @private
+   * @param {*} [value] The value to convert to an iteratee.
+   * @param {number} [arity] The arity of the created iteratee.
+   * @returns {Function} Returns the chosen function or its result.
+   */
+  function getIteratee() {
+    var result = lodash.iteratee || iteratee;
+    result = result === iteratee ? baseIteratee : result;
+    return arguments.length ? result(arguments[0], arguments[1]) : result;
+  }
+
+  /**
    * Gets the data for `map`.
    *
    * @private
@@ -2788,6 +3018,26 @@
     return isKeyable(key)
       ? data[typeof key == 'string' ? 'string' : 'hash']
       : data.map;
+  }
+
+  /**
+   * Gets the property names, values, and compare flags of `object`.
+   *
+   * @private
+   * @param {Object} object The object to query.
+   * @returns {Array} Returns the match data of `object`.
+   */
+  function getMatchData(object) {
+    var result = keys(object),
+        length = result.length;
+
+    while (length--) {
+      var key = result[length],
+          value = object[key];
+
+      result[length] = [key, value, isStrictComparable(value)];
+    }
+    return result;
   }
 
   /**
@@ -3120,6 +3370,37 @@
   }
 
   /**
+   * Checks if `value` is suitable for strict equality comparisons, i.e. `===`.
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` if suitable for strict
+   *  equality comparisons, else `false`.
+   */
+  function isStrictComparable(value) {
+    return value === value && !isObject(value);
+  }
+
+  /**
+   * A specialized version of `matchesProperty` for source values suitable
+   * for strict equality comparisons, i.e. `===`.
+   *
+   * @private
+   * @param {string} key The key of the property to get.
+   * @param {*} srcValue The value to match.
+   * @returns {Function} Returns the new spec function.
+   */
+  function matchesStrictComparable(key, srcValue) {
+    return function(object) {
+      if (object == null) {
+        return false;
+      }
+      return object[key] === srcValue &&
+        (srcValue !== undefined || (key in Object(object)));
+    };
+  }
+
+  /**
    * A specialized version of `_.memoize` which clears the memoized function's
    * cache when it exceeds `MAX_MEMOIZE_SIZE`.
    *
@@ -3367,6 +3648,33 @@
   function last(array) {
     var length = array == null ? 0 : array.length;
     return length ? array[length - 1] : undefined;
+  }
+
+  /**
+   * This method is like `_.uniq` except that it accepts `iteratee` which is
+   * invoked for each element in `array` to generate the criterion by which
+   * uniqueness is computed. The order of result values is determined by the
+   * order they occur in the array. The iteratee is invoked with one argument:
+   * (value).
+   *
+   * @static
+   * @memberOf _
+   * @since 4.0.0
+   * @category Array
+   * @param {Array} array The array to inspect.
+   * @param {Function} [iteratee=_.identity] The iteratee invoked per element.
+   * @returns {Array} Returns the new duplicate free array.
+   * @example
+   *
+   * _.uniqBy([2.1, 1.2, 2.3], Math.floor);
+   * // => [2.1, 1.2]
+   *
+   * // The `_.property` iteratee shorthand.
+   * _.uniqBy([{ 'x': 1 }, { 'x': 2 }, { 'x': 1 }], 'x');
+   * // => [{ 'x': 1 }, { 'x': 2 }]
+   */
+  function uniqBy(array, iteratee) {
+    return (array && array.length) ? baseUniq(array, getIteratee(iteratee, 2)) : [];
   }
 
   /*------------------------------------------------------------------------*/
@@ -4242,6 +4550,36 @@
   /*------------------------------------------------------------------------*/
 
   /**
+   * Gets the value at `path` of `object`. If the resolved value is
+   * `undefined`, the `defaultValue` is returned in its place.
+   *
+   * @static
+   * @memberOf _
+   * @since 3.7.0
+   * @category Object
+   * @param {Object} object The object to query.
+   * @param {Array|string} path The path of the property to get.
+   * @param {*} [defaultValue] The value returned for `undefined` resolved values.
+   * @returns {*} Returns the resolved value.
+   * @example
+   *
+   * var object = { 'a': [{ 'b': { 'c': 3 } }] };
+   *
+   * _.get(object, 'a[0].b.c');
+   * // => 3
+   *
+   * _.get(object, ['a', '0', 'b', 'c']);
+   * // => 3
+   *
+   * _.get(object, 'a.b.c', 'default');
+   * // => 'default'
+   */
+  function get(object, path, defaultValue) {
+    var result = object == null ? undefined : baseGet(object, path);
+    return result === undefined ? defaultValue : result;
+  }
+
+  /**
    * Checks if `path` is a direct or inherited property of `object`.
    *
    * @static
@@ -4506,6 +4844,94 @@
   }
 
   /**
+   * Creates a function that invokes `func` with the arguments of the created
+   * function. If `func` is a property name, the created function returns the
+   * property value for a given element. If `func` is an array or object, the
+   * created function returns `true` for elements that contain the equivalent
+   * source properties, otherwise it returns `false`.
+   *
+   * @static
+   * @since 4.0.0
+   * @memberOf _
+   * @category Util
+   * @param {*} [func=_.identity] The value to convert to a callback.
+   * @returns {Function} Returns the callback.
+   * @example
+   *
+   * var users = [
+   *   { 'user': 'barney', 'age': 36, 'active': true },
+   *   { 'user': 'fred',   'age': 40, 'active': false }
+   * ];
+   *
+   * // The `_.matches` iteratee shorthand.
+   * _.filter(users, _.iteratee({ 'user': 'barney', 'active': true }));
+   * // => [{ 'user': 'barney', 'age': 36, 'active': true }]
+   *
+   * // The `_.matchesProperty` iteratee shorthand.
+   * _.filter(users, _.iteratee(['user', 'fred']));
+   * // => [{ 'user': 'fred', 'age': 40 }]
+   *
+   * // The `_.property` iteratee shorthand.
+   * _.map(users, _.iteratee('user'));
+   * // => ['barney', 'fred']
+   *
+   * // Create custom iteratee shorthands.
+   * _.iteratee = _.wrap(_.iteratee, function(iteratee, func) {
+   *   return !_.isRegExp(func) ? iteratee(func) : function(string) {
+   *     return func.test(string);
+   *   };
+   * });
+   *
+   * _.filter(['abc', 'def'], /ef/);
+   * // => ['def']
+   */
+  function iteratee(func) {
+    return baseIteratee(typeof func == 'function' ? func : baseClone(func, CLONE_DEEP_FLAG));
+  }
+
+  /**
+   * This method returns `undefined`.
+   *
+   * @static
+   * @memberOf _
+   * @since 2.3.0
+   * @category Util
+   * @example
+   *
+   * _.times(2, _.noop);
+   * // => [undefined, undefined]
+   */
+  function noop() {
+    // No operation performed.
+  }
+
+  /**
+   * Creates a function that returns the value at `path` of a given object.
+   *
+   * @static
+   * @memberOf _
+   * @since 2.4.0
+   * @category Util
+   * @param {Array|string} path The path of the property to get.
+   * @returns {Function} Returns the new accessor function.
+   * @example
+   *
+   * var objects = [
+   *   { 'a': { 'b': 2 } },
+   *   { 'a': { 'b': 1 } }
+   * ];
+   *
+   * _.map(objects, _.property('a.b'));
+   * // => [2, 1]
+   *
+   * _.map(_.sortBy(objects, _.property(['a', 'b'])), 'a.b');
+   * // => [1, 2]
+   */
+  function property(path) {
+    return isKey(path) ? baseProperty(toKey(path)) : basePropertyDeep(path);
+  }
+
+  /**
    * This method returns a new empty array.
    *
    * @static
@@ -4551,14 +4977,17 @@
   lodash.debounce = debounce;
   lodash.difference = difference;
   lodash.flatten = flatten;
+  lodash.iteratee = iteratee;
   lodash.keys = keys;
   lodash.keysIn = keysIn;
   lodash.memoize = memoize;
   lodash.merge = merge;
   lodash.omit = omit;
   lodash.pick = pick;
+  lodash.property = property;
   lodash.toArray = toArray;
   lodash.toPlainObject = toPlainObject;
+  lodash.uniqBy = uniqBy;
   lodash.values = values;
 
   /*------------------------------------------------------------------------*/
@@ -4567,6 +4996,7 @@
   lodash.clone = clone;
   lodash.cloneDeep = cloneDeep;
   lodash.eq = eq;
+  lodash.get = get;
   lodash.hasIn = hasIn;
   lodash.identity = identity;
   lodash.isArguments = isArguments;
@@ -4586,6 +5016,7 @@
   lodash.last = last;
   lodash.stubArray = stubArray;
   lodash.stubFalse = stubFalse;
+  lodash.noop = noop;
   lodash.now = now;
   lodash.toNumber = toNumber;
   lodash.toString = toString;

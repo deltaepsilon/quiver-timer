@@ -254,7 +254,9 @@
     ],
 
     _setEditing: function (ready, timerKey) {
-      var timer = this.timers[timerKey];
+      var timer = this.timers.find(function(timer) {
+        return timer.$key == timerKey;
+      });
       if (ready && timer) {
         setTimeout(function () {
           this.dispatch('updateValue', 'updateKey', timer.$key);

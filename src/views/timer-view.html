@@ -162,7 +162,7 @@
     },
 
     _timerKey: function (timerKey) {
-      return +timerKey;
+      return timerKey;
     },
 
     _state: function (localRoute, subrouteData) {
@@ -171,7 +171,9 @@
     },
 
     _timer: function (timerKey, timers) {
-      var timer = timers[timerKey];
+      var timer = timers.find(function(timer) {
+        return timer.$key == timerKey;
+      });
       var prepareColor = this.prepareColor;
       var colors = {
         work: this.workColors.slice(0),

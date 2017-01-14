@@ -17,7 +17,7 @@ module.exports = function (e) {
   if (!timer || timer.private) {
     console.log('removing', key);
     return searchRef.remove();
-  } 
+  }
 
   if (!timer.owned || timer.copy) {
     console.log('skipping', timer.name);

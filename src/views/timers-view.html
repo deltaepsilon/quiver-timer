@@ -88,7 +88,7 @@
   <paper-fab icon="add"></paper-fab>
 </a>
 
-<timer-search id="timerSearch" env="[[env]]" email="[[account.email]]" search-term="{{searchTerm}}"></timer-search>
+<timer-search id="timerSearch" env="[[env]]" email="[[account.email]]" search-term="{{searchTerm}}" timers="[[timers]]"></timer-search>
 
 <template is="dom-if" if="[[!account]]">
   <paper-toolbar class="layout horizontal center-justified">
@@ -110,7 +110,7 @@
     <template is="dom-repeat" items="[[filteredTimers]]" as="timer">
       <div>
         <paper-icon-item two-line style="padding: 0;">
-<a class="flex layout horizontal center-justified" href="/timer/[[index]]/stopped" item-icon>
+<a class="flex layout horizontal center-justified" href="/timer/[[timer.$key]]/stopped" item-icon>
   <paper-icon-button icon="av:play-circle-outline"></paper-icon-button>
 </a>
 <paper-item-body>
@@ -127,15 +127,15 @@
       <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
       <paper-menu class="dropdown-content">
         <paper-item>
-          <a href="/configure/[[index]]">
+          <a href="/configure/[[timer.$key]]">
             <paper-icon-button icon="editor:mode-edit"></paper-icon-button>
           </a>
         </paper-item>
         <paper-item>
-          <paper-icon-button icon="content-copy" on-click="duplicate" index="[[index]]"></paper-icon-button>
+          <paper-icon-button icon="content-copy" on-click="duplicate" key="[[timer.$key]]"></paper-icon-button>
         </paper-item>
         <paper-item>
-          <paper-icon-button icon="delete" on-click="delete" index="[[index]]"></paper-icon-button>
+          <paper-icon-button icon="delete" on-click="delete" key="[[timer.$key]]"></paper-icon-button>
         </paper-item>
       </paper-menu>
     </paper-menu-button>
@@ -198,7 +198,7 @@
     _fuse: function (timers) {
       return new Fuse(timers, {
         shouldSort: true,
-        keys: ['name', 'description', 'flatTags']
+        keys: ['name', 'description', '_tags']
       });
     },
 
@@ -213,17 +213,24 @@
     },
 
     // Functions
+    findTimerIndexByKey: function(key) {
+      var i = this.timers.length;
+      while (i--) {
+        if (this.timers[i].$key == key) return i;
+      }
+    },
+
     duplicate: function (e) {
       this.dispatch({
         type: 'duplicateTimer',
-        index: +e.target.index
+        index: this.findTimerIndexByKey(e.target.key)
       });
     },
 
     delete: function (e) {
       this.dispatch({
         type: 'deleteTimer',
-        index: +e.target.index
+        index: this.findTimerIndexByKey(e.target.key)
       });
     },
 
@@ -243,6 +250,24 @@
 
     clearSearchTerm: function () {
       this.$.timerSearch.clear();
+    },
+
+    restoreDefaults: function () {
+      this.$.timerSearch.filterByTag('.Default')
+        .then(function (hits) {
+          this.dispatch({
+            type: 'addTimers',
+            timers: hits.hits.map(function(timer) {
+              timer.$key = timer.objectID;
+              delete timer.objectID;
+              delete _highlightResult;
+              return timer;
+            })
+          });
+        }.bind(this))
+        .catch(function (err) {
+          this.fire('error', err);
+        }.bind(this));
     }
   });
 </script>

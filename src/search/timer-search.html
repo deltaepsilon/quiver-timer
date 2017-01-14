@@ -59,7 +59,7 @@
     <template is="dom-repeat" items="[[hits]]" as="timer">
       <paper-icon-item>
         <div class="flex layout horizontal center-justified" item-icon>
-          <paper-icon-button icon="av:library-add" on-click="addTimer" key$="[[timer.$key]]"></paper-icon-button>
+          <paper-icon-button icon="av:library-add" on-click="addTimer" key$="[[timer.objectID]]"></paper-icon-button>
         </div>
         <paper-item-body>
           <div>
@@ -103,6 +103,10 @@
       showClear: {
         type: Boolean,
         computed: '_showClear(searchTerm)'
+      },
+      timers: {
+        type: Array,
+        value: []
       },
       hits: {
         type: Array,
@@ -148,7 +152,13 @@
             console.log('Algolia search error', err);
             return this.fire('error', err);
           }
-          this.splice.apply(this, ['hits', 0, this.hits.length].concat(content.hits));
+          var existingKeys = this.timers.map(function(timer) {
+            return timer.$key;
+          });
+          var hits = content.hits.filter(function(timer) {
+            return !~existingKeys.indexOf(timer.objectID);
+          });
+          this.splice.apply(this, ['hits', 0, this.hits.length].concat(hits));
           this.hitsPerPage = content.hitsPerPage;
           this.hitsCount = content.nbHits;
           this.pageCount = content.nbPage;
@@ -158,8 +168,31 @@
       }
     },
 
+    filterByTag: function(tag) {
+      return new Promise(function(resolve, reject) {
+        this.index.search({
+          filters: tag
+        }, function (err, content) {
+          return err ? reject(err) : resolve(content);
+        });
+      }.bind(this));
+    },
+
     clear: function () {
       this.searchTerm = '';
+    },
+
+    addTimer: function(e) {
+      var timer = this.hits.find(function(timer) {
+        return timer.objectID == e.target.getAttribute('key');
+      });
+      timer.$key = timer.objectID;
+      delete timer.objectID;
+      this.dispatch({
+        type: 'addTimer',
+        timer: timer
+      });
+      this.clear();
     }
   });
 </script>
