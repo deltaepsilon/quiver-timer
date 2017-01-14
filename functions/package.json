@@ -10,6 +10,6 @@
     "quiver-firebase-search": "^1.0.4"
   },
   "devDependencies": {
-    "firebase-local-functions": "git+https://github.com/deltaepsilon/firebase-local-functions.git"
+    "firebase-local-functions": "git+ssh://github.com/deltaepsilon/firebase-local-functions.git"
   }
 }
