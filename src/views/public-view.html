@@ -2,6 +2,7 @@
 <link rel="import" href="../../bower_components/app-route/app-route.html">
 
 <link rel="import" href="../views/timer-view.html">
+<link rel="import" href="../search/timer-search.html">
 <link rel="import" href="../shared-styles.html">
 
 <dom-module id="public-view">
@@ -10,62 +11,101 @@
       :host {
         display: block;
       }
+
+      .title {
+        text-decoration: none;
+      }
+
+      timer-search {
+        width: 100%;
+      }
+      
+      p {
+        width: 50vw;
+        text-align: center;
+      }
+
+
     </style>
 
-    <app-route route="{{route}}" pattern="/:key" data="{{routeData}}"></app-route>
+<app-route route="{{route}}" pattern="/:key" data="{{routeData}}"></app-route>
 
-    <timer-view id="timerView" timers="[[timers]]" local-route="[[route]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]" casting="false"></timer-view>
-  </template>
-  <script>
-    Polymer({
-       is: "public-view",
+<div class="layout vertical center" hidden="[[!showSearch]]">
+  <a class="title" href="/">
+    <h1>HiiT Clock</h1>
+  </a>
+  <p>
+    Search the HiiT Clock public timers.
+  </p>
+  <timer-search id="timerSearch" env="[[env]]"></timer-search>
+</div>
 
-       properties: {
-         firebase: Object,
-         model: Object,
-         route: Object,
-         routeData: Object,
-         key: {
-           type: String,
-           computed: '_key(routeData.key)'
-         },
-         timerEndpoint: {
-           type: String,
-           computed: '_timerEndpoint(model, key)'
-         },
-         timerRef: {
-          type: Object,
-          computed: '_timerRef(firebase, timerEndpoint)'
-         },
-         timers: {
-           type: Array,
-           value: []
-         }
-       },
+<timer-view id="timerView" hidden$="[[showSearch]]" timers="[[timers]]" local-route="[[route]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]"
+  casting="false" account="[[account]]"></timer-view>
+</template>
+<script>
+  Polymer({
+    is: "public-view",
 
-       // Observers
-       observers: ['_timer(timerRef)'],
+    properties: {
+      env: Object,
+      firebase: Object,
+      model: Object,
+      route: Object,
+      routeData: Object,
+      account: Object,
+      key: {
+        type: String,
+        computed: '_key(routeData.key)'
+      },
+      showSearch: {
+        type: Boolean,
+        computed: '_showSearch(key)'
+      },
+      timerEndpoint: {
+        type: String,
+        computed: '_timerEndpoint(model, key)'
+      },
+      timerRef: {
+        type: Object,
+        computed: '_timerRef(firebase, timerEndpoint)'
+      },
+      timers: {
+        type: Array,
+        value: []
+      }
+    },
 
-       _key: function(key) {
-         return key;
-       },
+    // Observers
+    observers: ['_timer(timerRef)'],
 
-       _timerEndpoint: function(model, key) {
-         return model.admin.search.timers + '/' + key;
-       },
+    _key: function (key) {
+      return key;
+    },
 
-       _timerRef: function(firebase, timerEndpoint) {
-         return firebase.database().ref(timerEndpoint);
-       },
+    _showSearch: function (key) {
+      if (!key) {
+        this.$.timerSearch.setSearchTerm('');
+      }
+      return !key;
+    },
 
-       _timer: function(timerRef) {
-         return timerRef.once('value')
-          .then(function(snap) {
-            var timer = snap.val();
-            timer.$key = snap.key;
-            this.splice('timers', 0, 1, timer);
-          }.bind(this));
-       }
-    });
-  </script>
+    _timerEndpoint: function (model, key) {
+      return model.admin.search.timers + '/' + key;
+    },
+
+    _timerRef: function (firebase, timerEndpoint) {
+      return firebase.database().ref(timerEndpoint);
+    },
+
+    _timer: function (timerRef) {
+      return timerRef.once('value')
+        .then(function (snap) {
+          var timer = snap.val();
+          timer.$key = snap.key;
+          this.splice('timers', 0, 1, timer);
+        }.bind(this));
+    }
+  });
+</script>
 </dom-module>

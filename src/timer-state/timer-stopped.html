@@ -73,14 +73,18 @@
       #cast-description-wrapper .app-grid {
         
       }
+
+      [is-public] .hide-public {
+        display: none;
+      }
     </style>
 
 
 <template is="dom-if" if="[[!isCast]]">
-  <div id="top-title" class="layout vertical">
+  <div id="top-title" class="layout vertical" is-public$="[[isPublic]]">
     <h3 id="title" class="layout horizontal">
       [[timer.name]]
-      <a href$="/configure/[[timerKey]]/">
+      <a class="hide-public" href$="/configure/[[timerKey]]/">
         <iron-icon icon="editor:mode-edit"></iron-icon>
       </a>
     </h3>
@@ -102,8 +106,8 @@
         <div class="flex">
           <strong style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
 <div class="layout horizontal center" secondary>
-<digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
-<span class="show-stopwatch" style="margin-left: .5rem;">Time Cap</span>
+  <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
+  <span class="show-stopwatch" style="margin-left: .5rem;">Time Cap</span>
 </div>
 </div>
 <div class$="color-block md-[[period.color]]"></div>
@@ -126,21 +130,21 @@
 </div>
 <div id="cast-description-wrapper" class="layout horizontal justified">
   <div style="min-width: 33%;">
-    <marked-element markdown="[[timer.description]]"></marked-element>
-  </div>
-  <div class="flex">
-    <paper-material class="app-grid" elevation="1">
-      <template is="dom-repeat" items="[[timer.periods]]" as="period">
-        <paper-icon-item type$="[[period.type]]">
-          <iron-icon class="type-color" icon="[[period.icon]]" item-icon></iron-icon>
-          <paper-item-body>
-            <div class="layout horizontal justified center">
-              <div class="flex">
-                <strong style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
+<marked-element markdown="[[timer.description]]"></marked-element>
+</div>
+<div class="flex">
+  <paper-material class="app-grid" elevation="1">
+    <template is="dom-repeat" items="[[timer.periods]]" as="period">
+      <paper-icon-item type$="[[period.type]]">
+        <iron-icon class="type-color" icon="[[period.icon]]" item-icon></iron-icon>
+        <paper-item-body>
+          <div class="layout horizontal justified center">
+            <div class="flex">
+              <strong style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
 <div class="layout horizontal center" secondary>
-  
-<digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
-<span class="show-stopwatch" style="margin-left: .25rem;">Time Cap</span>
+
+  <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
+  <span class="show-stopwatch" style="margin-left: .25rem;">Time Cap</span>
 </div>
 </div>
 <div class$="color-block md-[[period.color]]"></div>
@@ -168,7 +172,15 @@
       isCast: {
         type: Boolean,
         value: false
+      },
+      isPublic: {
+        type: Boolean,
+        computed: '_isPublic(prefix)'
       }
+    },
+
+    _isPublic: function(prefix) {
+      return prefix == '/public'
     }
   });
 </script>

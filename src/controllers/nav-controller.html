@@ -26,6 +26,7 @@
 
       a {
         color: var(--primary-text-color);
+        text-decoration: none;
       }
 
       #title {
@@ -42,10 +43,15 @@
       paper-icon-button[casting] {
         color: var(--app-primary-color);
       }
+
+      .title {
+        font-family: 'Brothers';
+        font-size: 1.25rem;
+      }
     </style>
 <div class="layout horizontal justified" style="position: relative; z-index: 1;">
 <a href="/timers" class$="[[arrowClass]]" style="margin-left: -2px;">
-  <paper-icon-button icon="arrow-back"></paper-icon-button>
+<paper-icon-button icon="arrow-back"></paper-icon-button>
 </a>
 <a class$="hidden [[adminClass]]" href="/admin">
   <paper-icon-button icon="build"></paper-icon-button>
@@ -56,8 +62,19 @@
   <paper-icon-button class$="hidden [[settingsClass]]" icon="settings" on-click="openSettings"></paper-icon-button>
   <paper-icon-button class$="hidden [[exitClass]]" icon="power-settings-new" on-click="logout"></paper-icon-button>
 </div>
+</div>
+<template is="dom-if" if="[[showPublicTimer]]">
+  <div class="layout horizontal justified center" style="margin-top: -5px;">
+    <a href="/public/" style="margin-left: -2px;">
+<paper-icon-button icon="arrow-back"></paper-icon-button>
+</a>
+<div class="flex layout horizontal end-justified">
+  <a class="title" href="/">HiiT Clock</a>  
+</div>
 
 </div>
+
+</template>
 </template>
 <script>
   Polymer({
@@ -68,11 +85,11 @@
       tail: Object,
       uid: {
         type: String,
-        value: ''  
+        value: ''
       },
       isAdmin: {
         type: Boolean,
-        value: false  
+        value: false
       },
       connected: {
         type: Boolean,
@@ -114,6 +131,10 @@
         type: Boolean,
         computed: '_isAdminPage(page)'
       },
+      showPublicTimer: {
+        type: Boolean,
+        computed: '_showPublicTimer(page, tail)'
+      },
       exitClass: {
         type: String,
         computed: '_showHide(isLoggedInPage, connected)'
@@ -139,7 +160,7 @@
       return ''
     },
 
-    _titleClass: function(page, tail) {
+    _titleClass: function (page, tail) {
       if (page == 'timer' && !tail.path.match(/stopped/)) return 'bottom-right';
     },
 
@@ -150,23 +171,27 @@
     },
 
 
-    _isLoggedInPage: function(pages, page) {
+    _isLoggedInPage: function (pages, page) {
       return !!~pages.indexOf(page);
     },
 
-    _isTimerPage: function(page) {
+    _isTimerPage: function (page) {
       return page == 'timer';
     },
 
-    _isAdminPage: function(page) {
-      return page == 'admin';
-    },
-
-    _isPublicPage: function(page) {
+    _isPublicPage: function (page) {
       return page != 'admin';
     },
 
-    _showHide: function() {
+    _isAdminPage: function (page) {
+      return page == 'admin';
+    },
+
+    _showPublicTimer: function (page, tail) {
+      return page == 'public' && tail.path != '/';
+    },
+
+    _showHide: function () {
       var args = Array.prototype.slice.call(arguments);
       var i = args.length;
 
@@ -182,8 +207,8 @@
       this.fire('openSettings');
     },
 
-    openCast: function() {
-      this.fire('openDialog', {id: 'castDialog'})
+    openCast: function () {
+      this.fire('openDialog', { id: 'castDialog' })
     },
 
     logout: function () {

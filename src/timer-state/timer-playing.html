@@ -135,7 +135,7 @@
     <div class="bottom-sheet layout horizontal justified center">
       <paper-icon-button class="invisible-first-period" icon="av:skip-previous" on-click="previous"></paper-icon-button>
       <paper-icon-button icon="av:replay-10" on-click="replay"></paper-icon-button>
-      <a href$="/timer/[[timerKey]]/paused">
+      <a href$="[[prefix]]/[[timerKey]]/paused">
         <paper-fab icon="av:pause"></paper-fab>
       </a>
       <paper-icon-button icon="av:forward-10" on-click="forward"></paper-icon-button>
@@ -148,7 +148,7 @@
       <a href$="[[prefix]]/[[timerKey]]/stopped">
         <paper-icon-button icon="av:stop"></paper-icon-button>
       </a>
-      <a href$="/timer/[[timerKey]]/playing">
+      <a href$="[[prefix]]/[[timerKey]]/playing">
         <paper-fab icon="av:play-arrow"></paper-fab>
       </a>
       <paper-icon-button icon="av:replay" on-click="refresh"></paper-icon-button>

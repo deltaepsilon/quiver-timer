@@ -69,6 +69,7 @@
         type: Boolean,
         value: false
       },
+      account: Object,
       ref: {
         type: Object,
         computed: '_ref(firebase, timerEndpoint)'
@@ -226,7 +227,7 @@
         timer: timer
       });
 
-      if (this.casting) {
+      if (this.casting && this.account) {
         ref.update({
           state: state,
           seconds: seconds,
@@ -256,14 +257,14 @@
 
       this.state = 'playing';
       if (!this.localRoute.path.match(/playing/)) {
-        this.fire('redirect', '/timer/' + this.timerKey + '/playing');
+        this.fire('redirect', this.prefix + '/' + this.timerKey + '/playing');
       }
       this.fire('testSound');
     },
 
     pause: function () {
       this.state = 'paused'; // Set to avoid sync issues from upstream
-      this.fire('redirect', '/timer/' + this.timerKey + '/paused');
+      this.fire('redirect', this.prefix + '/' + this.timerKey + '/paused');
     },
 
     stop: function () {

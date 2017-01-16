@@ -143,10 +143,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <landing-view id="landingView" name="landing"></landing-view>
     <login-view id="loginView" name="login" pathname="[[pathname]]" user="[[user]]"></login-view>
     <timers-view id="timersView" name="timers" timers="[[timers]]" account="[[account]]" env="[[env]]"></timers-view>
-    <timer-view id="timerView" name="timer" timers="[[timers]]" local-route="[[subroute]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]" casting="[[casting]]"></timer-view>
+    <timer-view id="timerView" name="timer" timers="[[timers]]" local-route="[[subroute]]" firebase="[[firebase]]" timer-endpoint="[[timerEndpoint]]" casting="[[casting]]" account="[[account]]"></timer-view>
     <configure-view id="configureView" name="configure" account="[[account]]" timers="[[timers]]" local-route="[[subroute]]" on-bulk-changed="toggleConfigureSheet" sheet-payload="{{periodSelectSheetPayload}}"></configure-view>
     <cast-view id="castView" name="cast" firebase="[[firebase]]" cast-endpoint="[[castEndpoint]]"></cast-view>
-    <public-view id="publicView" name="public" firebase="[[firebase]]" model="[[model]]" route="[[subroute]]"></public-view>
+    <public-view id="publicView" name="public" env="[[env]]" firebase="[[firebase]]" model="[[model]]" route="[[subroute]]"></public-view>
     <admin-view id="adminView" name="admin" firebase="[[firebase]]" model="[[model]]"></admin-view>
     <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
     
