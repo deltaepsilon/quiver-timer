@@ -43,7 +43,8 @@
     "redux": "https://npmcdn.com/redux/dist/redux.js",
     "polymer-redux": "^0.3.0",
     "web-component-tester": "~5.0.0",
-    "fuse.js": "^2.6.1"
+    "fuse.js": "^2.6.1",
+    "slug": "^0.9.1"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"

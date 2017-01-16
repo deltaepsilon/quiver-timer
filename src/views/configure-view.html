@@ -385,12 +385,15 @@
     },
 
     // Functions
-    _cleanPeriod: function (period) {
-      return _.clone(period);
+    getTimerIndex: function(timerKey) {
+      var i = this.timers.length;
+      while (i--) {
+        if (this.timers[i].$key == timerKey) return i;
+      }
     },
 
     save: function () {
-      this.dispatch('updateValue', 'updateTimer', this.timerKey);
+      this.dispatch('updateValue', 'updateTimer', this.getTimerIndex(this.timerKey));
       this.dispatch('updateValue', 'resetEditing');
       this.fire('redirect', '/timers');
     },

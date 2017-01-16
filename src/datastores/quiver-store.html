@@ -1,11 +1,25 @@
 <link rel="import" href="../timer-behavior/timer-defaults.html">
 
 <script src="../../bower_components/redux/index.js"></script>
+<script src="../../bower_components/slug/slug.js"></script>
 <script src="../third-party/lodash.custom.min.js"></script>
 
 <script>
   function getPushKey() {
     return firebase.database().ref().push().key;
+  };
+
+  function getSlug(timer) {
+    var tags = timer._tags || [];
+
+    if (timer.tags) {
+      var keys = Object.keys(timer.tags);
+      tags = keys.map(function(key) {
+        return timer.tags[key].value;
+      });
+    }
+
+    return slug(timer.name + ' ' + tags.join('-'));
   };
 
   var QuiverStoreDefaults = {
@@ -99,6 +113,8 @@
         timer.totalSeconds = timer.periods.reduce(function (s, period) {
           return period.totalSeconds + s;
         }, 0);
+
+        timer.slug = getSlug(timer);
 
         if (timer.description == QuiverStoreDefaults.state.editing.description) delete timer.description;
 
@@ -263,6 +279,12 @@
       case 'addTimer':
         state.timers = state.timers.sort(function(a, b) {
           return a.name > b.name;
+        });
+        state.timers = state.timers.map(function(timer) {
+          if (!timer.slug) {
+            timer.slug = getSlug(timer);
+          }
+          return timer;
         });
         break;
     }

@@ -51,8 +51,8 @@
 <app-route route="{{subroute}}" pattern="/:state" data="{{subrouteData}}"></app-route>
 
 <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="stopped" role="main">
-  <timer-stopped id="timerStopped" name="stopped" timer-key="[[timerKey]]" timer="[[timer]]"></timer-stopped>
-  <timer-playing id="timerPlaying" name="playing" state="[[state]]" timer-key="[[timerKey]]" seconds="[[seconds]]" periods="[[workingPeriods]]"></timer-playing>
+  <timer-stopped id="timerStopped" name="stopped" prefix="[[prefix]]" timer-key="[[timerKey]]" timer="[[timer]]"></timer-stopped>
+  <timer-playing id="timerPlaying" name="playing" prefix="[[prefix]]" state="[[state]]" timer-key="[[timerKey]]" seconds="[[seconds]]" periods="[[workingPeriods]]"></timer-playing>
 </iron-pages>
 </template>
 <script>
@@ -73,6 +73,10 @@
         type: Object,
         computed: '_ref(firebase, timerEndpoint)'
       },
+      prefix: {
+        type: String,
+        computed: '_prefix(localRoute.prefix)'
+      },
       timerKey: {
         type: Number,
         computed: '_timerKey(routeData.timerKey)'
@@ -83,11 +87,11 @@
       },
       timer: {
         type: Object,
-        computed: '_timer(timerKey, timers)'
+        computed: '_timer(timerKey, timers, timers.splices)'
       },
       state: {
         type: String,
-        computed: '_state(localRoute, subrouteData)'
+        computed: '_state(prefix, subrouteData)'
       },
       clock: {
         type: Object,
@@ -161,12 +165,16 @@
       return firebase.database().ref(timerEndpoint);
     },
 
+    _prefix: function(prefix) {
+      return prefix;
+    },
+
     _timerKey: function (timerKey) {
       return timerKey;
     },
 
-    _state: function (localRoute, subrouteData) {
-      if (localRoute.prefix !== '/timer') return 'stopped';
+    _state: function (prefix, subrouteData) {
+      if (prefix !== '/timer' && prefix !== '/public') return 'stopped';
       return subrouteData.state || 'stopped';
     },
 

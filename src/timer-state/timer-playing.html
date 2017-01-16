@@ -145,7 +145,7 @@
 
   <div class="show-paused">
     <div class="bottom-sheet layout horizontal justified center">
-      <a href$="/timer/[[timerKey]]/stopped">
+      <a href$="[[prefix]]/[[timerKey]]/stopped">
         <paper-icon-button icon="av:stop"></paper-icon-button>
       </a>
       <a href$="/timer/[[timerKey]]/playing">
@@ -165,6 +165,7 @@
 
     properties: {
       state: String,
+      prefix: String,
       isCast: Boolean
     },
 

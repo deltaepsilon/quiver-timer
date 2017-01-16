@@ -91,7 +91,7 @@
   </div>
 
   <paper-material class="list" elevation="1">
-    <a id="top-fab" class="layout horizontal end-justified" style="left: 13px;" href$="/timer/[[timerKey]]/playing">
+    <a id="top-fab" class="layout horizontal end-justified" style="left: 13px;" href$="[[prefix]]/[[timerKey]]/playing">
 <paper-fab icon="av:play-arrow"></paper-fab>
 </a>
 <template is="dom-repeat" items="[[timer.periods]]" as="period">
@@ -162,6 +162,7 @@
 
     properties: {
       state: String,
+      prefix: String,
       timerKey: String,
       timer: Object,
       isCast: {
