@@ -4,7 +4,9 @@ const LocalFunctions = require('firebase-local-functions');
 const functions = require('firebase-functions');
 
 new LocalFunctions({
-  specs: specs,
+  specs: specs.filter(function(spec) {
+    return spec.path
+  }),
   firebaseConfig: env.firebaseConfig,
   path: 'timer/development',
   params: {

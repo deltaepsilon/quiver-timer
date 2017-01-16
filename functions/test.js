@@ -1,10 +1,10 @@
-var royal4 = require('./services/royal4')({
-  root: 'http://40.141.45.139:8888/scripts/cgiip.exe/WService=wise/',
-  userId: 'QVR1',
-  password: 'QVR1'
+var env = require('./services/environment');
+var admin = require('firebase-admin');
+var sitemap = require('./actions/sitemap');
+
+admin.initializeApp({
+  databaseURL: env.firebaseConfig.databaseURL,
+  credential: admin.credential.cert(env.firebaseConfig.serviceAccount)  
 });
 
-royal4.getInventory()
-  .then(function(inventory) {
-    console.log(inventory);
-  });
+sitemap(null, null, admin.database());

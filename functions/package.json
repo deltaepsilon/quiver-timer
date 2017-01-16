@@ -5,9 +5,11 @@
     "axios": "^0.15.3",
     "firebase": "^3.6.4",
     "firebase-functions": "https://storage.googleapis.com/firebase-preview-drop/node/firebase-functions/firebase-functions-preview.latest.tar.gz",
+    "google-cloud": "^0.45.2",
     "lodash": "^4.17.2",
     "md5": "^2.2.1",
-    "quiver-firebase-search": "^1.0.4"
+    "quiver-firebase-search": "^1.0.4",
+    "sitemap": "^1.9.0"
   },
   "devDependencies": {
     "firebase-local-functions": "git+ssh://github.com/deltaepsilon/firebase-local-functions.git"

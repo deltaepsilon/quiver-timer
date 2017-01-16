@@ -18,5 +18,10 @@ module.exports = [
     name: 'search',
     path: '/admin/search/timers/{key}',
     func: require('./actions/timers-search')
+  },
+  {
+    name: 'sitemap',
+    endpoint: 'https://us-central1-quiver-timer.cloudfunctions.net/sitemap',
+    func: require('./actions/timers-search')
   }
 ];
