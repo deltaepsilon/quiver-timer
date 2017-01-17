@@ -21,7 +21,7 @@ module.exports = [
   },
   {
     name: 'sitemap',
-    endpoint: 'https://us-central1-quiver-timer.cloudfunctions.net/sitemap',
-    func: require('./actions/timers-search')
+    path: '/admin/queues/sitemap/{key}',
+    func: require('./actions/sitemap')
   }
 ];
