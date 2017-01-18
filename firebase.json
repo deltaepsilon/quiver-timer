@@ -17,6 +17,13 @@
         "source": "**",
         "destination": "/index.html"
       }
+    ],
+    "redirects": [
+      {
+        "source": "/sitemap.xml",
+        "destination": "https://storage.googleapis.com/quiver-timer.appspot.com/development%2Fsitemap.xml?GoogleAccessId=quiver-timer@quiver-timer.iam.gserviceaccount.com&Expires=1798786800&Signature=Ezehkpa8j3LF5fkWBIjKtyecgTivybDj%2BMJ1b7wamyIfbjJ47s6NL%2BiWrcNxyjgWD6FGwzsrOrg%2BbXqF%2B1B%2FY%2BeJ1WNeXAsZq9cpjSeLfiLtETEkhGxT%2BYUSLrwTomgk4Qw0N5KKx%2FZ2F8ntnKNbiunAgM6WuTadSd%2Fw5mpVEfX6jqLK3XW%2FuakgoyBiVkf%2BONbltYHkYKrWtD8zRz5LAsJ8nu62hfJQ7Q6B9TQY3Vdu%2Ffwc%2FXjc2ogtIPKxKgWNsUPotNDMPeZgO6uWxOvFKcOsqivn4FilnSI0KMWPWKNHZqx6Mosv9mChOB%2BFRlfK%2BdDtmDVdHkG8as3M4wP2Jg%3D%3D",
+        "type": 302
+      }
     ]
   }
 }

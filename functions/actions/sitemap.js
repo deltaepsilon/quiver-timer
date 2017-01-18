@@ -9,11 +9,7 @@ module.exports = function (e) {
   var env = require('../services/environment');
   var sitemapConfig = _.clone(env.sitemap);
   var gcloud = require('google-cloud');
-  var gcloudAuth = {
-    client_email: env.googleCloud.credentials.client_email,
-    private_key: env.googleCloud.credentials.private_key.replace(/\\n/g, "\n")
-  };
-  var gcs = gcloud.storage(gcloudAuth);
+  var gcs = gcloud.storage(env.googleCloud);
   var bucket = gcs.bucket(env.googleCloud.bucket);
   var file = bucket.file(process.env.NODE_ENV + '/' + env.sitemap.filename);
   var logsRef = e.data.ref.root.child(env.model.admin.logs.sitemap);
@@ -41,7 +37,7 @@ module.exports = function (e) {
         var s = new Readable();
 
         s.pipe(file.createWriteStream())
-          .on('error', err => reject(err))
+          .on('error', err => console.log(err))
           .on('finish', res => resolve(res));
 
         s.push(xml);
@@ -61,18 +57,43 @@ module.exports = function (e) {
         file.setMetadata(env.sitemap.metadata, (err, res) => err ? reject(err) : resolve(res));
       });
     })
-    .then(function() {
+    .then(function () {
       return e.data.ref.remove();
     })
-    .then(function() {
+    .then(function () {
+      return file.getSignedUrl({
+        action: 'read',
+        expires: '1-1-' + (new Date().getFullYear() + 10)
+      })
+        .then(function(urls) {
+          return urls[0];
+        });
+    })
+    .then(function (url) {
       return e.data.ref.root.child(env.model.admin.logs.sitemap).push({
-        success: new Date().toString()
+        timestamp: new Date().toString(),
+        url: url
       });
+    })
+    .then(function() {
+      return true;
+    })
+    .catch(function (err) {
+      return new Promise(function (resolve, reject) {
+        gcs.getCredentials((err, credentials) => err ? reject(err) : resolve(credentials));
+      })
+        .then(function (credentials) {
+          return e.data.ref.root.child(env.model.admin.logs.sitemap).push({
+            timestamp: new Date().toString(),
+            credentials: credentials,
+            error: err.toString()
+          });
+        });
     })
     .catch(function (err) {
       return e.data.ref.root.child(env.model.admin.logs.sitemap).push({
         timestamp: new Date().toString(),
-        gcloudAuth: gcloudAuth,
+        credentials: 'failed to acquire credentials',
         error: err.toString()
       });
     });
