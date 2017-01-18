@@ -81,7 +81,7 @@
   <div id="searchList">
     <template is="dom-repeat" items="[[hits]]" as="timer">
       <paper-icon-item>
-        <a class="flex layout horizontal center-justified" href="/public/[[timer.objectID]]/stopped" item-icon>
+        <a class="flex layout horizontal center-justified" href="/public/[[timer.objectID]]/stopped/[[timer.slug]]" item-icon>
           <paper-icon-button icon="av:play-circle-outline"></paper-icon-button>
         </a>
         <paper-item-body>
@@ -210,7 +210,7 @@
           this.hitsCount = content.nbHits;
           this.pageCount = content.nbPage;
           this.page = content.page;
-          console.log('results', err, content);
+          // console.log('results', err, content);
         }.bind(this));
       }
     },
