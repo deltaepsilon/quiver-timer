@@ -104,6 +104,10 @@
           var timer = snap.val();
           timer.$key = snap.key;
           this.splice('timers', 0, 1, timer);
+          this.fire('metadata', {
+            key: 'description',
+            value: timer.description || timer.name
+          });
         }.bind(this));
     }
   });

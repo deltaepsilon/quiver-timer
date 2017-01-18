@@ -1,4 +1,4 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <dom-module id="metadata-manager">
 <script>
@@ -7,18 +7,14 @@
 
         properties: {
             route: Object,
-            title: {
-                type: String,
-                computed: '_title(route, route.path)'
-            },
-            description: {
-                type: String,
-                computed: '_description(route, route.path)'
-            }
+            title: String,
+            description: String
         },
 
         // Observers
         observers: [
+            '_description(route, route.path)',
+            '_title(route, route.path)',
             '_setTitle(title)',
             '_setDescription(description)'
         ],
@@ -27,11 +23,11 @@
             var parts = route.path.split('/').slice(1);
             switch (route.path) {
                 case '/login':
-                    return 'HiiT Clock: Login or Register'
+                    return this.title = 'HiiT Clock: Login or Register'
                 case '/timers':
-                    return 'HiiT Clock: Timers'
+                    return this.title = 'HiiT Clock: Timers'
                 case '/public':
-                    return 'HiiT Clock: Public Timer'
+                    return this.title = 'HiiT Clock: Public Timer'
                 break;
             }
 
@@ -39,18 +35,18 @@
                 return parts[3].replace(/-/g, ' ');
             }
 
-            return 'HiiT Clock';
+            return this.title = 'HiiT Clock';
         },
 
         _description: function(route) {
             var parts = route.path.split('/').slice(1);
             switch (route.path) {
                 case '/public':
-                    return 'Search the HiiT Clock timer database.'
+                    return this.description = 'Search the HiiT Clock timer database.'
                 break;
             }
 
-            return "HiiT Clock is an advanced interval timer for web, iOS and Android. It's free to use! Designed for HiiT, Tabata, CrossFit, Pilates and yoga. Customize your own timers or use our timer database.";
+            return this.description =  "HiiT Clock is an advanced interval timer for web, iOS and Android. It's free to use! Designed for HiiT, Tabata, CrossFit, Pilates and yoga. Customize your own timers or use our timer database.";
         },
 
         _setTitle: function (title) {
@@ -58,7 +54,12 @@
         },
 
         _setDescription: function (description) {
-            document.head.querySelector('meta[name="description"]').innerHTML = description;
+            document.head.querySelector('meta[name="description"]').setAttribute('content', description);
+        },
+
+        // Functions
+        publicSet: function (key, value) {
+            return this.set(key, value);
         }
 
     });

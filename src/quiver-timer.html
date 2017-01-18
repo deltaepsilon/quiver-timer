@@ -338,7 +338,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ArrowRight: '_arrowRight',
       cast: '_cast',
       deleteTimer: '_deleteTimer',
-      forceSync: '_forceSync'
+      forceSync: '_forceSync',
+      metadata: '_metadata'
     },
     _redirect: function (e) {
       this.set('route.path', e.detail);
@@ -453,6 +454,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     _forceSync: function() {
       // this.$.firebaseSync.forceSync();
+    },
+
+    _metadata: function (e) {
+      this.$.metadataManager.publicSet(e.detail.key, e.detail.value);
     },
 
     // Functions
