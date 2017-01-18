@@ -390,6 +390,7 @@
       while (i--) {
         if (this.timers[i].$key == timerKey) return i;
       }
+      return timerKey;
     },
 
     save: function () {

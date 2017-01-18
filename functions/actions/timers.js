@@ -15,12 +15,12 @@ module.exports = function (e) {
 
   console.log(key, timer ? timer.name : 'remove me!');
   if (!timer || timer.private) {
-    console.log('removing', key);
+    // console.log('removing', key);
     return searchRef.remove();
   }
 
   if (!timer.owned || timer.copy) {
-    console.log('skipping', timer.name);
+    // console.log('skipping', timer.name);
     return true;
   }
 
@@ -38,7 +38,7 @@ module.exports = function (e) {
     })
     .then(function(snap) {
       if (snap.val() && !~Object.keys(snap.val()).indexOf(key)) return true; // Skip records with matching hashes
-      console.log('set', timer.name, key);
+      // console.log('set', timer.name, key);
       return searchRef.set(_.omit(timer, ['owned', 'private']));
     })
     .then(function() {
@@ -54,7 +54,7 @@ module.exports = function (e) {
       var updates = toRemove.reduce(function(updates, key) {
         return updates[key] = null, updates;
       }, {});
-      console.log('updates', updates);
+      // console.log('updates', updates);
       searchRef.parent.update(updates);
     })
 

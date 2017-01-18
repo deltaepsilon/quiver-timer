@@ -118,6 +118,10 @@
         type: String,
         value: ''
       },
+      defaultAll: {
+        type: Boolean,
+        value: false
+      },
       client: {
         type: Object,
         computed: '_client(env.algolia)'
@@ -166,9 +170,18 @@
       return !!searchTerm;
     },
 
+    // Listeners
+    listeners: {
+      keyup: '_handleKeyup'
+    },
+
+    _handleKeyup: function(e) {
+      if (e.key == 'Escape') return this.clear();
+    },
+
     // Functions
     search: function (searchTerm, email, index) {
-      if (typeof searchTerm !== 'string') {
+      if ((this.defaultAll && typeof searchTerm !== 'string') || (!this.defaultAll && !searchTerm)) {
         this.splice('hits', 0, this.hits.length);
         this.hitsPerPage = 0;
         this.hitsCount = 0;
