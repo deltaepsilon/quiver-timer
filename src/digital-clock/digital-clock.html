@@ -44,7 +44,9 @@
        },
 
        _timeString: function(hours, minutes, seconds) {
-         return this.pad(hours) + ':' + this.pad(minutes) + ':' + this.pad(seconds); 
+         var parts = [this.pad(hours), this.pad(minutes), this.pad(seconds)];
+         if (parts[0] == '00') parts.shift();
+         return parts.join(':');
        },
 
        pad: function(num) {

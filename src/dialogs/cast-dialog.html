@@ -4,6 +4,26 @@
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/iron-icons/social-icons.html">
 <link rel="import" href="../shared-styles.html">
+<link rel="import" href="../icons.html">
+
+<script>
+  window.fbAsyncInit = function () {
+    FB.init({
+      appId: '1823013464643289',
+      xfbml: true,
+      version: 'v2.8'
+    });
+    FB.AppEvents.logPageView();
+  };
+
+  (function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) { return; }
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  } (document, 'script', 'facebook-jssdk'));
+</script>
 
 <dom-module id="cast-dialog">
   <template>
@@ -22,32 +42,51 @@
     <paper-icon-button icon="social:share"></paper-icon-button> Open Public Timer
   </a>
 
+  <paper-item>
+    <div class="layout horizontal space-between">
+      <a target="_blank" href="https://twitter.com/intent/tweet?text=HiiTClock.com:%20an%20advanced%20interval%20timer%20app%20for%20web,%20Android%20and%20iOS.">
+        <paper-icon-button icon="twitter:twitter"></paper-icon-button>
+      </a>
+
+      <paper-icon-button icon="facebook:facebook" on-click="facebook"></paper-icon-button>
+    </div>
+  </paper-item>
+
   <div class="buttons">
     <paper-button tabindex="1" on-click="close">close</paper-button>
   </div>
+
 </paper-dialog>
 
 </template>
 <script>
-    Polymer({
-      is: "cast-dialog",
+  Polymer({
+    is: "cast-dialog",
 
-      properties: {
-        uid: String,
-        casting: {
-          type: Boolean,
-          value: false,
-          notify: true
-        }
-      },
-
-      open: function () {
-        this.$.dialog.open();
-      },
-
-      close: function () {
-        this.$.dialog.close();
+    properties: {
+      uid: String,
+      casting: {
+        type: Boolean,
+        value: false,
+        notify: true
       }
-    });
-  </script>
+    },
+
+    open: function () {
+      this.$.dialog.open();
+    },
+
+    close: function () {
+      this.$.dialog.close();
+    },
+
+    facebook: function () {
+      FB.ui(
+        {
+          method: 'share',
+          href: location.origin
+        }, function (response) { });
+    }
+  });
+</script>
 </dom-module>

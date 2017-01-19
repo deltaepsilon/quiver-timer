@@ -25,7 +25,7 @@
       
       #wrapper {
         padding: 1rem;
-        top: 4rem;
+        top: 3rem;
       }
 
       #timer-wrapper {
@@ -65,18 +65,18 @@
       }*/
       .total-seconds {
         position: absolute;
-        top: 1rem;
+        bottom: 6rem;
         right: 26px;
         left: 26px;
-        font-size: 3vh;
+        font-size: 5vh;
 
         @apply(--layout-horizontal);
       }
       
-      .bottom-icons {
+      .top-icons {
         position: absolute;
         right: 26px;
-        bottom: 7rem;
+        top: 2rem;
         left: 24px;
         font-size: 3vh;
       }
@@ -91,18 +91,20 @@
       }
 
       [is-cast] #timer-wrapper {
+        position: fixed !important;
         padding: 2rem;
-        height: calc(100% - 4rem);
+        height: calc(100% - 4rem) !important;
       }
 
       [is-cast] .total-seconds {
-        top: 2rem;
+        top: 36rem;
         right: 4rem;
-        left: 4rem;
-        font-size: 86px;
+        left: -2rem;
+        /*font-size: 86px;*/
+        font-size: 4rem;
       }
 
-      [is-cast] .bottom-icons {
+      [is-cast] .top-icons {
         bottom: 3rem;
         right: 4rem;
         left: 4rem;
@@ -113,9 +115,50 @@
         height: 96px;
       }
 
+      [orientation="horizontal"]#wrapper {
+        left: 6rem;
+      }
+
+      [orientation="horizontal"] #timer-wrapper {
+        height: 100%;
+        position: absolute;
+        top: 0rem;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+      }
+
+      [orientation="horizontal"] .total-seconds {
+        font-size: 10vh;
+        bottom: 1rem;
+      }
+
+      [orientation="horizontal"] .top-icons {
+        position: absolute;
+        bottom: 1rem;
+      }
+
+      [orientation="horizontal"] .top-icons iron-icon {
+        margin-left: -4px;
+      }
+
+      [orientation="horizontal"] .bottom-sheet {
+        top: 0;
+        left: 0;
+        right: inherit;
+        z-index: 1;
+
+        @apply(--layout-vertical);
+      }
+
+      [orientation="vertical"] .bottom-sheet {
+        @apply(--layout-horizontal);
+      }
+
     </style>
-<div id="wrapper" class="pinned" type$="[[period.type]]" current-period$="[[currentPeriod]]" state$="[[state]]" is-cast$="[[isCast]]">
-  <div id="timer-wrapper" class$="layout [[position]]">
+<div id="wrapper" class="pinned" type$="[[period.type]]" current-period$="[[currentPeriod]]" state$="[[state]]" is-cast$="[[isCast]]" orientation$="[[orientation]]">
+  <div id="timer-wrapper" class$="layout [[orientation]]">
 <digital-timer id="timer" class="timer flex" is-cast="[[isCast]]" global-seconds="[[seconds]]" period-seconds="[[periodSeconds]]" global-cycle-seconds="[[seconds]]"
   global-cycle="[[globalCycle]]" period-cycle-seconds="[[periodCycleSeconds]]" period-cycle="[[periodCycle]]" color-wheel="[[colorWheel]]"></digital-timer>
 </div>
@@ -126,13 +169,13 @@
   <digital-clock total-seconds="[[totalGlobalSeconds]]"></digital-clock>
 </div>
 
-<div class="bottom-icons hide-cast layout horizontal justified center">
-  <iron-icon id="icon" icon="[[period.icon]]"></iron-icon>
+<div class="top-icons hide-cast layout horizontal justified center">
+  <!--<iron-icon id="icon" icon="[[period.icon]]"></iron-icon>-->
 </div>
 
-<div class="hide-cast">
+<div id="bottom-sheet-wrapper" class="hide-cast">
   <div class="show-playing">
-    <div class="bottom-sheet layout horizontal justified center">
+    <div class="bottom-sheet layout justified center">
       <paper-icon-button class="invisible-first-period" icon="av:skip-previous" on-click="previous"></paper-icon-button>
       <paper-icon-button icon="av:replay-10" on-click="replay"></paper-icon-button>
       <a href$="[[prefix]]/[[timerKey]]/paused">
@@ -144,7 +187,7 @@
   </div>
 
   <div class="show-paused">
-    <div class="bottom-sheet layout horizontal justified center">
+    <div class="bottom-sheet layout justified center">
       <a href$="[[prefix]]/[[timerKey]]/stopped">
         <paper-icon-button icon="av:stop"></paper-icon-button>
       </a>

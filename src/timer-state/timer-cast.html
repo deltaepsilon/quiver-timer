@@ -49,18 +49,32 @@
       }*/
       .total-seconds {
         position: absolute;
+        font-size: 14vh;
+      }
+
+      [orientation="horizontal"] .total-seconds {
         right: 1rem;
         top: 1rem;
         left: 1rem;
-        font-size: 3vh;
 
         @apply(--layout-horizontal);
+      }
+
+      [orientation="vertical"] .total-seconds {
+        right: 0;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        font-size: 14vh;
+        text-align: center;
+
+        @apply(--layout-vertical);
       }
       
       .bottom-icons {
         position: absolute;
         right: 1rem;
-        bottom: 7rem;
+        bottom: 2rem;
         left: 1rem;
         font-size: 3vh;
       }
@@ -69,9 +83,18 @@
         height: 100%;
       }
 
+      [orientation="vertical"] #timer-wrapper {
+        height: calc(100% - 26rem);
+        margin-top: 13rem;
+      }
+
+      [orientation="horizontal"] #timer-wrapper {
+        height: calc(100% - 0rem);
+      }
+
     </style>
-<div id="wrapper" class="pinned" type$="[[period.type]]" current-period$="[[currentPeriod]]" state$="[[state]]">
-  <div class$="layout [[position]]" style="height: calc(100% + 0rem)">
+<div id="wrapper" class="pinned" orientation$="[[orientation]]" type$="[[period.type]]" current-period$="[[currentPeriod]]" state$="[[state]]">
+  <div id="timer-wrapper" class$="layout [[position]]">
 <digital-timer id="timer" class="timer flex" global-seconds="[[seconds]]" period-seconds="[[periodSeconds]]" global-cycle-seconds="[[seconds]]"
   global-cycle="[[globalCycle]]" period-cycle-seconds="[[periodCycleSeconds]]" period-cycle="[[periodCycle]]" color-wheel="[[colorWheel]]"></digital-timer>
 </div>
@@ -83,15 +106,36 @@
 </div>
 
 <div class="bottom-icons layout horizontal justified center">
-  <iron-icon id="icon" icon="[[period.icon]]"></iron-icon>
+  <!--<iron-icon id="icon" icon="[[period.icon]]"></iron-icon>-->
 </div>
 
 </template>
 <script>
-    Polymer({
-      is: "timer-cast",
+  Polymer({
+    is: "timer-cast",
 
-      behaviors: [TimerCyclesBehavior, QuiverColorWheel]
-    });
-  </script>
+    behaviors: [TimerCyclesBehavior, QuiverColorWheel],
+
+    properties: {
+      orientation: {
+        type: String,
+        value: 'vertical'
+      }
+    },
+
+    attached: function () {
+      this.resize();
+      window.addEventListener('resize', this.resize.bind(this));
+    },
+
+    // Functions
+    resize: function () {
+      if (document.body.offsetWidth > document.body.offsetHeight) {
+        this.orientation = 'horizontal';
+      } else {
+        this.orientation = 'vertical';
+      }
+    }
+  });
+</script>
 </dom-module>
