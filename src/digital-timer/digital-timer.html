@@ -100,13 +100,13 @@
       }
 
       #castTextWrapper #fontFill {
-        width: 7em; 
+        width: 6em; 
         height: 3em; 
         text-align: center;
       }
 
       [is-cast] digital-clock {
-        font-size: 1.4em;
+        font-size: 2em;
       }
     </style>
 
@@ -145,7 +145,7 @@
     <digital-clock class="hide-prepare" total-seconds="[[globalSeconds]]"></digital-clock>
     <digital-clock total-seconds="[[periodSeconds]]"></digital-clock>
   </div>
-  <div class="flex layout vertical center-justified">
+  <div class="flex layout vertical center-justified" style="margin-top: -60px;">
     <font-fill id="fontFill" text="[[title]]"></font-fill>
   </div>
   <div style="height: 7rem;"></div>
@@ -248,7 +248,7 @@
 
     _fontSize: function (h, w) {
       var min = Math.min(h, w);
-      return min * .08;
+      return min * .10;
     },
 
     _period: function (globalSeconds, globalCycle) {

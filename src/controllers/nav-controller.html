@@ -34,10 +34,20 @@
         padding: 6px 10px 0;
       }
 
-      #title.bottom-right {
+      #title.top-right {
         position: fixed;
-        bottom: 110px;
-        right: 26px;
+        top: 3rem;
+        right: 1rem;
+        font-size: 1rem;
+      }
+
+      [orientation="horizontal"] #title.top-right {
+        position: fixed;
+        top: 1rem;
+        right: 0;
+        left: 5.5rem;
+        text-align: center;
+        font-size: 2.5vw;
       }
 
       paper-icon-button[casting] {
@@ -48,33 +58,37 @@
         font-family: 'Brothers';
         font-size: 1.25rem;
       }
+
+      #formatting-wrapper[orientation="horizontal"].playing, #formatting-wrapper[orientation="horizontal"].paused {
+        padding-left: 6rem;
+      }
     </style>
-<div class="layout horizontal justified" style="position: relative; z-index: 1;">
-<a href="/timers" class$="[[arrowClass]]" style="margin-left: -2px;">
-<paper-icon-button icon="arrow-back"></paper-icon-button>
-</a>
-<a class$="hidden [[adminClass]]" href="/admin">
-  <paper-icon-button icon="build"></paper-icon-button>
-</a>
-<h3 id="title" class$="[[titleClass]]">[[pageTitle]]</h3>
-<div class="flex layout horizontal end-justified">
-  <paper-icon-button class$="hidden [[castClass]]" casting$="[[casting]]" icon="social:share" on-click="openCast"></paper-icon-button>
-  <paper-icon-button class$="hidden [[settingsClass]]" icon="settings" on-click="openSettings"></paper-icon-button>
-  <paper-icon-button class$="hidden [[exitClass]]" icon="power-settings-new" on-click="logout"></paper-icon-button>
-</div>
-</div>
-<template is="dom-if" if="[[showPublicTimer]]">
-  <div class="layout horizontal justified center" style="margin-top: -5px;">
-    <a href="/public/" style="margin-left: -2px;">
-<paper-icon-button icon="arrow-back"></paper-icon-button>
-</a>
-<div class="flex layout horizontal end-justified">
-  <a class="title" href="/">HiiT Clock</a>  
-</div>
-
-</div>
-
-</template>
+    <div id="formatting-wrapper" class$="[[pageClass]]" orientation$="[[orientation]]">
+      <div class="layout horizontal justified" style="position: relative; z-index: 1;">
+        <a href="/timers" class$="[[arrowClass]]" style="margin-left: -2px;">
+          <paper-icon-button icon="arrow-back"></paper-icon-button>
+        </a>
+        <a class$="hidden [[adminClass]]" href="/admin">
+          <paper-icon-button icon="build"></paper-icon-button>
+        </a>
+        <h3 id="title" class$="[[titleClass]]">[[pageTitle]]</h3>
+        <div class="flex layout horizontal end-justified">
+          <paper-icon-button class$="hidden [[castClass]]" casting$="[[casting]]" icon="social:share" on-click="openCast"></paper-icon-button>
+          <paper-icon-button class$="hidden [[settingsClass]]" icon="settings" on-click="openSettings"></paper-icon-button>
+          <paper-icon-button class$="hidden [[exitClass]]" icon="power-settings-new" on-click="logout"></paper-icon-button>
+        </div>
+      </div>
+      <template is="dom-if" if="[[showPublicTimer]]">
+        <div class="layout horizontal justified center" style="margin-top: -5px;">
+          <a href="/public/" style="margin-left: -2px;">
+            <paper-icon-button icon="arrow-back"></paper-icon-button>
+          </a>
+          <div class="flex layout horizontal end-justified">
+            <a class="title" href="/">HiiT Clock</a>
+          </div>
+        </div>
+      </template>
+    </div>
 </template>
 <script>
   Polymer({
@@ -99,9 +113,17 @@
         type: Boolean,
         value: false
       },
+      orientation: {
+        type: String,
+        value: 'vertical'
+      },
       pageTitle: {
         type: String,
         computed: '_pageTitle(page, tail)'
+      },
+      pageClass: {
+        type: String,
+        computed: '_pageClass(page, tail)'
       },
       titleClass: {
         type: String,
@@ -153,6 +175,11 @@
       }
     },
 
+    attached: function () {
+      this.resize();
+      window.addEventListener('resize', this.resize.bind(this));
+    },
+
     // Observers
     _pageTitle: function (page, tail) {
       if (page == 'timers') return 'Timers';
@@ -160,8 +187,14 @@
       return ''
     },
 
+    _pageClass: function(page, tail) {
+      if (page == 'timer' && tail.path.match(/stopped/)) return 'stopped';
+      if (page == 'timer' && tail.path.match(/playing/)) return 'playing';
+      if (page == 'timer' && tail.path.match(/paused/)) return 'paused';
+    },
+
     _titleClass: function (page, tail) {
-      if (page == 'timer' && !tail.path.match(/stopped/)) return 'bottom-right';
+      if (page == 'timer' && !tail.path.match(/stopped/)) return 'top-right';
     },
 
     _arrowClass: function (page, tail) {
@@ -201,6 +234,15 @@
         if (!args[i]) return 'hidden';
       }
       return 'show';
+    },
+
+    // Functions
+    resize: function () {
+      if (document.body.offsetWidth > document.body.offsetHeight) {
+        this.orientation = 'horizontal';
+      } else {
+        this.orientation = 'vertical';
+      }
     },
 
     openSettings: function () {

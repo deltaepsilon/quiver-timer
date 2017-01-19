@@ -7,7 +7,7 @@
         type: Array,
         value: []
       },
-      position: {
+      orientation: {
         type: String,
         value: 'vertical'
       }
@@ -41,9 +41,9 @@
 
     resize: function() {
       if (document.body.offsetWidth > document.body.offsetHeight) {
-        this.position = 'horizontal';
+        this.orientation = 'horizontal';
       } else {
-        this.position = 'vertical';
+        this.orientation = 'vertical';
       }
     }
   }
