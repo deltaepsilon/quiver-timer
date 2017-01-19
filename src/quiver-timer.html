@@ -33,7 +33,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="datastores/quiver-store-behavior.html">
 <link rel="import" href="firebase-sync/firebase-sync.html">
 <link rel="import" href="firebase-behavior/firebase-behavior.html">
-<link rel="import" href="metadata-manager/metadata-manager.html">
+<link rel="import" href="managers/metadata-manager.html">
+<link rel="import" href="managers/analytics-manager.html">
 
 <script src="third-party/lodash.custom.min.js"></script>
 
@@ -133,6 +134,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   connected="[[connected]]" page="[[page]]" user="[[user]]" account="[[account]]"></auth-controller>
 <firebase-sync id="firebaseSync" firebase="[[firebase]]" model="[[model]]" connected="[[connected]]" account="[[account]]"></firebase-sync>
 <metadata-manager id="metadataManager" route="[[route]]"></metadata-manager>
+<analytics-manager id="analyticsManager" environment="[[env.environment]]" tracking-id="[[env.analytics.trackingId]]" pathname="[[pathname]]"></analytics-manager>
 
 <cast-controller id="castController" route="[[route]]" env="[[env]]"></cast-controller>
 <paper-toast id="toast"></paper-toast>
