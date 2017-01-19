@@ -129,31 +129,37 @@
 <digital-clock id="title-clock" total-seconds="[[timer.totalSeconds]]"></digital-clock>
 </div>
 <div id="cast-description-wrapper" class="layout horizontal justified">
-  <div style="min-width: 33%;">
-<marked-element markdown="[[timer.description]]"></marked-element>
-</div>
-<div class="flex">
-  <paper-material class="app-grid" elevation="1">
-    <template is="dom-repeat" items="[[timer.periods]]" as="period">
-      <paper-icon-item type$="[[period.type]]">
-        <iron-icon class="type-color" icon="[[period.icon]]" item-icon></iron-icon>
-        <paper-item-body>
-          <div class="layout horizontal justified center">
-            <div class="flex">
-              <strong style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
-<div class="layout horizontal center" secondary>
+  
+  <template is="dom-if" if="[[timer.description]]">
+    <div style="min-width: 33%;">
+      <marked-element markdown="[[timer.description]]"></marked-element>
+    </div>
+  </template>
 
-  <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
-  <span class="show-stopwatch" style="margin-left: .25rem;">Time Cap</span>
-</div>
-</div>
-<div class$="color-block md-[[period.color]]"></div>
-</div>
-</paper-item-body>
-</paper-icon-item>
-</template>
-</paper-material>
-</div>
+  <template is="dom-if" if="[[!timer.description]]">
+    <div class="flex">
+      <paper-material class="app-grid" elevation="1">
+        <template is="dom-repeat" items="[[timer.periods]]" as="period">
+          <paper-icon-item type$="[[period.type]]">
+            <iron-icon class="type-color" icon="[[period.icon]]" item-icon></iron-icon>
+            <paper-item-body>
+              <div class="layout horizontal justified center">
+                <div class="flex">
+                  <strong style="overflow: hidden; text-overflow: ellipsis;">[[period.name]]</strong>
+                  <div class="layout horizontal center" secondary>
+                    <digital-clock total-seconds="[[period.totalSeconds]]"></digital-clock>
+                    <span class="show-stopwatch" style="margin-left: .25rem;">Time Cap</span>
+                  </div>
+                </div>
+                <div class$="color-block md-[[period.color]]"></div>
+              </div>
+            </paper-item-body>
+          </paper-icon-item>
+        </template>
+      </paper-material>
+    </div>
+  </template>
+
 </div>
 </div>
 
