@@ -35,6 +35,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="firebase-behavior/firebase-behavior.html">
 <link rel="import" href="managers/metadata-manager.html">
 <link rel="import" href="managers/analytics-manager.html">
+<!--<link rel="import" href="managers/feedback-manager.html">-->
+
 
 <script src="third-party/lodash.custom.min.js"></script>
 
@@ -135,8 +137,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <firebase-sync id="firebaseSync" firebase="[[firebase]]" model="[[model]]" connected="[[connected]]" account="[[account]]"></firebase-sync>
 <metadata-manager id="metadataManager" route="[[route]]"></metadata-manager>
 <analytics-manager id="analyticsManager" environment="[[env.environment]]" tracking-id="[[env.analytics.trackingId]]" pathname="[[pathname]]"></analytics-manager>
+<!--<feedback-manager id="feedbackManager" app-key="[[env.doorbell.appKey]]"></feedback-manager>-->
 
-<cast-controller id="castController" route="[[route]]" env="[[env]]"></cast-controller>
+<cast-controller id="castController" route="[[route]]" env="[[env]]" cast-connected="{{castConnected}}"></cast-controller>
 <paper-toast id="toast"></paper-toast>
 
 
@@ -160,7 +163,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- Dialogs -->
 <item-name-dialog id="itemNameDialog"></item-name-dialog>
 <item-description-dialog id="itemDescriptionDialog"></item-description-dialog>
-<settings-dialog id="settingsDialog" settings="[[settings]]" account="[[account]]"></settings-dialog>
+<settings-dialog id="settingsDialog" settings="[[settings]]" account="[[account]]" cast-connected="[[castConnected]]"></settings-dialog>
 <sound-dialog id="soundDialog"></sound-dialog>
 <cast-dialog id="castDialog" uid="[[user.uid]]" casting="{{casting}}"></cast-dialog>
 <guest-mode-dialog id="guestModeDialog"></guest-mode-dialog>
@@ -341,7 +344,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       cast: '_cast',
       deleteTimer: '_deleteTimer',
       forceSync: '_forceSync',
-      metadata: '_metadata'
+      metadata: '_metadata',
+      refresh: 'refresh'
     },
     _redirect: function (e) {
       this.set('route.path', e.detail);
@@ -463,9 +467,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     // Functions
+    refresh: function() {
+      return this.unregisterServiceWorkers()
+        .then(function() {
+          this.clearLocalStorage();
+        }.bind(this));      
+    },
+
     clearLocalStorage: function () {
       localStorage.clear();
       location = location.pathname + '?now=' + Date.now();
+    },
+
+    unregisterServiceWorkers: function () {
+      return navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        return Promise.all(registrations.map(function(registration) {
+          registration.unregister();
+        }));
+      });
     },
 
     toggleConfigureSheet: function (e) {

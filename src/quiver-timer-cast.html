@@ -117,7 +117,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <!-- Main content -->
 <div id="main" class="app-grid">
-  <receiver-view id="receiverView" env="[[env]]" settings="[[settings]]" state="[[state]]" seconds="[[seconds]]" periods="[[periods]]" timer="[[timer]]"></receiver-view>
+  <receiver-view id="receiverView" env="[[env]]" settings="[[settings]]" state="[[state]]" seconds="[[seconds]]" periods="[[periods]]"
+    timer="[[timer]]"></receiver-view>
 </div>
 
 </template>
@@ -141,7 +142,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
       state: {
         type: String,
-        value: 'stopped'  
+        value: 'stopped'
       },
       seconds: {
         type: Number,
@@ -162,29 +163,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     // Observers
     observers: ['_init(env)'],
 
-    _init: function(env) {
+    _init: function (env) {
       var appConfig = new cast.receiver.CastReceiverManager.Config();
       var castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
       var messageBus = castReceiverManager.getCastMessageBus(env.chromecast.namespace);
 
-      appConfig.statusText = "Get to work!";
+      appConfig.statusText = 'HiiT Clock activated';
       appConfig.maxInactivity = 6000;
 
       console.log('appconfig', appConfig, castReceiverManager);
       castReceiverManager.start(appConfig);
 
-      castReceiverManager.onSenderDisconnected = function(e) {
+      castReceiverManager.onSenderDisconnected = function (e) {
         console.log('disconnected', castReceiverManager.getSenders(), e);
       };
 
-      messageBus.onMessage = function(e) {
+      messageBus.onMessage = function (e) {
         if (e.data) {
           var payload = JSON.parse(e.data);
-          this.state = payload.state;
-          this.seconds = payload.seconds;
-          this.splice.apply(this, ['periods', 0, this.periods.length].concat(payload.periods || []));
-          this.timer = payload.timer;
-          this.settings = payload.settings;
+
+          if (payload.refresh) return this.fire('refresh');
+
+          if (payload.state) {
+            this.state = payload.state;
+            this.seconds = payload.seconds;
+            this.splice.apply(this, ['periods', 0, this.periods.length].concat(payload.periods || []));
+          }
+
+          if (payload.timer) this.timer = payload.timer;
+
+          if (payload.settings) this.settings = payload.settings;
         }
       }.bind(this);
     },
@@ -195,7 +203,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       sound: '_sound',
       testSound: '_testSound',
       alert: '_alert',
-      error: '_error'
+      error: '_error',
+      refresh: 'refresh'
     },
 
     _flash: function (e) {
@@ -234,6 +243,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       setTimeout(function () {
         this.$.toast.duration = tempDuration;
       }.bind(this), tempDuration);
+    },
+
+    refresh: function() {
+      return this.unregisterServiceWorkers()
+        .then(function() {
+          this.clearLocalStorage();
+        }.bind(this));
+    },
+
+    clearLocalStorage: function () {
+      localStorage.clear();
+      location = location.pathname + '?now=' + Date.now();
+    },
+
+    unregisterServiceWorkers: function () {
+      return navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        return Promise.all(registrations.map(function(registration) {
+          registration.unregister();
+        }));
+      });
     }
   });
 </script>

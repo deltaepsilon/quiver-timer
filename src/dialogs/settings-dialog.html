@@ -48,6 +48,17 @@
         <paper-radio-button disabled$="[[disabled]]" name="reverb-chime">Reverb Chime</paper-radio-button>
       </paper-radio-group>
     </paper-item>
+
+    <paper-item>
+      <paper-button on-click="refreshApp">Refresh App</paper-button>
+    </paper-item>  
+    
+    <template is="dom-if" if="[[castConnected]]">
+      <paper-item>
+        <paper-button on-click="refreshCast">Refresh Cast</paper-button>
+      </paper-item>  
+    </template>
+    
     <paper-item>
       <paper-button on-click="restoreDefaults">Restore Defaults</paper-button>
     </paper-item>
@@ -67,6 +78,7 @@
     properties: {
       settings: Object,
       account: Object,
+      castConnected: Boolean,
       email: {
         type: String,
         computed: '_email(account)'
@@ -133,6 +145,16 @@
     restoreDefaults: function () {
       this.fire('restoreDefaults');
       this.close();
+    },
+
+    refreshApp: function() {
+      this.fire('refresh');
+    },
+
+    refreshCast: function() {
+      this.fire('cast', {
+        refresh: true
+      });
     }
   });
 </script>

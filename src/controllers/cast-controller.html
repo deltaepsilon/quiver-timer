@@ -41,7 +41,12 @@
         type: Object,
         computed: '_playerController(player)'
       },
-      payload: Object
+      payload: Object,
+      castConnected: {
+        type: Boolean,
+        value: false,
+        notify: true
+      }
     },
 
     attached: function () {
@@ -97,6 +102,17 @@
         autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
       });
       instance.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, function (e) {
+        var state = e.sessionState;
+        switch (state) {
+          case 'SESSION_STARTED':
+          case 'SESSION_RESUMED':
+          case 'SESSION_STARTING':
+            this.set('castConnected', true);
+            break;
+          default:
+            this.set('castConnected', true);
+        }
+        console.log('session state', e.sessionState);
         this.set('sessionState', e.sessionState);
       }.bind(this));
       return instance;
