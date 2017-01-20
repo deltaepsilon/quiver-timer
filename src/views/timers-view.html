@@ -198,6 +198,12 @@
     },
 
     // Observers
+    observers: ['_restoreDefaults(account)'],
+
+    _restoreDefaults: function(account) {
+      if (account === false) this.restoreDefaults();
+    },
+
     _showVerifyEmail: function (isAnonymous, emailVerified) {
       return !isAnonymous && !emailVerified;
     },
@@ -238,12 +244,6 @@
       this.dispatch({
         type: 'deleteTimer',
         index: this.findTimerIndexByKey(e.target.key)
-      });
-    },
-
-    restoreDefaults: function () {
-      this.dispatch({
-        type: 'restoreDefaults'
       });
     },
 
