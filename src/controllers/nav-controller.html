@@ -76,6 +76,7 @@
         <div class="flex layout horizontal end-justified">
           <paper-icon-button class$="hidden [[castClass]]" casting$="[[casting]]" icon="social:share" on-click="openCast"></paper-icon-button>
           <paper-icon-button class$="hidden [[settingsClass]]" icon="settings" on-click="openSettings"></paper-icon-button>
+          <paper-icon-button class$="hidden [[feedbackClass]]" icon="feedback" on-click="openFeedback"></paper-icon-button>
           <paper-icon-button class$="hidden [[exitClass]]" icon="power-settings-new" on-click="logout"></paper-icon-button>
         </div>
       </div>
@@ -142,17 +143,21 @@
         type: Boolean,
         computed: '_isLoggedInPage(loggedInPages, page)'
       },
+      isTimersPage: {
+        type: Boolean,
+        computed: '_isPage(page, "timers")'
+      },
       isTimerPage: {
         type: Boolean,
-        computed: '_isTimerPage(page)'
+        computed: '_isPage(page, "timer")'
+      },
+      isAdminPage: {
+        type: Boolean,
+        computed: '_isPage(page, "admin")'
       },
       isPublicPage: {
         type: Boolean,
         computed: '_isPublicPage(page)'
-      },
-      isAdminPage: {
-        type: Boolean,
-        computed: '_isAdminPage(page)'
       },
       showPublicTimer: {
         type: Boolean,
@@ -161,6 +166,10 @@
       exitClass: {
         type: String,
         computed: '_showHide(isLoggedInPage, connected)'
+      },
+      feedbackClass: {
+        type: String,
+        computed: '_showHide(isTimersPage, connected)'
       },
       settingsClass: {
         type: String,
@@ -204,21 +213,16 @@
       return !!~showPages.indexOf(page) ? 'show' : 'hidden';
     },
 
+    _isPage: function(page, match) {
+      return page == match;
+    },
 
     _isLoggedInPage: function (pages, page) {
       return !!~pages.indexOf(page);
     },
 
-    _isTimerPage: function (page) {
-      return page == 'timer';
-    },
-
     _isPublicPage: function (page) {
       return page != 'admin';
-    },
-
-    _isAdminPage: function (page) {
-      return page == 'admin';
     },
 
     _showPublicTimer: function (page, tail) {
@@ -244,6 +248,10 @@
       } else {
         this.orientation = 'vertical';
       }
+    },
+
+    openFeedback: function () {
+      this.fire('openFeedback');
     },
 
     openSettings: function () {

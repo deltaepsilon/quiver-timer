@@ -1,0 +1,107 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+
+<link rel="import" href="../shared-styles.html">
+
+<script src="../third-party/lodash.custom.min.js"></script>
+
+<dom-module id="feedback-dialog">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      paper-input {
+        width: 100%;
+      }
+
+      paper-textarea {
+        height: 50vh;
+        width: 60vw;
+        max-width: 100%;
+      }
+    </style>
+
+<paper-dialog id="dialog" with-backdrop always-on-top="false">
+  <form id="form" is="iron-form">
+    <paper-item>
+      <paper-input label="Email" value="{{email}}" type="text"></paper-input>
+    </paper-item>
+    <paper-item>
+      <paper-textarea label="Feedback" value="{{feedback}}" required></paper-textarea>
+    </paper-item>
+
+    <div class="buttons">
+      <paper-button tabindex="2" on-click="close">close</paper-button>
+      <paper-button tabindex="1" on-click="send">send</paper-button>
+    </div>
+  </form>
+</paper-dialog>
+</template>
+<script>
+  Polymer({
+    is: "feedback-dialog",
+
+    properties: {
+      account: Object,
+      feedback: String,
+      firebase: Object,
+      endpoint: String,
+      feedbackRef: {
+        type: Object,
+        computed: '_feedbackRef(firebase, endpoint)'
+      }
+    },
+
+    // Observers
+    observers: ['_email(account.email)'],
+
+    _email: function(email) {
+      this.email = email;
+    },
+
+    _feedbackRef: function(firebase, endpoint) {
+      return firebase.database().ref(endpoint);
+    },
+
+    // Functions
+    open: function() {
+      this.$.dialog.open();
+    },
+
+    close: function() {
+      this.$.dialog.close();
+    },
+
+    send: function() {
+      this.close();
+
+      var payload = {
+        email: this.email,
+        feedback: this.feedback,
+        timestamp: new Date().toString(),
+        navigator: _.pick(navigator, ['appName', 'appVersion', 'language', 'doNotTrack', 'platform', 'product', 'vendor'])
+      };
+
+      if (this.account) {
+        payload.uid = this.account.uid;
+        payload.accountEmail = this.account.email;
+      }
+
+      return this.feedbackRef.push(payload)
+        .then(function() {
+          this.fire('alert', 'Feedback submitted. Thank you!');    
+        }.bind(this))
+        .catch(function(err) {
+          this.fire('error', err);
+        });
+    }
+
+  });
+</script>
+</dom-module>
