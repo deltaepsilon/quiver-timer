@@ -33,7 +33,7 @@
       <paper-input label="Email" value="{{email}}" type="text"></paper-input>
     </paper-item>
     <paper-item>
-      <paper-textarea label="Feedback" value="{{feedback}}" required></paper-textarea>
+      <paper-textarea label="Feedback" value="{{text}}" required></paper-textarea>
     </paper-item>
 
     <div class="buttons">
@@ -49,7 +49,7 @@
 
     properties: {
       account: Object,
-      feedback: String,
+      text: String,
       firebase: Object,
       endpoint: String,
       feedbackRef: {
@@ -83,7 +83,8 @@
 
       var payload = {
         email: this.email,
-        feedback: this.feedback,
+        name: this.account.displayName || 'A User',
+        text: this.text,
         timestamp: new Date().toString(),
         navigator: _.pick(navigator, ['appName', 'appVersion', 'language', 'doNotTrack', 'platform', 'product', 'vendor'])
       };

@@ -13,7 +13,7 @@ module.exports = function (e) {
   var timersRef = e.data.adminRef.root.child(utils.replaceWildcard(env.model.user.owned.state, 'uid', uid)).child('timers');
   var md5Hash = md5(JSON.stringify(_.omit(timer, ['uid', 'updated']))).replace(/\//, '|');
 
-  console.log(key, timer ? timer.name : 'remove me!');
+  // console.log(key, timer ? timer.name : 'remove me!');
   if (!timer || timer.private) {
     // console.log('removing', key);
     return searchRef.remove();

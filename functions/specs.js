@@ -23,5 +23,10 @@ module.exports = [
     name: 'sitemap',
     path: '/admin/queues/sitemap/{key}',
     func: require('./actions/sitemap')
+  },
+  {
+    name: 'feedback',
+    path: '/user/write/feedback/{key}',
+    func: require('./actions/feedback')
   }
 ];
