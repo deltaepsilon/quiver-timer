@@ -46,7 +46,7 @@
       }
 
       #algolia-wrapper {
-        position: absolute;
+        position: relative;
         top: .5rem;
         right: .5rem;
         height: 1rem;
@@ -71,7 +71,7 @@
   <!--<h3>Search Timers</h3>-->
 
   <template is="dom-if" if="[[hits.length]]">
-    <div id="algolia-wrapper" class="layout horizontal center">
+    <div id="algolia-wrapper" class="layout horizontal end-justified">
       <!--<span>search by</span>-->
       <img src="/images/algolia.svg" alt="powered by Algolia">
     </div>
@@ -155,7 +155,7 @@
 
     // Observers 
     observers: [
-      'search(searchTerm, email, index)'
+      'search(searchTerm, index)'
     ],
 
     _client: function (algoliaConfig) {
@@ -180,7 +180,7 @@
     },
 
     // Functions
-    search: function (searchTerm, email, index) {
+    search: function (searchTerm, index) {
       if ((this.defaultAll && typeof searchTerm !== 'string') || (!this.defaultAll && !searchTerm)) {
         this.splice('hits', 0, this.hits.length);
         this.hitsPerPage = 0;
@@ -191,8 +191,8 @@
         var options = {
           facets: 'email'
         };
-        if (email) {
-          options.filters = 'NOT email:' + email;
+        if (this.email) {
+          options.filters = 'NOT email:' + this.email;
         }
         index.search(searchTerm, options, function (err, content) {
           if (err) {
