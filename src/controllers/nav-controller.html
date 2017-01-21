@@ -2,6 +2,10 @@
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/iron-icons/social-icons.html">
+<link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
 
 <link rel="import" href="../icons.html">
 
@@ -31,7 +35,7 @@
 
       #title {
         margin: 0;
-        padding: 6px 10px 0;
+        padding: 7px 10px 0;
       }
 
       #title.top-right {
@@ -63,14 +67,37 @@
       #formatting-wrapper[orientation="horizontal"].playing, #formatting-wrapper[orientation="horizontal"].paused {
         padding-left: 6rem;
       }
+
+      paper-item a {
+         color: var(--dark-primary-color);
+      }
     </style>
     <div id="formatting-wrapper" class$="[[pageClass]]" orientation$="[[orientation]]">
       <div class="layout horizontal justified" style="position: relative; z-index: 1;">
+        <paper-menu-button class$="[[menuClass]]" horizontal-align="left" style="padding: 0;">
+          <paper-icon-button icon="menu" class="dropdown-trigger"></paper-icon-button>
+          <paper-menu class="dropdown-content">
+            <paper-item>
+              <a href="/faq">FAQ</a>
+            </paper-item>
+            <paper-item>
+              <a href="/about">About</a>
+            </paper-item>
+            <paper-item>
+              <a href="/policies">Policies</a>
+            </paper-item>
+            <paper-item>
+              <a href="/contact">Contact</a>
+            </paper-item>
+            <paper-item>
+              <a class$="hidden [[adminClass]]" href="/admin">
+                <paper-icon-button icon="build"></paper-icon-button>
+              </a>      
+            </paper-item>
+          </paper-menu>
+        </paper-menu-button>
         <a href="/timers" class$="[[arrowClass]]" style="margin-left: -2px;">
           <paper-icon-button icon="arrow-back"></paper-icon-button>
-        </a>
-        <a class$="hidden [[adminClass]]" href="/admin">
-          <paper-icon-button icon="build"></paper-icon-button>
         </a>
         <h3 id="title" class$="[[titleClass]]">[[pageTitle]]</h3>
         <div class="flex layout horizontal end-justified">
@@ -163,6 +190,10 @@
         type: Boolean,
         computed: '_showPublicTimer(page, tail)'
       },
+      menuClass: {
+        type: String,
+        computed: '_showHide(isTimersPage)'
+      },
       exitClass: {
         type: String,
         computed: '_showHide(isLoggedInPage, connected)'
@@ -208,7 +239,7 @@
     },
 
     _arrowClass: function (page, tail) {
-      var showPages = ['admin', 'timer', 'configure', 'fourohfour'];
+      var showPages = ['admin', 'timer', 'configure', 'fourohfour', 'faq', 'about', 'policies', 'contact'];
       // if (tail.path.match(/playing/)) return 'none';
       return !!~showPages.indexOf(page) ? 'show' : 'hidden';
     },

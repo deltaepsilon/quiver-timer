@@ -200,7 +200,7 @@
     // Observers
     observers: ['_restoreDefaults(account)'],
 
-    _restoreDefaults: function(account) {
+    _restoreDefaults: function (account) {
       if (account === false) this.restoreDefaults();
     },
 
@@ -226,7 +226,7 @@
     },
 
     // Functions
-    findTimerIndexByKey: function(key) {
+    findTimerIndexByKey: function (key) {
       var i = this.timers.length;
       while (i--) {
         if (this.timers[i].$key == key) return i;
@@ -264,7 +264,7 @@
         .then(function (hits) {
           this.dispatch({
             type: 'addTimers',
-            timers: hits.hits.map(function(timer) {
+            timers: hits.hits.map(function (timer) {
               timer.$key = timer.objectID;
               delete timer.objectID;
               delete _highlightResult;
