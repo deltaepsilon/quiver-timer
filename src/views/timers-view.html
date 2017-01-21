@@ -112,7 +112,7 @@
     <template is="dom-repeat" items="[[filteredTimers]]" as="timer">
       <div>
         <paper-icon-item two-line style="padding: 0;">
-<a class="flex layout horizontal center-justified" href="/timer/[[timer.$key]]/stopped" item-icon>
+<a class="flex layout horizontal center-justified" href="/timer/[[timer.$key]]/stopped/[[timer.slug]]" item-icon>
   <paper-icon-button icon="av:play-circle-outline"></paper-icon-button>
 </a>
 <paper-item-body>

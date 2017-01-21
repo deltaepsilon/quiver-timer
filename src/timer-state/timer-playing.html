@@ -178,7 +178,7 @@
     <div class="bottom-sheet layout justified center">
       <paper-icon-button class="invisible-first-period" icon="av:skip-previous" on-click="previous"></paper-icon-button>
       <paper-icon-button icon="av:replay-10" on-click="replay"></paper-icon-button>
-      <a href$="[[prefix]]/[[timerKey]]/paused">
+      <a href$="[[prefix]]/[[timerKey]]/paused/[[slug]]">
         <paper-fab icon="av:pause"></paper-fab>
       </a>
       <paper-icon-button icon="av:forward-10" on-click="forward"></paper-icon-button>
@@ -188,10 +188,10 @@
 
   <div class="show-paused">
     <div class="bottom-sheet layout justified center">
-      <a href$="[[prefix]]/[[timerKey]]/stopped">
+      <a href$="[[prefix]]/[[timerKey]]/stopped/[[slug]]">
         <paper-icon-button icon="av:stop"></paper-icon-button>
       </a>
-      <a href$="[[prefix]]/[[timerKey]]/playing">
+      <a href$="[[prefix]]/[[timerKey]]/playing/[[slug]]">
         <paper-fab icon="av:play-arrow"></paper-fab>
       </a>
       <paper-icon-button icon="av:replay" on-click="refresh"></paper-icon-button>
@@ -209,7 +209,8 @@
     properties: {
       state: String,
       prefix: String,
-      isCast: Boolean
+      isCast: Boolean,
+      slug: String
     },
 
     observers: ['_state(state)'],

@@ -52,7 +52,7 @@
 
 <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="stopped" role="main">
   <timer-stopped id="timerStopped" name="stopped" prefix="[[prefix]]" timer-key="[[timerKey]]" timer="[[timer]]"></timer-stopped>
-  <timer-playing id="timerPlaying" name="playing" prefix="[[prefix]]" state="[[state]]" timer-key="[[timerKey]]" seconds="[[seconds]]" periods="[[workingPeriods]]"></timer-playing>
+  <timer-playing id="timerPlaying" name="playing" prefix="[[prefix]]" state="[[state]]" timer-key="[[timerKey]]" seconds="[[seconds]]" periods="[[workingPeriods]]" slug="[[timer.slug]]"></timer-playing>
 </iron-pages>
 </template>
 <script>
@@ -257,14 +257,14 @@
 
       this.state = 'playing';
       if (!this.localRoute.path.match(/playing/)) {
-        this.fire('redirect', this.prefix + '/' + this.timerKey + '/playing');
+        this.fire('redirect', this.prefix + '/' + this.timerKey + '/playing/' + this.timer.slug);
       }
       this.fire('testSound');
     },
 
     pause: function () {
       this.state = 'paused'; // Set to avoid sync issues from upstream
-      this.fire('redirect', this.prefix + '/' + this.timerKey + '/paused');
+      this.fire('redirect', this.prefix + '/' + this.timerKey + '/paused/' + this.timer.slug);
     },
 
     stop: function () {
