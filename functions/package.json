@@ -11,6 +11,7 @@
     "firebase-functions": "https://storage.googleapis.com/firebase-preview-drop/node/firebase-functions/firebase-functions-preview.latest.tar.gz",
     "google-cloud": "^0.45.2",
     "lodash": "^4.17.2",
+    "mandrill-api": "^1.0.45",
     "md5": "^2.2.1",
     "quiver-firebase-search": "^1.0.4",
     "sitemap": "^1.9.0"

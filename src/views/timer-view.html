@@ -175,7 +175,7 @@
     },
 
     _state: function (prefix, subrouteData) {
-      if (prefix !== '/timer' && prefix !== '/public') return 'stopped';
+      if (prefix !== '/timer' && prefix !== '/public') return this.subrouteData.state = 'stopped';
       return subrouteData.state || 'stopped';
     },
 
