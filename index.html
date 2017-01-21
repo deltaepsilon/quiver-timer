@@ -113,10 +113,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
       (function () {
         window.addEventListener('showCast', function (e) {
-          document.body.querySelector('#cast-button').setAttribute('style', 'display: block;');
+          document.body.querySelector('#cast-button').setAttribute('class', 'show-important');
         });
         window.addEventListener('hideCast', function (e) {
-          document.body.querySelector('#cast-button').removeAttribute('style');
+          document.body.querySelector('#cast-button').removeAttribute('class');
         });
       })();
   </script>
@@ -136,6 +136,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         --connected-color: #1C898E;
         --disconnected-color: #FFFFFF;
+      }
+
+      #cast-button.show-important {
+        display: block !important;
       }
 
       #cast-button:focus {
