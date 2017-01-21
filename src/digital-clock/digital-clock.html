@@ -54,6 +54,7 @@
        },
 
        breakdown: function(s) {
+         if (isNaN(s)) return { hours: 0, minutes: 0, seconds: 0 };
          var seconds = Math.max(0, s);
          var hours = Math.floor(seconds/3600);
          var minutes = Math.floor((seconds - hours * 3600) / 60);
