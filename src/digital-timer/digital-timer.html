@@ -272,7 +272,7 @@
       var minDimension = Math.max(0, Math.min(width, height - 16)); // Prevent clipping in vert layouts 
       var w = minDimension;
       var h = minDimension;
-      var arcWidth = minDimension * .06;
+      var arcWidth = minDimension * .05;
       var outerRadiusArc = w / 2;
       var innerRadiusArc = outerRadiusArc - arcWidth;
       var shadowWidth = minDimension * .02;
@@ -300,7 +300,8 @@
       function innerCircleFill(d, i) {
         //  var c = d3.hsl(color(d.data.color));
         var c = d3.hsl(d3.color(d.data.color));
-        return d3.hsl((c.h + 5), (c.s + .07), (c.l - .15));
+        return c;
+        //return d3.hsl((c.h + 5), (c.s + .07), (c.l - .15));
       };
 
 
