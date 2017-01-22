@@ -9,6 +9,10 @@
         type: Object,
         computed: '_period(periodIndex, periods, periods.splices)'
       },
+      nextPeriod: {
+        type: Object,
+        computed: '_nextPeriod(periodIndex, periods, periods.splices)'
+      },
       periodSeconds: {
         type: Number,
         computed: '_periodSeconds(seconds, periodIndex, periods, periods.splices)'
@@ -186,6 +190,10 @@
 
     _period: function(periodIndex, periods) {
       return periods[periodIndex];
+    },
+
+    _nextPeriod: function(periodIndex, periods) {
+      return periods[periodIndex + 1];
     },
 
     _periodSeconds: function(seconds, periodIndex, periods) {

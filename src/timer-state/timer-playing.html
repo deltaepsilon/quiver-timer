@@ -72,6 +72,31 @@
 
         @apply(--layout-horizontal);
       }
+
+      .next-period {
+        font-size: 1rem;
+        padding: 6px;
+      }
+
+      .next-period iron-icon {
+        margin-top: -4px;
+      }
+
+      .next-period span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 33vw;
+      }
+
+      [orientation="horizontal"] .next-period > span {
+        position: fixed;
+        right: 26px;
+        top: calc(50vh + 10px);
+        text-align: right;
+        max-width: 15vw;
+        white-space: inherit;
+      }
       
       .top-icons {
         position: absolute;
@@ -165,7 +190,14 @@
 
 <div class="total-seconds">
   <digital-clock total-seconds="[[totalGlobalSeconds]]"></digital-clock>
-  <div class="flex"></div>
+  <div class="next-period flex layout horizontal center-justified end">
+    <template is="dom-if" if="[[nextPeriod.name]]">
+      <span>
+        <iron-icon icon="chevron-right"></iron-icon>
+        [[nextPeriod.name]]
+      </span>
+    </template>
+  </div>
   <digital-clock total-seconds="[[totalPeriodSeconds]]"></digital-clock>
 </div>
 
