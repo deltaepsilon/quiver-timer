@@ -350,7 +350,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       deleteTimer: '_deleteTimer',
       forceSync: '_forceSync',
       metadata: '_metadata',
-      refresh: 'refresh'
+      refreshApp: 'refreshApp'
     },
     _redirect: function (e) {
       this.set('route.path', e.detail);
@@ -415,6 +415,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     _logout: function () {
       this.$.authController.logout();
+      localStorage.clear();
       this.dispatch({
         type: 'clearState'
       });
@@ -472,7 +473,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     // Functions
-    refresh: function() {
+    refreshApp: function() {
       return this.unregisterServiceWorkers()
         .then(function() {
           this.clearLocalStorage();

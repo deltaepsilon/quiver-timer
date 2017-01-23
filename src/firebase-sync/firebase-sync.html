@@ -118,7 +118,7 @@
             promises.push(searchRef.child(key).once('value')
               .then(function (snap) {
                 var timer = snap.val();
-                timer.$key = timer.objectID;
+                timer.$key = snap.key;
                 delete timer.objectID;
                 timers.push(timer);
               }));
@@ -126,6 +126,16 @@
             timer.$key = key;
             timers.push(timer);
           }
+        }
+
+        var missingKeys = timers.filter(function(timer) {
+          return !timer.$key;
+        });
+
+        if (missingKeys.length) {
+          console.log('$key missing!!!');
+          console.table(timers);
+          debugger;
         }
 
         Promise.all(promises)
