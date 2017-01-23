@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/marked-element/marked-element.html">
 <link rel="import" href="../shared-styles.html">
 
 <dom-module id="policies-view">
@@ -8,7 +9,18 @@
         display: block;
       }
     </style>
-    <h1>Policies</h1>
+    
+    <marked-element>
+      <div class="markdown-html"></div>
+      <script type="text/markdown">
+        # Policies
+
+        ### Why should I log in?
+        I've tried to make Guest Mode as useful as possible. You can still create timers, but they'll only save to your local cache, so you lose them at log out. However, if you log in with Google or Facebook, you can build your own timer library... and that's where HiiT Clock get super powerful.
+        
+      </script>
+    </marked-element>
+
   </template>
   <script>
     Polymer({
