@@ -21,6 +21,14 @@
       :host {
         display: block;
       }
+
+      #settings-buttons > *{
+        padding: .5rem 0;
+      }
+
+      #settings-buttons paper-button {
+        width: 100%;
+      }
     </style>
 
 <div id="sounds">
@@ -51,21 +59,29 @@
         </paper-radio-group>
       </paper-item>
 
-      <paper-item>
-        <paper-button on-click="refreshApp">Refresh App</paper-button>
-      </paper-item>  
-      
-      <template is="dom-if" if="[[castConnected]]">
-        <paper-item>
-          <paper-button on-click="refreshCast">Refresh Cast</paper-button>
-        </paper-item>  
-      </template>
-      
-      <paper-item>
-        <paper-button on-click="restoreDefaults">Restore Defaults</paper-button>
-      </paper-item>
+      <div id="settings-buttons" class="layout vertical">
 
-      
+        <template is="dom-if" if="[[castSessionState]]">
+          <paper-item>
+            <paper-button class="secondary" on-click="stopCast">Stop Casting</paper-button>
+          </paper-item>  
+        </template>
+
+        <template is="dom-if" if="[[castConnected]]">
+          <paper-item>
+            <paper-button class="secondary" on-click="refreshCast">Refresh Cast</paper-button>
+          </paper-item>  
+        </template>
+
+        <paper-item>
+          <paper-button class="secondary" on-click="refreshApp">Refresh App</paper-button>
+        </paper-item>  
+        
+        <paper-item>
+          <paper-button class="primary" on-click="restoreDefaults">Restore Defaults</paper-button>
+        </paper-item>
+
+      </div>
     </form>
   </paper-dialog-scrollable>
   <div class="buttons">
@@ -83,6 +99,7 @@
       settings: Object,
       account: Object,
       castConnected: Boolean,
+      castSessionState: String,
       email: {
         type: String,
         computed: '_email(account)'
@@ -159,6 +176,12 @@
       this.fire('cast', {
         refresh: true
       });
+      this.close();
+    },
+
+    stopCast: function() {
+      this.fire('stopCast');
+      this.close();
     }
   });
 </script>

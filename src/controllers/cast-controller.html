@@ -16,7 +16,10 @@
     properties: {
       route: Object,
       env: Object,
-      sessionState: String,
+      sessionState: {
+        type: String,
+        notify: true
+      },
       isAvailable: {
         type: Boolean,
         value: false
@@ -151,6 +154,10 @@
       if (this.castSession && this.env.chromecast.namespace) {
         this.castSession.sendMessage(this.env.chromecast.namespace, this.payload);
       }
+    },
+
+    stopCast: function() {
+      this.castSession.endSession(true);
     }
 
   });

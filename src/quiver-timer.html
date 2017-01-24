@@ -138,7 +138,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <metadata-manager id="metadataManager" route="[[route]]"></metadata-manager>
 <analytics-manager id="analyticsManager" environment="[[env.environment]]" tracking-id="[[env.analytics.trackingId]]" pathname="[[pathname]]"></analytics-manager>
 
-<cast-controller id="castController" route="[[route]]" env="[[env]]" cast-connected="{{castConnected}}"></cast-controller>
+<cast-controller id="castController" route="[[route]]" env="[[env]]" cast-connected="{{castConnected}}" session-state="{{castSessionState}}"></cast-controller>
 <paper-toast id="toast"></paper-toast>
 
 
@@ -166,7 +166,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- Dialogs -->
 <item-name-dialog id="itemNameDialog"></item-name-dialog>
 <item-description-dialog id="itemDescriptionDialog"></item-description-dialog>
-<settings-dialog id="settingsDialog" settings="[[settings]]" account="[[account]]" cast-connected="[[castConnected]]"></settings-dialog>
+<settings-dialog id="settingsDialog" settings="[[settings]]" account="[[account]]" cast-connected="[[castConnected]]" cast-session-state="[[castSessionState]]"></settings-dialog>
 <feedback-dialog id="feedbackDialog" firebase="[[firebase]]" endpoint="[[model.user.write.feedback]]" account="[[account]]"></feedback-dialog>
 <sound-dialog id="soundDialog"></sound-dialog>
 <cast-dialog id="castDialog" uid="[[user.uid]]" casting="{{casting}}"></cast-dialog>
@@ -350,7 +350,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       deleteTimer: '_deleteTimer',
       forceSync: '_forceSync',
       metadata: '_metadata',
-      refreshApp: 'refreshApp'
+      refreshApp: 'refreshApp',
+      stopCast: 'stopCast'
     },
     _redirect: function (e) {
       this.set('route.path', e.detail);
@@ -478,6 +479,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         .then(function() {
           this.clearLocalStorage();
         }.bind(this));      
+    },
+
+    stopCast: function() {
+      this.$.castController.stopCast();
     },
 
     clearLocalStorage: function () {
