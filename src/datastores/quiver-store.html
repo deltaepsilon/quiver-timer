@@ -266,7 +266,9 @@
       case 'duplicateTimer':
       case 'restoreDefaults':
       case 'addTimers':
-        state.version = Date.now();
+        if (!action.restoreDefaults) {
+          state.version = Date.now();
+        }
         break;
     }
 

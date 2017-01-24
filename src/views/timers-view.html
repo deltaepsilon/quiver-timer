@@ -201,7 +201,10 @@
     observers: ['_restoreDefaults(account)'],
 
     _restoreDefaults: function (account) {
-      if (account === false) this.restoreDefaults();
+      if (account === false) {
+        // console.log('restoring defaults');
+        this.restoreDefaults();
+      } 
     },
 
     _showVerifyEmail: function (isAnonymous, emailVerified) {
@@ -269,7 +272,8 @@
               delete timer.objectID;
               delete _highlightResult;
               return timer;
-            })
+            }),
+            restoreDefaults: true
           });
         }.bind(this))
         .catch(function (err) {
