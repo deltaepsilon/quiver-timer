@@ -62,7 +62,7 @@
   };
 
   var QuiverStore = Redux.createStore(function (state, action) {
-    if (typeof state == 'undefined') {
+    if (action.type == '@@redux/INIT') {
       try {
         state = JSON.parse(localStorage.getItem('QuiverStoreState'));
       } catch (err) {
@@ -279,14 +279,15 @@
       case 'duplicateTimer':
       case 'addTimers':
       case 'addTimer':
-        state.timers = state.timers.sort(function(a, b) {
-          return a.name > b.name;
-        });
+      case '@@redux/INIT':
         state.timers = state.timers.map(function(timer) {
           if (!timer.slug) {
             timer.slug = getSlug(timer);
           }
           return timer;
+        });
+        state.timers = state.timers.sort(function(a, b) {
+          return a.name > b.name;
         });
         break;
     }
