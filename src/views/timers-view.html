@@ -237,16 +237,20 @@
     },
 
     duplicate: function (e) {
+      // Safari targets the button press differently, hence the .parentElement failsafe
+      var index = this.findTimerIndexByKey(e.target.key || e.target.parentElement.key); 
       this.dispatch({
         type: 'duplicateTimer',
-        index: this.findTimerIndexByKey(e.target.key)
+        index: index
       });
     },
 
     delete: function (e) {
+      // Safari targets the button press differently, hence the .parentElement failsafe
+      var index = this.findTimerIndexByKey(e.target.key || e.target.parentElement.key); 
       this.dispatch({
         type: 'deleteTimer',
-        index: this.findTimerIndexByKey(e.target.key)
+        index: index
       });
     },
 
