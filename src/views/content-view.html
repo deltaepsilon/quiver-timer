@@ -1,0 +1,55 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/marked-element/marked-element.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="content-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+    <app-route id="route" route="{{route}}" pattern="/:page" data="{{routeData}}"></app-route>
+    <iron-ajax auto url="[[contentUrl]]" handle-as="text" last-response="{{res}}"></iron-ajax>
+    
+    <marked-element markdown="[[markdown]]"></marked-element>
+
+  </template>
+  <script>
+    Polymer({
+       is: "content-view",
+
+       properties: {
+         route: Object,
+         page: {
+           type: String,
+           computed: '_page(routeData.page)'
+         },
+         contentUrl: {
+           type: String,
+           computed: '_contentUrl(page)'
+         },
+         markdown: {
+           type: String,
+           computed: '_markdown(res)'
+         }
+       },
+
+       // Observers
+       _page: function (page) {
+        return page;
+       },
+
+       _contentUrl: function (page) {
+         return '../src/markdown/' + page + '.md';
+       },
+
+       _markdown: function (markdown) {
+         return markdown || "# Page Not Found: 404\n[Head back to the ranch](/)";
+       }
+    });
+  </script>
+</dom-module>

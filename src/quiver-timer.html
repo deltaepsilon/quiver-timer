@@ -158,10 +158,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <cast-view id="castView" name="cast" firebase="[[firebase]]" cast-endpoint="[[castEndpoint]]"></cast-view>
     <public-view id="publicView" name="public" env="[[env]]" firebase="[[firebase]]" model="[[model]]" route="[[subroute]]"></public-view>
     <admin-view id="adminView" name="admin" firebase="[[firebase]]" model="[[model]]"></admin-view>
-    <faq-view id="faqView" name="faq"></faq-view>
-    <about-view id="aboutView" name="about"></about-view>
-    <policies-view id="policiesView" name="policies"></policies-view>
-    <contact-view id="contactView" name="contact"></contact-view>
+    <content-view id="contentView" name="content" route="[[subroute]]"></content-view>
     <fourohfour-view id="fourohfourView" name="fourohfour"></fourohfour-view>
     
   </iron-pages>
@@ -431,7 +428,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     _error: function (e) {
-      this.alert(e.detail.toString(), 5000);
+      this.alert((e.detail.error || e.detail).toString(), 5000);
     },
 
     _log: function (e) {
