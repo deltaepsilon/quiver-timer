@@ -103,12 +103,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: #011627;
         color: #FFF;
       }
+
+      #title-wrapper {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 1rem;
+        left: 0;
+
+        z-index: -1;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+      }
+
+      #title {
+        font-size: 3vw;
+        /*text-transform: uppercase;*/ 
+        color: rgba(255, 255, 255, .1);
+      }
     </style>
 </head>
 
 <body>
   <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
   <quiver-timer-cast id="app"></quiver-timer-cast>
+  <div id="title-wrapper">
+    <span id="title"></span>
+  </div>
+  <script>
+    (function () {
+      var title = document.body.querySelector('#title');
+      title.innerHTML = location.hostname;
+    })()
+  </script>
   <!-- Built with love using Polymer Starter Kit -->
 </body>
 
