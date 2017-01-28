@@ -36,7 +36,7 @@ Of course, this doesn't work on Android devices, so you're out of luck if you ha
 On any timer page, notice the share icon in the top nav. Click it to open the share dialog. Enable sharing to send your timer to a publicly available page. Anyone can access this page, and it's particularly useful for putting up on a television.
 
 ### Background sound alerts
-Android and the desktop Chrome will play your selected alert chimes in the background. iOS does not support background sound, so you're out of luck. There's nothing I can do to fix this.
+Android and the desktop Chrome will play your selected alert chimes in the background. iOS does not support background sound, so you're out of luck. There's nothing we can do to fix this.
 
 ### Foreground sound alerts
 All browsers support foreground sound. Click the Settings gears to configure your alerts.
