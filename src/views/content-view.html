@@ -10,12 +10,39 @@
       :host {
         display: block;
       }
+
+      .markdown-html > h1 {
+        text-align: center;
+        font-family: Brothers;
+        margin-top: -2.75rem;
+      }
+
+      .markdown-html table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .markdown-html td {
+        padding: .5rem;
+      }
+
+      .markdown-html tr:nth-child(even) {
+          background-color: var(--color-rich-black);
+      }
+
+      /*.markdown-html tr:nth-child(odd) {
+          background-color: var(--color-metallic-seaweed);
+      }*/
+
+      
     </style>
 
     <app-route id="route" route="{{route}}" pattern="/:page" data="{{routeData}}"></app-route>
     <iron-ajax auto url="[[contentUrl]]" handle-as="text" last-response="{{res}}"></iron-ajax>
     
-    <marked-element markdown="[[markdown]]"></marked-element>
+    <marked-element markdown="[[markdown]]">
+      <div class="markdown-html"></div>
+    </marked-element>
 
   </template>
   <script>
@@ -48,7 +75,7 @@
        },
 
        _markdown: function (markdown) {
-         return markdown || "# Page Not Found: 404\n[Head back to the ranch](/)";
+         return markdown || "# 404 \n ## Page not found :( \n [Head back to the ranch](/)";
        }
     });
   </script>

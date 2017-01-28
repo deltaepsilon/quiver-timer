@@ -78,7 +78,7 @@
           <paper-icon-button icon="menu" class="dropdown-trigger"></paper-icon-button>
           <paper-menu class="dropdown-content">
             <paper-item>
-              <a href="/content/faq">FAQ</a>
+              <a href="/content/tips">Tips & Tricks</a>
             </paper-item>
             <paper-item>
               <a href="/content/about">About</a>
@@ -239,7 +239,7 @@
     },
 
     _arrowClass: function (page, tail) {
-      var showPages = ['admin', 'timer', 'configure', 'fourohfour', 'faq', 'about', 'policies', 'contact'];
+      var showPages = ['admin', 'timer', 'configure', 'fourohfour', 'content'];
       // if (tail.path.match(/playing/)) return 'none';
       return !!~showPages.indexOf(page) ? 'show' : 'hidden';
     },
