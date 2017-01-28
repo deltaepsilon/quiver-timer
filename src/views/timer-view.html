@@ -88,7 +88,7 @@
       },
       timer: {
         type: Object,
-        computed: '_timer(timerKey, timers)'
+        computed: '_timer(timerKey, timers, timers.splices)'
       },
       state: {
         type: String,
@@ -183,6 +183,7 @@
       var timer = timers.find(function(timer) {
         return timer.$key == timerKey;
       });
+      console.log('timer-view found timer', timer, timerKey, timers);
       var prepareColor = this.prepareColor;
       var colors = {
         work: this.workColors.slice(0),
