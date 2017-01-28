@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
 <link rel="import" href="../firebase-behavior/firebase-behavior.html">
 <link rel="import" href="../datastores/quiver-store-behavior.html">
 <link rel="import" href="../shared-styles.html">
@@ -11,12 +12,24 @@
       :host {
         display: block;
       }
+
+      #spinner-wrapper {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1;
+        background: rgba(255, 255, 255, .5);
+        display: none;
+      }
+
+      #spinner-wrapper[loading] {
+        display: flex;
+      }
     </style>
-    
-    <template is="dom-if" if=""></template>
-    
-    <div class="guest-mode">
-      
+    <div id="spinner-wrapper" class="layout vertical center-justified center" loading$="[[loading]]">
+      <paper-spinner-lite id="spinner" active$="[[loading]]" alt="Loading authenticated user"></paper-spinner-lite>
     </div>
 </template>
 <script>
@@ -37,6 +50,10 @@
       loginPages: {
         type: Array,
         value: ['timers', 'timer', 'configure']
+      },
+      loading: {
+        type: Boolean,
+        value: true
       }
     },
 
@@ -50,6 +67,7 @@
       var handler;
       var accountRef;
       firebase.auth().onAuthStateChanged(function (user) {
+        this.loading = false;
         this.dispatch({
           type: 'setUser',
           user: user
@@ -116,22 +134,22 @@
       var provider = new this.firebase.auth.GoogleAuthProvider();
       provider.addScope('profile');
       provider.addScope('email');
-      this.signInWithPopupProvider(provider);
+      this.signInWithProvider(provider);
     },
 
     facebook: function () {
       var provider = new this.firebase.auth.FacebookAuthProvider();
       provider.addScope('public_profile');
       provider.addScope('email');
-      this.signInWithPopupProvider(provider);
+      this.signInWithProvider(provider);
     },
 
     anonymous: function () {
       this.firebase.auth().signInAnonymously();
     },
 
-    signInWithPopupProvider: function (provider) {
-      return this.firebase.auth().signInWithPopup(provider)
+    signInWithProvider: function (provider) {
+      return this.firebase.auth().signInWithRedirect(provider)
         .catch(function (err) {
           console.log('err', err);
           if (err.code == 'auth/account-exists-with-different-credential') {
