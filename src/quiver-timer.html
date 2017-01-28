@@ -490,11 +490,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     clearLocalStorage: function () {
+      if (!localStorage) return;
       localStorage.clear();
       location = location.pathname + '?now=' + Date.now();
     },
 
     unregisterServiceWorkers: function () {
+      if (!navigator.serviceWorker) return Promise.resolve();
       return navigator.serviceWorker.getRegistrations().then(function (registrations) {
         return Promise.all(registrations.map(function(registration) {
           registration.unregister();
