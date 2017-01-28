@@ -131,7 +131,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-<iron-ajax auto url="/env.client.json" handle-as="json" last-response="{{rawEnv}}"></iron-ajax>
+<iron-ajax id="env" auto url="/env.client.json" handle-as="json" last-response="{{rawEnv}}"></iron-ajax>
 <app-location id="appLocation" route="{{route}}" on-location-changed="_locationChanged"></app-location>
 <app-route id="appRoute" route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
 <app-scrollpos-control selected="{{page}}"></app-scrollpos-control>
@@ -249,8 +249,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     // Computed
     _firebase: function (firebaseConfig) {
-      firebase.initializeApp(firebaseConfig);
-      return firebase;
+      if (firebase.apps && firebase.apps.length) {
+        return firebase.app();
+      } else {
+        firebase.initializeApp(firebaseConfig);
+        return firebase;
+      }
     },
 
     _env: function (env) {

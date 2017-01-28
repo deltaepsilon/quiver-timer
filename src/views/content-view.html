@@ -20,6 +20,7 @@
       .markdown-html table {
         width: 100%;
         border-collapse: collapse;
+        margin: 2rem 0 1rem;
       }
 
       .markdown-html td {
@@ -57,7 +58,7 @@
          },
          contentUrl: {
            type: String,
-           computed: '_contentUrl(page)'
+           computed: '_contentUrl(page, route.prefix)'
          },
          markdown: {
            type: String,
@@ -70,8 +71,8 @@
         return page;
        },
 
-       _contentUrl: function (page) {
-         return '../src/markdown/' + page + '.md';
+       _contentUrl: function (page, prefix) {
+         return prefix != '/content' ? this.contentUrl : '../src/markdown/' + page + '.md';
        },
 
        _markdown: function (markdown) {
