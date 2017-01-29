@@ -13,11 +13,11 @@
     "test": "polymer test",
     "build": "node build",
     "serve-tests": "http-server",
-    "deploy": "polymer build && node build && firebase deploy",
+    "deploy": "polymer build && node build && node build-cast-service-worker.js && firebase deploy",
     "serve": "polymer serve -p 8081",
     "server": "cd functions && NODE_ENV=development nodemon runner.js",
     "refresh-credentials": "gcloud auth application-default login",
-    "deploy-hosting": "polymer build && firebase deploy --only hosting",
+    "deploy-hosting": "polymer build && node build-cast-service-worker.js && firebase deploy --only hosting",
     "lodash": "cd src/third-party && lodash exports=global include=debounce,pick,omit,merge,clone,isEqual,cloneDeep,toArray,difference,uniqBy"
   },
   "repository": {
