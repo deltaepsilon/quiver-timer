@@ -14,6 +14,8 @@
       created: function () {
         this.state = this.getState();
         this.store = QuiverStore;
+        this.getSlug = QuiverStore.getSlug;
+        this.getPushKey = QuiverStore.getPushKey;
       }
     }
   ]; 

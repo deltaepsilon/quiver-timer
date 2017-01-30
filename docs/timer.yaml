@@ -1,0 +1,14 @@
+name: Generic Timer
+tags:
+- "TagOne"
+- "TagTwo"
+periods:
+- name: Round 1
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 2
+  totalSeconds: 20
+  type: stopwatch

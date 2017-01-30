@@ -9,10 +9,12 @@
     return firebase.database().ref().push().key;
   };
 
-  function getSlug(timer) {
+  function getSlug(timer, tagsOverride) {
     var tags = timer._tags || [];
 
-    if (timer.tags) {
+    if (tagsOverride) {
+      tags = tagsOverride;
+    } else if (timer.tags) {
       var keys = Object.keys(timer.tags);
       tags = keys.map(function(key) {
         return timer.tags[key].value;
@@ -296,6 +298,9 @@
 
     return state;
   });
+
+  QuiverStore.getSlug = getSlug;
+  QuiverStore.getPushKey = getPushKey;
 
   QuiverStore.subscribe(function () {
     localStorage.setItem('QuiverStoreState', JSON.stringify(QuiverStore.getState()));

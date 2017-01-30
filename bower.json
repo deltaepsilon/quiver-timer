@@ -45,7 +45,9 @@
     "web-component-tester": "~5.0.0",
     "fuse.js": "^2.6.1",
     "slug": "^0.9.1",
-    "paper-spinner": "PolymerElements/paper-spinner#^1.2.1"
+    "paper-spinner": "PolymerElements/paper-spinner#^1.2.1",
+    "yaml-js": "^0.1.4",
+    "js-yaml": "^3.7.0"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"

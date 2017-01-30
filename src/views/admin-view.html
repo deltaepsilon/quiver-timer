@@ -6,7 +6,10 @@
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 
 <link rel="import" href="../datastores/quiver-store-behavior.html">
+<link rel="import" href="../timer-behavior/timer-defaults.html">
 <link rel="import" href="../shared-styles.html">
+
+<script src="../../bower_components/js-yaml/dist/js-yaml.min.js"></script>
 
 <dom-module id="admin-view">
   <template>
@@ -21,9 +24,21 @@
 
       .list {
         padding: 1rem !important;
+        width: calc(100% - 4rem) !important;
       }
 
     </style>
+
+<paper-material elevation="1">
+  <div class="layout horizontal justified center">
+    <h3>Upload Timers</h3>
+    <a href="/docs/timer.yaml" target="_blank" download>Template</a>  
+  </div>
+  <input id="timersInput" is="iron-input" type="file" multiple on-change="processTimers">
+  <label for="timersInput">
+    <paper-button class="primary" raised>Select</paper-button>
+  </label>
+</paper-material>
 
 <paper-material elevation="1" class="list">
 
@@ -54,6 +69,10 @@
     properties: {
       firebase: Object,
       model: Object,
+      account: {
+        type: Object,
+        statePath: 'account'  
+      },
       tagsRef: {
         type: Object,
         computed: '_tagsRef(firebase, model)'
@@ -68,10 +87,11 @@
       return firebase.database().ref(model.public.tags);
     },
 
-    addTag: function() {
-      this.tagsRef.push(this.newTag);
+    addTag: function(tag) {
+      var tagRef = this.tagsRef.push(typeof tag == 'string' ? tag : this.newTag);
       this.newTag = '';
       this.$.newTag.focus();
+      return tagRef;
     },
 
     deleteTag: function(e) {
@@ -83,6 +103,86 @@
         type: 'updateTag',
         tags: tags
       });
+    },
+
+    processTimers: function(e) {
+      var files = this.$.timersInput.files;
+      var i = files.length;
+      var promises = [];
+
+      while (i--) {
+        promises.push(this.processTimer(files[i]));
+      }
+
+      return Promise.all(promises)
+        .catch(function(err) {
+          this.fire('error', err);
+        }.bind(this));
+    },
+
+    processTimer: function(file) {
+      return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+          try {
+            var timer = jsyaml.safeLoad(reader.result);
+            timer.displayName = this.account.displayName;
+            timer.email = this.account.email;
+            timer.totalSeconds = timer.periods.reduce(function(s, period) {
+              return s + period.totalSeconds;
+            }, 0);
+            timer.updated = Date.now();
+            timer._tags = timer.tags.slice(0);
+            timer.tags = timer._tags.reduce(function(tags, t) {
+              var tag = this.tags.find(function(tag) {
+                return t == tag.value;
+              });
+              if (!tag) {
+                var tagRef = this.addTag(t);
+                tags[tagRef.key] = t;
+              } else {
+                tags[tag.$key] = tag.value;
+              }
+              return tags;
+            }.bind(this), {});
+            timer.slug = this.getSlug(timer, timer._tags); // Must be done before the remapping of the tags
+            timer.$key = timer.slug;
+
+            if (timer.periods[0].type !== 'prepare') {
+              timer.periods.unshift(TimerDefaults.periods.prepare);
+            }
+
+            timer.periods = timer.periods.map(function(period, i) {
+              var result;
+              if (i == 0 && period.type !== 'prepare') {
+                throw new Error('First period must have type "prepare"');
+              } else if (i == 0) {
+                result = TimerDefaults.periods.prepare;
+              } else if (!TimerDefaults.periods[period.type]) {
+                throw new Error('First period must have a valid type');
+              } else {
+                result = TimerDefaults.periods[period.type];
+              }
+
+              result.totalSeconds = period.totalSeconds;
+              result.name = period.name;
+              result.description = period.description;
+              result.minutes = Math.floor(result.totalSeconds/60);
+              result.seconds = result.totalSeconds - (result.minutes * 60);
+              return result;
+            });
+
+            console.log('timer to save', timer);
+          } catch (e) {
+            reject(e);
+          }
+          
+          console.log('yaml', timer);
+        }.bind(this);
+
+        reader.readAsText(file, 'utf8');
+      }.bind(this));
     }
   });
 </script>
