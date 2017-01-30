@@ -4,9 +4,12 @@
 <link rel="import" href="../../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
 
 <link rel="import" href="../datastores/quiver-store-behavior.html">
+<link rel="import" href="../firebase-behavior/firebase-behavior.html">
 <link rel="import" href="../timer-behavior/timer-defaults.html">
+<link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../shared-styles.html">
 
 <script src="../../bower_components/js-yaml/dist/js-yaml.min.js"></script>
@@ -29,161 +32,222 @@
 
     </style>
 
-<paper-material elevation="1">
-  <div class="layout horizontal justified center">
-    <h3>Upload Timers</h3>
-    <a href="/docs/timer.yaml" target="_blank" download>Template</a>  
-  </div>
-  <input id="timersInput" is="iron-input" type="file" multiple on-change="processTimers">
-  <label for="timersInput">
-    <paper-button class="primary" raised>Select</paper-button>
-  </label>
-</paper-material>
+    <firebase-query id="timers" app="[[firebase]]" path="[[timersPath]]" data="{{timers}}"></firebase-query>
 
-<paper-material elevation="1" class="list">
+    <paper-material elevation="1" class="list">
+      <div class="layout horizontal justified center wrap">
+        <h3 style="margin: 0 1rem 0 0;">Default Timers</h3>
+        <a href="/docs/timer.yaml" target="_blank" download>
+          <iron-icon icon="file-download"></iron-icon>
+        </a>    
+        <div class="flex layout horizontal end-justified">
+          <input id="timersInput" is="iron-input" type="file" multiple on-change="processTimers">
+          <label for="timersInput">
+            <paper-button class="primary" raised>Select & Upload</paper-button>
+          </label>
+        </div>
+      </div>
+      
+      <template is="dom-repeat" items="[[timers]]" as="timer">
+        <paper-item>
+          <paper-item-body two-line>
+            <div class="layout horizontal justified center">
+              <strong>[[timer.name]]</strong>
+              <paper-icon-button key$="[[timer.$key]]" icon="delete" on-click="deleteTimer"></paper-icon-button>  
+            </div>
+            <div secondary>
+              <span>Periods: [[timer.periods.length]]</span>
+              <span>Duration: <digital-clock total-seconds="[[timer.totalSeconds]]"></digital-clock></span>
+            </div>
+          </paper-item-body>
+        </paper-item>
+      </template>
+      
+    </paper-material>
 
-  <h3>Tags</h3>
+    <paper-material elevation="1" class="list">
 
-  <form is="iron-form" id="form">
-    <div class="layout horizontal">
-      <paper-input id="newTag" class="flex" label="New tag" value="{{newTag}}" type="text"></paper-input>
-      <paper-button on-click="addTag">Add</paper-button>  
-    </div>
-  </form>
+      <h3>Tags</h3>
 
-  <template is="dom-repeat" items="[[tags]]" as="tag">
-    <paper-item class="layout horizontal justified">
-      <span>[[tag.value]]</span>
-      <paper-icon-button key$="[[tag.$key]]" icon="delete" on-click="deleteTag"></paper-icon-button>
-    </paper-item>
+      <form is="iron-form" id="form">
+        <div class="layout horizontal">
+          <paper-input id="newTag" class="flex" label="New tag" value="{{newTag}}" type="text"></paper-input>
+          <paper-button on-click="addTag">Add</paper-button>  
+        </div>
+      </form>
+
+      <template is="dom-repeat" items="[[tags]]" as="tag">
+        <paper-item class="layout horizontal justified">
+          <span>[[tag.value]]</span>
+          <paper-icon-button key$="[[tag.$key]]" icon="delete" on-click="deleteTag"></paper-icon-button>
+        </paper-item>
+      </template>
+    </paper-material>
+
   </template>
-</paper-material>
+  <script>
+    Polymer({
+      is: "admin-view",
 
-</template>
-<script>
-  Polymer({
-    is: "admin-view",
+      behaviors: [QuiverStoreBehavior, FirebaseBehavior],
 
-    behaviors: [QuiverStoreBehavior],
-
-    properties: {
-      firebase: Object,
-      model: Object,
-      account: {
-        type: Object,
-        statePath: 'account'  
+      properties: {
+        firebase: Object,
+        model: Object,
+        account: {
+          type: Object,
+          statePath: 'account'  
+        },
+        tagsRef: {
+          type: Object,
+          computed: '_tagsRef(firebase, model)'
+        },
+        tags: {
+          type: Array,
+          statePath: 'tags'
+        },
+        timersPath: {
+          type: String,
+          computed: '_timersPath(model)'
+        },
+        timersRef: {
+          type: Object,
+          computed: '_timersRef(firebase, timersPath)'
+        },
+        timers: {
+          type: Array,
+          value: []
+        }
       },
-      tagsRef: {
-        type: Object,
-        computed: '_tagsRef(firebase, model)'
+
+      // Observers
+      observers: [
+        '_timers(timersRef)'
+      ],
+
+      _tagsRef: function(firebase, model) {
+        return firebase.database().ref(model.public.tags);
       },
-      tags: {
-        type: Array,
-        statePath: 'tags'
-      }
-    },
 
-    _tagsRef: function(firebase, model) {
-      return firebase.database().ref(model.public.tags);
-    },
+      _timersPath: function(model) {
+        return this.replaceWildcard(model.user.owned.state, 'uid', '--defaults') + '/timers';
+      },
 
-    addTag: function(tag) {
-      var tagRef = this.tagsRef.push(typeof tag == 'string' ? tag : this.newTag);
-      this.newTag = '';
-      this.$.newTag.focus();
-      return tagRef;
-    },
+      _timersRef: function(firebase, timersPath) {
+        return firebase.database().ref(timersPath);
+      },
 
-    deleteTag: function(e) {
-      return this.tagsRef.child(e.target.getAttribute('key')).remove();
-    },
-
-    updateTags: function (tags) {
-      this.dispatch({
-        type: 'updateTag',
-        tags: tags
-      });
-    },
-
-    processTimers: function(e) {
-      var files = this.$.timersInput.files;
-      var i = files.length;
-      var promises = [];
-
-      while (i--) {
-        promises.push(this.processTimer(files[i]));
-      }
-
-      return Promise.all(promises)
-        .catch(function(err) {
-          this.fire('error', err);
-        }.bind(this));
-    },
-
-    processTimer: function(file) {
-      return new Promise(function(resolve, reject) {
-        var reader = new FileReader();
-
-        reader.onload = function(e) {
-          try {
-            var timer = jsyaml.safeLoad(reader.result);
-            timer.displayName = this.account.displayName;
-            timer.email = this.account.email;
-            timer.totalSeconds = timer.periods.reduce(function(s, period) {
-              return s + period.totalSeconds;
-            }, 0);
-            timer.updated = Date.now();
-            timer._tags = timer.tags.slice(0);
-            timer.tags = timer._tags.reduce(function(tags, t) {
-              var tag = this.tags.find(function(tag) {
-                return t == tag.value;
-              });
-              if (!tag) {
-                var tagRef = this.addTag(t);
-                tags[tagRef.key] = t;
-              } else {
-                tags[tag.$key] = tag.value;
-              }
-              return tags;
-            }.bind(this), {});
-            timer.slug = this.getSlug(timer, timer._tags); // Must be done before the remapping of the tags
-            timer.$key = timer.slug;
-
-            if (timer.periods[0].type !== 'prepare') {
-              timer.periods.unshift(TimerDefaults.periods.prepare);
-            }
-
-            timer.periods = timer.periods.map(function(period, i) {
-              var result;
-              if (i == 0 && period.type !== 'prepare') {
-                throw new Error('First period must have type "prepare"');
-              } else if (i == 0) {
-                result = TimerDefaults.periods.prepare;
-              } else if (!TimerDefaults.periods[period.type]) {
-                throw new Error('First period must have a valid type');
-              } else {
-                result = TimerDefaults.periods[period.type];
-              }
-
-              result.totalSeconds = period.totalSeconds;
-              result.name = period.name;
-              result.description = period.description;
-              result.minutes = Math.floor(result.totalSeconds/60);
-              result.seconds = result.totalSeconds - (result.minutes * 60);
-              return result;
-            });
-
-            console.log('timer to save', timer);
-          } catch (e) {
-            reject(e);
-          }
+      _timers: function(timersRef) {
+        timersRef.on('value', function(snap) {
           
-          console.log('yaml', timer);
-        }.bind(this);
+        }.bind(this));
+      },
 
-        reader.readAsText(file, 'utf8');
-      }.bind(this));
-    }
-  });
-</script>
+      addTag: function(tag) {
+        var tagRef = this.tagsRef.push(typeof tag == 'string' ? tag : this.newTag);
+        this.newTag = '';
+        this.$.newTag.focus();
+        return tagRef;
+      },
+
+      deleteTag: function(e) {
+        return this.tagsRef.child(e.target.getAttribute('key')).remove();
+      },
+
+      updateTags: function (tags) {
+        this.dispatch({
+          type: 'updateTag',
+          tags: tags
+        });
+      },
+
+      processTimers: function(e) {
+        var files = this.$.timersInput.files;
+        var i = files.length;
+        var promises = [];
+
+        while (i--) {
+          promises.push(this.processTimer(files[i]));
+        }
+
+        return Promise.all(promises)
+          .then(function(timers) {
+            return Promise.all(timers.map(this.saveTimer.bind(this)));
+          }.bind(this))
+          .catch(function(err) {
+            this.fire('error', err);
+          }.bind(this));
+      },
+
+      processTimer: function(file) {
+        return new Promise(function(resolve, reject) {
+          var reader = new FileReader();
+
+          reader.onload = function(e) {
+            try {
+              var timer = jsyaml.safeLoad(reader.result);
+              timer.displayName = this.account.displayName;
+              timer.email = this.account.email;
+              timer.totalSeconds = timer.periods.reduce(function(s, period) {
+                return s + period.totalSeconds;
+              }, 0);
+              timer.updated = Date.now();
+              timer._tags = timer.tags.slice(0);
+              timer.tags = timer._tags.reduce(function(tags, t) {
+                var tag = this.tags.find(function(tag) {
+                  return t == tag.value;
+                });
+                if (!tag) {
+                  var tagRef = this.addTag(t);
+                  tags[tagRef.key] = t;
+                } else {
+                  tags[tag.$key] = tag.value;
+                }
+                return tags;
+              }.bind(this), {});
+              timer.slug = this.getSlug(timer, timer._tags); // Must be done before the remapping of the tags
+
+              if (timer.periods[0].type !== 'prepare') {
+                timer.periods.unshift(TimerDefaults.periods.prepare);
+              }
+
+              timer.periods = timer.periods.map(function(period, i) {
+                var result;
+                if (i == 0 && period.type !== 'prepare') {
+                  throw new Error('First period must have type "prepare"');
+                } else if (i == 0) {
+                  result = TimerDefaults.periods.prepare;
+                } else if (!TimerDefaults.periods[period.type]) {
+                  throw new Error('First period must have a valid type');
+                } else {
+                  result = TimerDefaults.periods[period.type];
+                }
+
+                result.totalSeconds = period.totalSeconds;
+                result.name = period.name;
+                result.description = period.description || null;
+                result.minutes = Math.floor(result.totalSeconds/60);
+                result.seconds = result.totalSeconds - (result.minutes * 60);
+                return result;
+              });
+
+              resolve(timer);
+            } catch (e) {
+              reject(e);
+            }
+          }.bind(this);
+
+          reader.readAsText(file, 'utf8');
+        }.bind(this));
+      },
+
+      saveTimer: function(timer) {
+        return this.timersRef.child(timer.slug).set(timer);
+      },
+
+      deleteTimer: function(e) {
+        return this.timersRef.child(e.target.getAttribute('key')).remove();
+      },
+    });
+  </script>
 </dom-module>
