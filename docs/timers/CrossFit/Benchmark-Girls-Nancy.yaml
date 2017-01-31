@@ -1,0 +1,11 @@
+name: Benchmark Girls - Nancy
+description: |
+  5 Rounds for Time
+  - 400m Run
+  - 15 Overhead Squat Rx 65/95 lbs
+tags:
+- CrossFit
+periods:
+- name: Nancy
+  totalSeconds: 1200
+  type: work

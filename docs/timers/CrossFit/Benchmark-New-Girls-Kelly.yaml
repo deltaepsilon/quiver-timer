@@ -1,0 +1,12 @@
+name: Benchmark Girls - Kelly
+description: |
+  5 Rounds for Time
+  - 400m Run
+  - 30 Box Jumps Rx 20/24 inches
+  - 30 Wall-ball Shots Rx 14/20 lbs
+tags:
+- CrossFit
+periods:
+- name: Kelly
+  totalSeconds: 1200
+  type: stopwatch

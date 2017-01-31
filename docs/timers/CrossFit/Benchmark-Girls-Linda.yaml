@@ -1,0 +1,12 @@
+name: Benchmark Girls - Linda aka 3 Bars of Death
+description: |
+  10/9/8/7/6/5/4/3/2/1 For Time
+  - Deadlift 1.5 x Bodyweight
+  - Bench  1 x Bodyweight
+  - Clean 3/4 x Bodyweight
+tags:
+- CrossFit
+periods:
+- name: Linda
+  totalSeconds: 1200
+  type: stopwatch

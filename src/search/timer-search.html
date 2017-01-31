@@ -195,7 +195,7 @@
         if (this.email) {
           options.filters = 'NOT email:' + this.email;
         }
-        console.log('options', options);
+        
         index.search(searchTerm, options, function (err, content) {
           if (err) {
             console.log('Algolia search error', err);

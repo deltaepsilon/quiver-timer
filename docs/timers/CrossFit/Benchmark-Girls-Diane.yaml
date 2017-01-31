@@ -8,4 +8,4 @@ tags:
 periods:
 - name: Diane
   totalSeconds: 1800
-  type: work
+  type: stopwatch

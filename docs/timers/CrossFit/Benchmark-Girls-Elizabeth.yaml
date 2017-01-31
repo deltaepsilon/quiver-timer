@@ -1,0 +1,11 @@
+name: Benchmark Girls - Elizabeth
+description: |
+  21-15-9 Reps for Time
+  - Clean Rx 95/135 lbs
+  - Ring Dips
+tags:
+- CrossFit
+periods:
+- name: Elizabeth
+  totalSeconds: 900
+  type: stopwatch

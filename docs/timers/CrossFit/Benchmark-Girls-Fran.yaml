@@ -1,0 +1,11 @@
+name: Benchmark Girls - Fran
+description: |
+  21-15-9 Reps for Time
+  - Thruster Rx 75/95 lbs
+  - Pull-ups
+tags:
+- CrossFit
+periods:
+- name: Fran
+  totalSeconds: 600
+  type: stopwatch

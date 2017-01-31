@@ -1,0 +1,12 @@
+name: Benchmark Girls - Jackie
+description: |
+  For time
+  - 1000m Row
+  - 50 Thrusters Rx 30/45 lbs
+  - 30 Pull-ups
+tags:
+- CrossFit
+periods:
+- name: Jackie
+  totalSeconds: 900
+  type: stopwatch

@@ -1,0 +1,11 @@
+name: Benchmark Girls - Annie
+description: |
+  50/40/30/20/10 For Time
+  - Double-unders
+  - Sit-ups
+tags:
+- CrossFit
+periods:
+- name: Annie
+  totalSeconds: 1200
+  type: stopwatch

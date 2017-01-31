@@ -1,0 +1,12 @@
+name: Benchmark Girls - Mary
+description: |
+  20m AMRAP
+  - 5 Handstand Push-ups
+  - 10 Pistol Squats
+  - 15 Pull-ups
+tags:
+- CrossFit
+periods:
+- name: Mary
+  totalSeconds: 1200
+  type: work

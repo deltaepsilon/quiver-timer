@@ -1,0 +1,11 @@
+name: Benchmark Girls - Amanda
+description: |
+  9/7/5 For Time
+  - Muscle-ups
+  - Snatches Rx 95/135 lbs
+tags:
+- CrossFit
+periods:
+- name: Amanda
+  totalSeconds: 900
+  type: stopwatch

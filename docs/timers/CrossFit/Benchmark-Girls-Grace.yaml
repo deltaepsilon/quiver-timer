@@ -1,0 +1,10 @@
+name: Benchmark Girls - Grace
+description: |
+  30 Reps for Time
+  - Clean & Jerk Rx 95/135 lbs
+tags:
+- CrossFit
+periods:
+- name: Grace
+  totalSeconds: 600
+  type: stopwatch

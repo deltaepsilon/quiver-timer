@@ -1,0 +1,11 @@
+name: Benchmark Girls - Lynne
+description: |
+  5 Rounds Max Reps
+  - Bench Press Bodyweight
+  - Pull-ups
+tags:
+- CrossFit
+periods:
+- name: Lynne
+  totalSeconds: 1200
+  type: work

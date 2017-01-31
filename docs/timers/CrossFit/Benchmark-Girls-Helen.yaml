@@ -1,0 +1,12 @@
+name: Benchmark Girls - Helen
+description: |
+  3 Rounds for Time
+  - 400m Run
+  - Kettlebell swing x 21 @ Rx 36/53 lbs
+  - 21 Pull-ups
+tags:
+- CrossFit
+periods:
+- name: Helen
+  totalSeconds: 1800
+  type: stopwatch

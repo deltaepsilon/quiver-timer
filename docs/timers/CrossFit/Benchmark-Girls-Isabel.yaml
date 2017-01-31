@@ -1,0 +1,10 @@
+name: Benchmark Girls - Isabel
+description: |
+  30 Reps for Time
+  - Snatch 95/135 lbs
+tags:
+- CrossFit
+periods:
+- name: Isabel
+  totalSeconds: 600
+  type: stopwatch

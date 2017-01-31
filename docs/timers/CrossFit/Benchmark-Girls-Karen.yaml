@@ -1,0 +1,10 @@
+name: Benchmark Girls - Karen
+description: |
+  For time
+  - 150 Wall-ball shots
+tags:
+- CrossFit
+periods:
+- name: Karen
+  totalSeconds: 600
+  type: stopwatch

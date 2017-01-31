@@ -23,7 +23,20 @@
     "bower_components/webcomponentsjs/webcomponents-lite.min.js",
     "bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror-worker.js",
     "bower_components/app-storage/app-indexeddb-mirror/common-worker-scope.js",
-    "bower_components/d3/d3.min.js",
-    "bower_components/timer.js/dist/timer.min.js"
+    "bower_components/js-yaml/dist/js-yaml.min.js",
+    "bower_components/iron-list/iron-list.html",
+    "bower_components/polymerfire/firebase-query.html",
+    "bower_components/polymerfire/firebase-database-behavior.html",
+    "bower_components/polymerfire/firebase-common-behavior.html",
+    "bower_components/polymerfire/firebase-app-script.html",
+    "bower_components/polymerfire/firebase-database-script.html",
+    "bower_components/app-storage/app-storage-behavior.html",
+    "bower_components/promise-polyfill/promise-polyfill.html",
+    "bower_components/app-storage/app-network-status-behavior.html",
+    "bower_components/promise-polyfill/Promise-Statics.js",
+    "bower_components/firebase/firebase-app.js",
+    "bower_components/firebase/firebase-database.js",
+    "bower_components/timer.js/dist/timer.min.js",
+    "bower_components/d3/d3.min.js"
   ]
 }

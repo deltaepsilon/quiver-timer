@@ -1,0 +1,12 @@
+name: Benchmark Girls - Eva
+description: |
+  5 Rounds for Time
+  - 800m Run
+  - 30 Kettlebell Swings Rx 53/72 lbs
+  - 30 Pull-ups
+tags:
+- CrossFit
+periods:
+- name: Eva
+  totalSeconds: 3600
+  type: stopwatch

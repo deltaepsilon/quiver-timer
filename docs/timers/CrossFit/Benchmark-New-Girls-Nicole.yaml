@@ -1,0 +1,11 @@
+name: Benchmark Girls - Nicole
+description: |
+  20m AMRAP
+  - 400m Run
+  - Max Rep Pull-ups
+tags:
+- CrossFit
+periods:
+- name: Nicole
+  totalSeconds: 1200
+  type: work
