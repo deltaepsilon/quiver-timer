@@ -1,0 +1,8 @@
+name: AMRAP 15 Minutes
+tags:
+- .Default
+- CrossFit
+periods:
+- name: AMRAP
+  totalSeconds: 900
+  type: stopwatch

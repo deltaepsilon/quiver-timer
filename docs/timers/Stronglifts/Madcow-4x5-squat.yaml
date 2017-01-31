@@ -1,0 +1,42 @@
+name: Madcow 4x5 Squat
+description:
+  Start at 50% of 5RM on week 1
+  Add 5% to each set on odd weeks
+tags:
+- Madcow
+- Stronglifts
+- Powerlifting
+periods:
+- name: First Warmup x 5
+  totalSeconds: 60
+  type: work
+- name: Second Warmup x 5
+  totalSeconds: 60
+  type: work
+- name: Rest before work sets
+  totalSeconds: 180
+  type: rest
+- name: 50% 5RM
+  totalSeconds: 60
+  type: work
+- name: Rest One
+  totalSeconds: 180
+  type: rest
+- name: 60% 5RM
+  totalSeconds: 60
+  type: work
+- name: Rest Two
+  totalSeconds: 180
+  type: rest
+- name: 70% 5RM
+  totalSeconds: 60
+  type: work
+- name: Rest Three
+  totalSeconds: 180
+  type: rest
+- name: 70% 5RM
+  totalSeconds: 60
+  type: work
+- name: Rest Four
+  totalSeconds: 180
+  type: rest

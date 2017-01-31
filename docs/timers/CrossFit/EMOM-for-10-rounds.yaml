@@ -1,0 +1,35 @@
+name: EMOM x 10
+tags:
+- .Default
+- CrossFit
+periods:
+- name: Minute 1
+  totalSeconds: 60
+  type: work
+- name: Minute 2
+  totalSeconds: 60
+  type: work
+- name: Minute 3
+  totalSeconds: 60
+  type: work
+- name: Minute 4
+  totalSeconds: 60
+  type: work
+- name: Minute 5
+  totalSeconds: 60
+  type: work
+- name: Minute 6
+  totalSeconds: 60
+  type: work
+- name: Minute 7
+  totalSeconds: 60
+  type: work
+- name: Minute 8
+  totalSeconds: 60
+  type: work
+- name: Minute 9
+  totalSeconds: 60
+  type: work
+- name: Minute 10
+  totalSeconds: 60
+  type: work

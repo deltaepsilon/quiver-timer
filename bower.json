@@ -47,7 +47,8 @@
     "slug": "^0.9.1",
     "paper-spinner": "PolymerElements/paper-spinner#^1.2.1",
     "yaml-js": "^0.1.4",
-    "js-yaml": "^3.7.0"
+    "js-yaml": "^3.7.0",
+    "iron-list": "PolymerElements/iron-list#^1.4.0"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"

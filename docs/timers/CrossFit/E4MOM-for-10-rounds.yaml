@@ -1,0 +1,35 @@
+name: E4MOM x 10
+tags:
+- .Default
+- CrossFit
+periods:
+- name: Round 1
+  totalSeconds: 240
+  type: work
+- name: Round 2
+  totalSeconds: 240
+  type: work
+- name: Round 3
+  totalSeconds: 240
+  type: work
+- name: Round 4
+  totalSeconds: 240
+  type: work
+- name: Round 5
+  totalSeconds: 240
+  type: work
+- name: Round 6
+  totalSeconds: 240
+  type: work
+- name: Round 7
+  totalSeconds: 240
+  type: work
+- name: Round 8
+  totalSeconds: 240
+  type: work
+- name: Round 9
+  totalSeconds: 240
+  type: work
+- name: Round 10
+  totalSeconds: 240
+  type: work

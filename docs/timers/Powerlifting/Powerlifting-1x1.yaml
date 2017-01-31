@@ -1,0 +1,20 @@
+name: Powerlifting 1x1
+description: |
+  Two light warmup sets
+  One work set at 105% of 1RM
+tags:
+- .Default
+- Powerlifting
+periods:
+- name: First Warmup
+  totalSeconds: 60
+  type: work
+- name: Second Warmup
+  totalSeconds: 60
+  type: work
+- name: Prepare of Work Sets
+  totalSeconds: 180
+  type: rest
+- name: 1RM
+  totalSeconds: 60
+  type: work

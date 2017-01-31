@@ -1,0 +1,50 @@
+name: Madcow 5x5
+description:
+  Start at 50% of 5RM for weeks 1 through 4
+  Add 5% to each lift for weeks 5 through 7
+  Add another 5%/lift for weeks 8 through 11
+  Add another 5%/lift for week 12
+tags:
+- Madcow
+- Stronglifts
+- Powerlifting
+periods:
+- name: First Warmup x 5
+  totalSeconds: 60
+  type: work
+- name: Second Warmup x 5
+  totalSeconds: 60
+  type: work
+- name: Rest before work sets
+  totalSeconds: 180
+  type: rest
+- name: 50% 5RM
+  totalSeconds: 60
+  type: work
+- name: Rest One
+  totalSeconds: 180
+  type: rest
+- name: 60% 5RM
+  totalSeconds: 60
+  type: work
+- name: Rest Two
+  totalSeconds: 180
+  type: rest
+- name: 70% 5RM
+  totalSeconds: 60
+  type: work
+- name: Rest Three
+  totalSeconds: 180
+  type: rest
+- name: 85% 5RM
+  totalSeconds: 60
+  type: work
+- name: Rest Four
+  totalSeconds: 180
+  type: rest
+- name: 95% 5RM
+  totalSeconds: 60
+  type: work
+- name: Rest Five
+  totalSeconds: 180
+  type: rest

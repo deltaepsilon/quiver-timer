@@ -27,9 +27,11 @@ module.exports = function (e) {
   return accountRef.once('value')
     .then(function(snap) {
       var account = snap.val();
-      timer.email = account.email;
-      timer.displayName = account.displayName;
-      timer.photoUrl = account.photoUrl;
+      if (account) {
+        timer.email = account.email;
+        timer.displayName = account.displayName;
+        timer.photoUrl = account.photoUrl;
+      }
       timer.uid = uid;
       timer.md5Hash = md5Hash;
       timer = utils.cleanObject(timer);

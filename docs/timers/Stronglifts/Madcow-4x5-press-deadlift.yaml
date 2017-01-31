@@ -1,0 +1,45 @@
+name: Madcow 5x5 Press & Deadlift
+description:
+  Start at 60% of 5RM on weeks 1 through 2
+  Add 5% to each set for weeks 3 through 6
+  Add 5% to each set for weeks 7 through 9
+  Add 5% to each set for weeks 10 through 11
+  Add 5% to each set for week 12
+tags:
+- Madcow
+- Stronglifts
+- Powerlifting
+periods:
+- name: First Warmup x 5
+  totalSeconds: 60
+  type: work
+- name: Second Warmup x 5
+  totalSeconds: 60
+  type: work
+- name: Rest before work sets
+  totalSeconds: 180
+  type: rest
+- name: 60% 5RM
+  totalSeconds: 60
+  type: work
+- name: Rest One
+  totalSeconds: 180
+  type: rest
+- name: 70% 5RM
+  totalSeconds: 60
+  type: work
+- name: Rest Two
+  totalSeconds: 180
+  type: rest
+- name: 85% 5RM
+  totalSeconds: 60
+  type: work
+- name: Rest Three
+  totalSeconds: 180
+  type: rest
+- name: 95% 5RM
+  totalSeconds: 60
+  type: work
+- name: Rest Four
+  totalSeconds: 180
+  type: rest

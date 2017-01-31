@@ -1,0 +1,32 @@
+name: Stronglifts 1x5
+tags:
+- .Default
+- Stronglifts
+periods:
+- name: Warmup One
+  totalSeconds: 30
+  type: work
+- name: Add Weight
+  totalSeconds: 45
+  type: rest
+- name: Warmup 2
+  totalSeconds: 30
+  type: work
+- name: Add Weight
+  totalSeconds: 45
+  type: rest
+- name: Warmup 3
+  totalSeconds: 30
+  type: work
+- name: Add Weight
+  totalSeconds: 45
+  type: rest
+- name: Warmup 4
+  totalSeconds: 30
+  type: work
+- name: Add Weight for Work Set
+  totalSeconds: 45
+  type: rest
+- name: Five Reps
+  totalSeconds: 60
+  type: work

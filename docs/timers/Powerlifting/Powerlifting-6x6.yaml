@@ -1,0 +1,53 @@
+name: Powerlifting 6x6
+description: |
+  Two light warmup sets
+  Six work sets at 75% of 1RM
+tags:
+- .Default
+- Powerlifting
+periods:
+- name: First Warmup
+  totalSeconds: 60
+  type: work
+- name: Second Warmup
+  totalSeconds: 60
+  type: work
+- name: Prepare of Work Sets
+  totalSeconds: 180
+  type: rest
+- name: Work One
+  totalSeconds: 60
+  type: work
+- name: Rest One
+  totalSeconds: 180
+  type: work
+- name: Work Two
+  totalSeconds: 60
+  type: work
+- name: Rest Two
+  totalSeconds: 180
+  type: work
+- name: Work Three
+  totalSeconds: 60
+  type: work
+- name: Rest Three
+  totalSeconds: 180
+  type: work
+- name: Work Four
+  totalSeconds: 60
+  type: work
+- name: Rest Four
+  totalSeconds: 180
+  type: work
+- name: Work Five
+  totalSeconds: 60
+  type: work
+- name: Rest Five
+  totalSeconds: 180
+  type: work
+- name: Work Six
+  totalSeconds: 60
+  type: work
+- name: Rest Six
+  totalSeconds: 180
+  type: work

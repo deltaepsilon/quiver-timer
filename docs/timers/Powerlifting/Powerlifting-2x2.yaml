@@ -1,0 +1,29 @@
+name: Powerlifting 2x2
+description: |
+  Two light warmup sets
+  Two work sets at 95% of 1RM
+tags:
+- .Default
+- Powerlifting
+periods:
+- name: First Warmup
+  totalSeconds: 60
+  type: work
+- name: Second Warmup
+  totalSeconds: 60
+  type: work
+- name: Prepare of Work Sets
+  totalSeconds: 180
+  type: rest
+- name: Work One
+  totalSeconds: 60
+  type: work
+- name: Rest One
+  totalSeconds: 180
+  type: work
+- name: Work Two
+  totalSeconds: 60
+  type: work
+- name: Rest Two
+  totalSeconds: 180
+  type: work

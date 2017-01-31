@@ -1,0 +1,50 @@
+name: Stronglifts 5x5
+tags:
+- .Default
+- Stronglifts
+periods:
+- name: First Warmup x 5
+  totalSeconds: 60
+  type: work
+- name: Second Warmup x 5
+  totalSeconds: 60
+  type: work
+- name: Third Warmup x 3 
+  totalSeconds: 60
+  type: work
+- name: Fourth Warmup x 3 
+  totalSeconds: 60
+  type: work
+- name: Rest before work sets
+  totalSeconds: 180
+  type: rest
+- name: Work One
+  totalSeconds: 60
+  type: work
+- name: Rest One
+  totalSeconds: 180
+  type: rest
+- name: Work Two
+  totalSeconds: 60
+  type: work
+- name: Rest Two
+  totalSeconds: 180
+  type: rest
+- name: Work Three
+  totalSeconds: 60
+  type: work
+- name: Rest Three
+  totalSeconds: 180
+  type: rest
+- name: Work Four
+  totalSeconds: 60
+  type: work
+- name: Rest Four
+  totalSeconds: 180
+  type: rest
+- name: Work Five
+  totalSeconds: 60
+  type: work
+- name: Rest Five
+  totalSeconds: 180
+  type: rest

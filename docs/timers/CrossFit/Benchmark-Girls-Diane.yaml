@@ -1,0 +1,11 @@
+name: Benchmark Girls - Diane
+description: |
+  21-15-9 Reps for Time
+  - Deadlift Rx 135/225 lbs
+  - Handstand Push-ups
+tags:
+- CrossFit
+periods:
+- name: Diane
+  totalSeconds: 1800
+  type: work

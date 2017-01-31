@@ -1,0 +1,125 @@
+name: Tabata 20/10
+tags:
+- .Default
+- Tabata
+periods:
+- name: Round 1
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 2
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 3
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 4
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 5
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 6
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 7
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 8
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 9
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 10
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 11
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 12
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 13
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 14
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 15
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 16
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 17
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 18
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 19
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest
+- name: Round 20
+  totalSeconds: 20
+  type: work
+- name: Rest
+  totalSeconds: 10
+  type: rest

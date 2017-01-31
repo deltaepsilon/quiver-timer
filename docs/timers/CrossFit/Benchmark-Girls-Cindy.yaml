@@ -1,0 +1,12 @@
+name: Benchmark Girls - Cindy
+description: |
+  20 Minute AMRAP
+  - 5 Pull-ups
+  - 10 Push-ups
+  - 15 Squats
+tags:
+- CrossFit
+periods:
+- name: Cindy
+  totalSeconds: 1200
+  type: work

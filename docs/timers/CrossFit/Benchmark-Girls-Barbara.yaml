@@ -1,0 +1,26 @@
+name: Benchmark Girls - Barbara
+description: |
+  5 Round, Time Each Round
+  - 20 Pull-ups
+  - 30 Push-ups
+  - 40 Sit-ups
+  - 50 Squats
+tags:
+- CrossFit
+periods:
+- name: Round One
+  totalSeconds: 600
+  type: stopwatch
+- name: Round Two
+  totalSeconds: 600
+  type: stopwatch
+- name: Round Three
+  totalSeconds: 600
+  type: stopwatch
+- name: Round Four
+  totalSeconds: 600
+  type: stopwatch
+- name: Round Five
+  totalSeconds: 600
+  type: stopwatch
+  

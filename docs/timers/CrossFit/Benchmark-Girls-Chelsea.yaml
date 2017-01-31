@@ -1,0 +1,102 @@
+name: Benchmark Girls - Chelsea
+description: |
+  Each minute on the minute for 30 Minutes
+  - 5 Pull-ups
+  - 10 Push-ups
+  - 15 Squats
+tags:
+- CrossFit
+periods:
+- name: Minute 1
+  totalSeconds: 60
+  type: work
+- name: Minute 2
+  totalSeconds: 60
+  type: work
+- name: Minute 3
+  totalSeconds: 60
+  type: work
+- name: Minute 4
+  totalSeconds: 60
+  type: work
+- name: Minute 5
+  totalSeconds: 60
+  type: work
+- name: Minute 6
+  totalSeconds: 60
+  type: work
+- name: Minute 7
+  totalSeconds: 60
+  type: work
+- name: Minute 8
+  totalSeconds: 60
+  type: work
+- name: Minute 9
+  totalSeconds: 60
+  type: work
+- name: Minute 10
+  totalSeconds: 60
+  type: work
+- name: Minute 10
+  totalSeconds: 60
+  type: work
+- name: Minute 11
+  totalSeconds: 60
+  type: work
+- name: Minute 12
+  totalSeconds: 60
+  type: work
+- name: Minute 13
+  totalSeconds: 60
+  type: work
+- name: Minute 14
+  totalSeconds: 60
+  type: work
+- name: Minute 15
+  totalSeconds: 60
+  type: work
+- name: Minute 16
+  totalSeconds: 60
+  type: work
+- name: Minute 17
+  totalSeconds: 60
+  type: work
+- name: Minute 18
+  totalSeconds: 60
+  type: work
+- name: Minute 19
+  totalSeconds: 60
+  type: work
+- name: Minute 20
+  totalSeconds: 60
+  type: work
+- name: Minute 21
+  totalSeconds: 60
+  type: work
+- name: Minute 22
+  totalSeconds: 60
+  type: work
+- name: Minute 23
+  totalSeconds: 60
+  type: work
+- name: Minute 24
+  totalSeconds: 60
+  type: work
+- name: Minute 25
+  totalSeconds: 60
+  type: work
+- name: Minute 26
+  totalSeconds: 60
+  type: work
+- name: Minute 27
+  totalSeconds: 60
+  type: work
+- name: Minute 28
+  totalSeconds: 60
+  type: work
+- name: Minute 29
+  totalSeconds: 60
+  type: work
+- name: Minute 30
+  totalSeconds: 60
+  type: work
