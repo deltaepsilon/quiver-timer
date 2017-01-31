@@ -105,6 +105,7 @@
       properties: {
         firebase: Object,
         model: Object,
+        env: Object,
         account: {
           type: Object,
           statePath: 'account'  
@@ -198,7 +199,7 @@
             try {
               var timer = jsyaml.safeLoad(reader.result);
               timer.displayName = this.account.displayName;
-              timer.email = this.account.email;
+              timer.email = this.env.algolia.adminEmail;
               timer.totalSeconds = timer.periods.reduce(function(s, period) {
                 return s + period.totalSeconds;
               }, 0);

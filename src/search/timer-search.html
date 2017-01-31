@@ -189,16 +189,19 @@
         this.page = 0;
       } else {
         var options = {
-          facets: 'email'
+          facets: 'email',
+          advancedSyntax: true
         };
         if (this.email) {
           options.filters = 'NOT email:' + this.email;
         }
+        console.log('options', options);
         index.search(searchTerm, options, function (err, content) {
           if (err) {
             console.log('Algolia search error', err);
             return this.fire('error', err);
           }
+          // console.log('hits', content.hits);
           var existingKeys = this.timers.map(function (timer) {
             return timer.$key;
           });
