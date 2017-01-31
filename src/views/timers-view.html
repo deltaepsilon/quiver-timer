@@ -128,11 +128,13 @@
     <paper-menu-button>
       <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
       <paper-menu class="dropdown-content">
-        <paper-item>
-          <a href="/configure/[[timer.$key]]">
-            <paper-icon-button icon="editor:mode-edit"></paper-icon-button>
-          </a>
-        </paper-item>
+        <template is="dom-if" if="[[timer.owned]]">
+          <paper-item>
+            <a href="/configure/[[timer.$key]]">
+              <paper-icon-button icon="editor:mode-edit"></paper-icon-button>
+            </a>
+          </paper-item>
+        </template>        
         <paper-item>
           <a href$="/public/[[timer.$key]]/stopped/[[timer.slug]]" target="_blank">
             <paper-icon-button icon="social:share"></paper-icon-button>
