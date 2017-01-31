@@ -13,6 +13,7 @@
 <link rel="import" href="../digital-clock/digital-clock.html">
 <link rel="import" href="../shared-styles.html">
 
+<script src="../third-party/lodash.custom.min.js"></script>
 <script src="../../bower_components/js-yaml/dist/js-yaml.min.js"></script>
 
 <dom-module id="admin-view">
@@ -221,7 +222,7 @@
               timer.owned = true;
 
               if (timer.periods[0].type !== 'prepare') {
-                timer.periods.unshift(TimerDefaults.periods.prepare);
+                timer.periods.unshift(_.clone(TimerDefaults.periods.prepare));
               }
 
               timer.periods = timer.periods.map(function(period, i) {
@@ -229,11 +230,11 @@
                 if (i == 0 && period.type !== 'prepare') {
                   throw new Error('First period must have type "prepare"');
                 } else if (i == 0) {
-                  result = TimerDefaults.periods.prepare;
+                  result = _.clone(TimerDefaults.periods.prepare);
                 } else if (!TimerDefaults.periods[period.type]) {
                   throw new Error('First period must have a valid type');
                 } else {
-                  result = TimerDefaults.periods[period.type];
+                  result = _.clone(TimerDefaults.periods[period.type]);
                 }
 
                 result.totalSeconds = period.totalSeconds;
@@ -243,6 +244,9 @@
                 result.seconds = result.totalSeconds - (result.minutes * 60);
                 return result;
               });
+
+              console.log('importing...', timer.name);  
+              console.table(timer.periods);
 
               resolve(timer);
             } catch (e) {
