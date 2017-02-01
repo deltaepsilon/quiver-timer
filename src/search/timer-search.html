@@ -50,6 +50,7 @@
         top: .5rem;
         right: .5rem;
         height: 1rem;
+        z-index: 1;
       }
 
       #algolia-wrapper img {
@@ -59,6 +60,18 @@
       #algolia-wrapper span {
         font-size: 10px;
         margin-right: 1px;
+      }
+
+      .right-button {
+        position: absolute;
+        right: 0;
+        background: var(--color-white);
+      }
+      
+      strong {
+        overflow: hidden;
+        margin-right: 2rem;
+        text-overflow: ellipsis;
       }
     </style>
 
@@ -89,7 +102,7 @@
             <strong>[[timer.name]]</strong>
 
             <template is="dom-if" if="[[showAdd]]">
-              <paper-icon-button icon="av:library-add" on-click="addTimer" key$="[[timer.objectID]]"></paper-icon-button>
+              <paper-icon-button class="right-button" icon="av:library-add" on-click="addTimer" key$="[[timer.objectID]]"></paper-icon-button>
             </template>
           </div>
           <!--<div secondary>
