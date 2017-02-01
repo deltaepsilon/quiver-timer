@@ -335,7 +335,7 @@
 
       //Functionality
       validatePeriod: function() {
-        this.period.seconds = Math.max(Math.min(this.period.seconds, 59), 0);
+        this.period.seconds = Math.max(Math.min(this.period.seconds || 0, 59), 0);
         this.period.minutes = Math.max(Math.min(this.period.minutes || 0, 59), 0);
         this.period.displayIcon = this.period.icon; 
         this.set('period.totalSeconds', this.period.seconds + this.period.minutes * 60);
