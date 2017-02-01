@@ -81,6 +81,9 @@
     // console.log('action.type', action.type);
 
     switch (action.type) {
+      case 'setState':
+        state = _.cloneDeep(action.state);
+        break;
       case 'clearState':
         var newState = _.cloneDeep(QuiverStoreDefaults.state);
         newState.connected = state.connected;
@@ -194,7 +197,11 @@
         }.bind(this));
         break;
       case 'duplicatePeriods':
-        state.editing.periods = state.editing.periods.concat(action.periods);
+        // Keep the newly created periods selected, but deselect the previously-selected periods
+        var periods = action.periods.slice(0);
+        state.editing.periods = state.editing.periods.map(function(period) {
+          return period.selected = false, period;
+        }).concat(periods);
         break;
       case 'deleteSelected':
         state.editing.periods = state.editing.periods.filter(function (period) {

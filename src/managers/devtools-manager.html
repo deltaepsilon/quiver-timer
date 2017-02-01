@@ -1,0 +1,49 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../shared-styles.html">
+<link rel="import" href="../datastores/quiver-store-behavior.html">
+
+<dom-module id="devtools-manager">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+  </template>
+  <script>
+    Polymer({
+       is: "devtools-manager",
+
+       behaviors: [QuiverStoreBehavior],
+
+       properties: {
+         env: Object,
+         devToolsExtension: {
+           type: Object,
+           value: function() {
+             return window.devToolsExtension;
+           }
+         }
+       },
+
+       // Observers
+       observers: [
+         '_enableDevtools(env)'
+       ],
+
+       _enableDevtools: function(env) {
+         if (env.environment == 'development' && this.devToolsExtension) {
+           window.devTools = this.devToolsExtension.connect();
+           this.devTools = window.devTools;
+           this.unsubscribe = this.devTools.subscribe(function(message) {
+            //  console.log('message', message);
+             if (message.type === 'DISPATCH' && message.payload.type === 'JUMP_TO_STATE') {
+               this.setState(message.state);
+             }
+           }.bind(this));
+           console.log('devtools enabled', this.devTools);
+         }
+       }
+    });
+  </script>
+</dom-module>

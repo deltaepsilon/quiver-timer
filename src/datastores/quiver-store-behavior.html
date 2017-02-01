@@ -12,10 +12,35 @@
       },
 
       created: function () {
-        this.state = this.getState();
         this.store = QuiverStore;
         this.getSlug = QuiverStore.getSlug;
         this.getPushKey = QuiverStore.getPushKey;
+
+        this.store.subscribe(function(state) {
+          this.state = this.store.getState();
+        }.bind(this));
+      },
+
+      dispatch: function(e) {
+        if (this.actions) {
+          var args = Array.prototype.slice.call(arguments);
+          var func = args.shift();
+          e = this.actions[func].apply(this, args);
+        }
+        if (window.devTools) {
+          window.devTools.send(e, this.store.getState());
+        }
+        return QuiverStore.dispatch(e);
+      },
+
+      setState: function(state) {
+        if (typeof state == 'string') {
+          state = JSON.parse(state);
+        }
+        return QuiverStore.dispatch({
+          type: 'setState',
+          state: state
+        });
       }
     }
   ]; 
