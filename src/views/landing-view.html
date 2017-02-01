@@ -11,16 +11,20 @@
         display: block;
       }
 
-      .top-quarter {
+      .top {
         height: 25vh;
         @apply(--layout-vertical);
         @apply(--layout-center-justified);
       }
 
-      .bottom-quarter {
+      .bottom {
         height: 25vh;
         @apply(--layout-vertical);
         @apply(--layout-end-justified);
+      }
+
+      .third {
+        height: 33vh;
       }
 
       .half {
@@ -28,14 +32,31 @@
       }
 
       h1 {
-        font-size: 10vw;
-        line-height: 10vw;
+        font-size: 15vw;
+        line-height: 15vw;
         margin: 0;
         text-align: center;
       }
 
       h3 {
-        margin-bottom: 0;
+        font-family: Brothers;
+        font-size: 8vw;
+        text-align: center;
+        margin: 1rem 0 0;
+      }
+
+      hr {
+        width: 100%;
+        margin: 2rem 0 1rem;
+        border-width: 1px 0 0 0;
+      }
+
+      p {
+        text-align: center;
+      }
+
+      table {
+        margin: 1rem;
       }
 
       .subhead {
@@ -62,12 +83,18 @@
       }
 
       img {
+        max-width: calc(100% - 2rem);
+        margin: 1rem auto;
+      }
+
+      .pixel-mockup img {
         position: relative;
         top: 75px;
         left: 20px;
         width: calc(100% - 41px);
         min-width: 315px;
         padding-bottom: 138px;
+        margin: inherit;
       }
       
       .pixel-mockup {
@@ -79,29 +106,134 @@
       }
     </style>
     <div class="layout vertical center">
-      <div class="top-quarter layout ">
+      <div class="top third layout ">
         <h1>HiiT Clock</h1>
-        <h4 class="subhead">Interval Timer</h4>  
+        <h4 class="subhead">🔥 The Baddest Interval Timer 🔥</h4>  
       </div>
-      <a class="icon half" href="/timers">
+      <a class="icon third" href="/timers">
         <iron-icon icon="av:play-circle-outline"></iron-icon>
       </a>
-      <div class="bottom-quarter">
+      <div class="bottom third">
         <span>Click to start ☝️</span>  
       </div>
       
-      <h3>HiiT / Tabata</h3>
-      <p>
-        Great for <strong>High-Intensity Interval Training</strong>. Set up any combination of work and rest periods. Stay in Beast Mode.
-      </p>
+      <hr>
+      <h3 style="margin-bottom: 1rem;">Optimized for Phones</h3>
       <div class="pixel-mockup">
         <img src="/images/playing-vertical.gif" alt="HiiT Clock in action">
       </div>
+
+      <hr>
+      <h3>Use your TV</h3>
+      <p>
+        Cast to Chromecast with Android. Other devices can use a mirrored web page to send the timer to a web-connected television.
+      </p>
+      <img src="/images/tv-mockup.png" alt="Cast HiiT Clock to your TV">
       <!--<iframe src="//giphy.com/embed/8yi5MTYV3lVde" width="480" height="395" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>-->
+      
+      <hr>
+      <h3>HiiT / Tabata</h3>
+      <p>
+        Keep close track of your <strong>High-Intensity Interval Training</strong>. Set up any combination of work and rest periods. Stay in Beast Mode. 🚴🏻 🚴🏻 🚴🏻
+      </p>
+      
+      <hr>
+      <h3>Body Building & Powerlifting</h3>
+      <p>
+        Need to carefully control your work/rest periods? HiiT Clock makes it so easy, you'll wonder how you survived without it. 💪🏻💪🏻💪🏻           
+      </p>
+
+      <hr>
+      <h3>Circuit Training</h3>
+      <p>
+        Program complicated circuits and stay on track with beeps in your headphones and on-screen reminders. 
+      </p>
+
+      <hr>
       <h3>Crossfit</h3>
       <p>
-        Do you have trouble remembering how many push press reps to hit on the second round of your 20-minute AMRAP? Build out your entire workout with HiiT Clock and stay at your anaerobic threshold until you puke.
+        Still remember how many push-press reps to hit on the second round of your 20-minute AMRAP? Of course not! Build out your WOD with HiiT Clock. Less thinking. More puking :) 🏋🏋🏋
       </p>
+
+      <hr>
+      <h3>Advanced Features</h3>
+      <p>
+        Check out our <a href="/content/features">full feature list</a>. It's pretty crazy.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:left"></th>
+            <th style="text-align:center">iOS</th>
+            <th style="text-align:center">Android</th>
+            <th style="text-align:center">Chrome</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="text-align:left">Logged-in Mode</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+          </tr>
+          <tr>
+            <td style="text-align:left">Guest Mode</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+          </tr>
+          <tr>
+            <td style="text-align:left">Native app</td>
+            <td style="text-align:center">💩</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center"></td>
+          </tr>
+          <tr>
+            <td style="text-align:left">Chromecast</td>
+            <td style="text-align:center">💩</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+          </tr>
+          <tr>
+            <td style="text-align:left">Apple AirPlay</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">💩</td>
+            <td style="text-align:center">👍</td>
+          </tr>
+          <tr>
+            <td style="text-align:left">Share active timers</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+          </tr>
+          <tr>
+            <td style="text-align:left">Background sound alerts</td>
+            <td style="text-align:center">💩</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+          </tr>
+          <tr>
+            <td style="text-align:left">Foreground sound alerts</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+          </tr>
+          <tr>
+            <td style="text-align:left">Screen flash alerts</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+          </tr>
+          <tr>
+            <td style="text-align:left">Shareable timers</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+            <td style="text-align:center">👍</td>
+          </tr>
+        </tbody>
+      </table>
+
+
       <!--<iframe src="//giphy.com/embed/mwQpUOLTjpePC" width="480" height="480" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>-->
 
       
