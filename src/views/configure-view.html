@@ -41,9 +41,12 @@
 
 <app-route route="{{localRoute}}" pattern="/:timerKey" data="{{routeData}}" tail="{{subroute}}"></app-route>
 
-<div id="top-title" class="layout vertical">
-  <h3 id="title" on-click="editName">[[timerName]]</h3>
-  <digital-clock id="totalSeconds" total-seconds="[[totalSeconds]]"></digital-clock>
+<div id="top-title" class="layout horizontal justified center">
+  <div>
+    <h3 id="title" on-click="editName">[[timerName]]</h3>
+    <digital-clock id="totalSeconds" total-seconds="[[totalSeconds]]"></digital-clock>  
+  </div>
+  <paper-button raised on-click="resetEditing">Reset</paper-button>
 </div>
 
 <hr>
@@ -395,8 +398,12 @@
 
     save: function () {
       this.dispatch('updateValue', 'updateTimer', this.getTimerIndex(this.timerKey));
-      this.dispatch('updateValue', 'resetEditing');
+      this.resetEditing();
       this.fire('redirect', '/timers');
+    },
+
+    resetEditing: function() {
+      this.dispatch('updateValue', 'resetEditing');
     },
 
     editName: function () {
