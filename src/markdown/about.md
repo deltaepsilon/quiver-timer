@@ -8,9 +8,7 @@ I'm a freelance web developer, so I wanted something that worked across all devi
 
 My favorite timer was [Interval Timer](http://www.intervaltimer.com/), also known as ***Seconds Pro*** on iOS and Android. The [developer is great](https://twitter.com/loadedwino), and the app is soooo close to what I wanted... but I need a few advanced features—especially for Android—that Seconds Pro doesn't support, and if I need them, there's got to be someone else out there looking for them as well.
 
-## HiiT Clock is crushes!
-
-My stated goal with HiiT Clock is to build the best timer app available for my CrossFit/powerlifting use case. I've been using it for months, and I'm confident that I've crushed that goal. I don't care if nobody else uses this app, because I'm working out with it forever more.
+My stated goal with HiiT Clock is to build the best timer app available for my CrossFit/powerlifting use case. I've been using it for months, and I'm confident that I've crushed that goal.
 
 ## Feature requests
 
