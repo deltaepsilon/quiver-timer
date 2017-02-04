@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<script src="https://cdn.ravenjs.com/3.10.0/raven.min.js"></script>
 
 <dom-module id="analytics-manager">
 <script>
@@ -6,7 +7,7 @@
         is: 'analytics-manager',
 
         properties: {
-            environment: String,
+            env: Object,
             trackingId: String,
             pathname: String,
             initialized: {
@@ -18,7 +19,8 @@
 
         // Observers
         observers: [
-            '_init(environment, trackingId, initialized)',
+            '_init(env.environment, trackingId, initialized)',
+            '_sentry(env.environment, env.sentry.config)',
             '_pathname(pathname, ready)'
         ],
 
@@ -44,6 +46,12 @@
             ga(function(tracker) {
                 this.ready = true;
             }.bind(this));
+        },
+
+        _sentry: function(environment, config) {
+            if (environment == 'production' && config) {
+                Raven.config(config).install();
+            }
         },
 
         _pathname: function (pathname, ready) {

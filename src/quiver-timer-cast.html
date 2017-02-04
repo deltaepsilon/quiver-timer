@@ -19,6 +19,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="flash-alert/flash-alert.html">
 <link rel="import" href="views/receiver-view.html">
+<link rel="import" href="managers/analytics-manager.html">
 
 <script src="third-party/lodash.custom.min.js"></script>
 
@@ -110,7 +111,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
 
 <iron-ajax auto url="/env.client.json" handle-as="json" last-response="{{rawEnv}}"></iron-ajax>
-
+<analytics-manager id="analyticsManager" env="[[env]]" tracking-id="[[env.analytics.trackingId]]" pathname="cast.html"></analytics-manager>
 <flash-alert id="flashAlert" flash="[[settings.flash]]" sound="[[settings.sound]]" sound-file="[[settings.soundFile]]"></flash-alert>
 <paper-toast id="toast"></paper-toast>
 

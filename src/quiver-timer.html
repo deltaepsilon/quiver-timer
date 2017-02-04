@@ -141,7 +141,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   connected="[[connected]]" page="[[page]]" user="[[user]]" account="[[account]]"></auth-controller>
 <firebase-sync id="firebaseSync" firebase="[[firebase]]" model="[[model]]" connected="[[connected]]" account="[[account]]"></firebase-sync>
 <metadata-manager id="metadataManager" route="[[route]]"></metadata-manager>
-<analytics-manager id="analyticsManager" environment="[[env.environment]]" tracking-id="[[env.analytics.trackingId]]" pathname="[[pathname]]"></analytics-manager>
+<analytics-manager id="analyticsManager" env="[[env]]" tracking-id="[[env.analytics.trackingId]]"  pathname="[[pathname]]"></analytics-manager>
 <devtools-manager id="devtoolsManager" env="[[env]]"></devtools-manager>
 
 <cast-controller id="castController" route="[[route]]" env="[[env]]" cast-connected="{{castConnected}}" session-state="{{castSessionState}}"></cast-controller>
