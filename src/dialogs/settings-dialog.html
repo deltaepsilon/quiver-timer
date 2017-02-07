@@ -125,7 +125,7 @@
     },
 
     _email: function(account) {
-      return account.email || 'Guest Mode';
+      return account && account.email ? account.email : 'Guest Mode';
     },
 
     // Functions
