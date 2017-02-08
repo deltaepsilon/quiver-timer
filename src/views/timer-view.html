@@ -128,7 +128,8 @@
       '_clock(state, timer.periods, clock)',
       '_workingPeriods(workingPeriods, timer.periods)',
       '_end(seconds, laggedSeconds, state)',
-      '_firebase(ref, state, seconds, workingPeriods, timer, workingPeriods.splices)'
+      '_firebase(ref, state, seconds, workingPeriods, timer, workingPeriods.splices)',
+      '_structuredData(timer, timer.name)'
     ],
 
     _timerFab: function (state) {
@@ -235,6 +236,13 @@
           periods: workingPeriods
         });
       }
+    },
+
+    _structuredData: function(timer) {
+      this.fire('structuredData', {
+        name: timer.name,
+        description: timer.description || 'A custom interval timer'
+      });
     },
 
     //Listeners

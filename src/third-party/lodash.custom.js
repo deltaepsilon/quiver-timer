@@ -1,7 +1,7 @@
 /**
  * @license
  * Lodash (Custom Build) <https://lodash.com/>
- * Build: `lodash exports="global" include="debounce,pick,omit,merge,clone,isEqual,cloneDeep,toArray,difference,uniqBy"`
+ * Build: `lodash exports="global" include="debounce,pick,omit,merge,clone,isEqual,cloneDeep,toArray,difference,uniqBy,defaultsDeep"`
  * Copyright JS Foundation and other contributors <https://js.foundation/>
  * Released under MIT license <https://lodash.com/license>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -2709,6 +2709,30 @@
   };
 
   /**
+   * Used by `_.defaultsDeep` to customize its `_.merge` use to merge source
+   * objects into destination objects that are passed thru.
+   *
+   * @private
+   * @param {*} objValue The destination value.
+   * @param {*} srcValue The source value.
+   * @param {string} key The key of the property to merge.
+   * @param {Object} object The parent object of `objValue`.
+   * @param {Object} source The parent object of `srcValue`.
+   * @param {Object} [stack] Tracks traversed source values and their merged
+   *  counterparts.
+   * @returns {*} Returns the value to assign.
+   */
+  function customDefaultsMerge(objValue, srcValue, key, object, source, stack) {
+    if (isObject(objValue) && isObject(srcValue)) {
+      // Recursively merge objects and arrays (susceptible to call stack limits).
+      stack.set(srcValue, objValue);
+      baseMerge(objValue, srcValue, undefined, customDefaultsMerge, stack);
+      stack['delete'](srcValue);
+    }
+    return objValue;
+  }
+
+  /**
    * Used by `_.omit` to customize its `_.cloneDeep` use to only clone plain
    * objects.
    *
@@ -4550,6 +4574,30 @@
   /*------------------------------------------------------------------------*/
 
   /**
+   * This method is like `_.defaults` except that it recursively assigns
+   * default properties.
+   *
+   * **Note:** This method mutates `object`.
+   *
+   * @static
+   * @memberOf _
+   * @since 3.10.0
+   * @category Object
+   * @param {Object} object The destination object.
+   * @param {...Object} [sources] The source objects.
+   * @returns {Object} Returns `object`.
+   * @see _.defaults
+   * @example
+   *
+   * _.defaultsDeep({ 'a': { 'b': 2 } }, { 'a': { 'b': 1, 'c': 3 } });
+   * // => { 'a': { 'b': 2, 'c': 3 } }
+   */
+  var defaultsDeep = baseRest(function(args) {
+    args.push(undefined, customDefaultsMerge);
+    return apply(mergeWith, undefined, args);
+  });
+
+  /**
    * Gets the value at `path` of `object`. If the resolved value is
    * `undefined`, the `defaultValue` is returned in its place.
    *
@@ -4701,6 +4749,41 @@
    */
   var merge = createAssigner(function(object, source, srcIndex) {
     baseMerge(object, source, srcIndex);
+  });
+
+  /**
+   * This method is like `_.merge` except that it accepts `customizer` which
+   * is invoked to produce the merged values of the destination and source
+   * properties. If `customizer` returns `undefined`, merging is handled by the
+   * method instead. The `customizer` is invoked with six arguments:
+   * (objValue, srcValue, key, object, source, stack).
+   *
+   * **Note:** This method mutates `object`.
+   *
+   * @static
+   * @memberOf _
+   * @since 4.0.0
+   * @category Object
+   * @param {Object} object The destination object.
+   * @param {...Object} sources The source objects.
+   * @param {Function} customizer The function to customize assigned values.
+   * @returns {Object} Returns `object`.
+   * @example
+   *
+   * function customizer(objValue, srcValue) {
+   *   if (_.isArray(objValue)) {
+   *     return objValue.concat(srcValue);
+   *   }
+   * }
+   *
+   * var object = { 'a': [1], 'b': [2] };
+   * var other = { 'a': [3], 'b': [4] };
+   *
+   * _.mergeWith(object, other, customizer);
+   * // => { 'a': [1, 3], 'b': [2, 4] }
+   */
+  var mergeWith = createAssigner(function(object, source, srcIndex, customizer) {
+    baseMerge(object, source, srcIndex, customizer);
   });
 
   /**
@@ -4975,6 +5058,7 @@
   // Add methods that return wrapped values in chain sequences.
   lodash.constant = constant;
   lodash.debounce = debounce;
+  lodash.defaultsDeep = defaultsDeep;
   lodash.difference = difference;
   lodash.flatten = flatten;
   lodash.iteratee = iteratee;
@@ -4982,6 +5066,7 @@
   lodash.keysIn = keysIn;
   lodash.memoize = memoize;
   lodash.merge = merge;
+  lodash.mergeWith = mergeWith;
   lodash.omit = omit;
   lodash.pick = pick;
   lodash.property = property;

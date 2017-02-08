@@ -77,7 +77,10 @@
     },
 
     // Observers
-    observers: ['_timer(timerRef)'],
+    observers: [
+      '_timer(timerRef)',
+      '_structuredData(key)'
+    ],
 
     _key: function (key) {
       return key;
@@ -102,13 +105,24 @@
       return timerRef.once('value')
         .then(function (snap) {
           var timer = snap.val();
-          timer.$key = snap.key;
-          this.splice('timers', 0, 1, timer);
-          this.fire('metadata', {
-            key: 'description',
-            value: timer.description || timer.name
-          });
+          if (timer) {
+            timer.$key = snap.key;
+            this.splice('timers', 0, 1, timer);
+            this.fire('metadata', {
+              key: 'description',
+              value: timer.description || timer.name
+            });
+          }
         }.bind(this));
+    },
+
+    _structuredData: function(key) {
+      if (!key) {
+        this.fire('structuredData', {
+          name: 'HiiT Clock Public Timers',
+          description: 'Search the HiiT Clock timer database.'
+        });
+      }
     }
   });
 </script>

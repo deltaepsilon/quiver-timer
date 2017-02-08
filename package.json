@@ -18,7 +18,7 @@
     "server": "cd functions && NODE_ENV=development nodemon runner.js",
     "refresh-credentials": "gcloud auth application-default login",
     "deploy-hosting": "polymer build && node build-cast-service-worker.js && firebase deploy --only hosting",
-    "lodash": "cd src/third-party && lodash exports=global include=debounce,pick,omit,merge,clone,isEqual,cloneDeep,toArray,difference,uniqBy"
+    "lodash": "cd src/third-party && lodash exports=global include=debounce,pick,omit,merge,clone,isEqual,cloneDeep,toArray,difference,uniqBy,defaultsDeep"
   },
   "repository": {
     "type": "git",

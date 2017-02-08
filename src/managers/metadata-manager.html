@@ -1,5 +1,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
+<script src="../third-party/lodash.custom.min.js"></script>
+
 <dom-module id="metadata-manager">
 <script>
     Polymer({
@@ -7,8 +9,10 @@
 
         properties: {
             route: Object,
+            env: Object,
             title: String,
-            description: String
+            description: String,
+            structuredData: Object
         },
 
         // Observers
@@ -16,7 +20,8 @@
             '_description(route, route.path)',
             '_title(route, route.path)',
             '_setTitle(title)',
-            '_setDescription(description)'
+            '_setDescription(description)',
+            '_setStructuredData(env.structuredData, route.path)'
         ],
 
         _title: function(route) {
@@ -57,9 +62,20 @@
             document.head.querySelector('meta[name="description"]').setAttribute('content', description);
         },
 
+        _setStructuredData: function(structuredData) {
+            this.structuredData = structuredData;
+            this.setStructuredData();
+        },
+
         // Functions
         publicSet: function (key, value) {
             return this.set(key, value);
+        },
+
+        setStructuredData: function(updates) {
+            var data = _.defaultsDeep(updates || {}, this.env.structuredData);
+            console.log('setting structured data', data);
+            document.head.querySelector('#structured-data').innerHTML = JSON.stringify(data);
         }
 
     });
